@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title> CHRONOS - Low-Cost Space Exploration</title>
+    <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.2/material.indigo-pink.min.css">
+    <script src="https://storage.googleapis.com/code.getmdl.io/1.0.2/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="mdl-grid">
+         <div class="mdl-cell mdl-cell--12-col">
+             <h1 class="header">Space: What do you want to Explore?</h1>
+             <h3 class="header">This a query engine for space-related knowledge</h3>
+         </div>
+    </div>
+    <!-- Body area -->
+    <div class="mdl-grid">
+      <div class="mdl-cell mdl-cell--2-col">
+           <h4>Use raw SPARQL queries&nbsp;&nbsp;<i class="material-icons md-48">forward</i></h4>
+      </div>
+      <div class="mdl-cell mdl-cell--6-col">
+          <form action="/" method="post">
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                 mdl-textfield--floating-label">
+                  <label class="mdl-button mdl-js-button mdl-button--icon" for="search-exp">
+                    <i class="material-icons">search</i>
+                  </label>
+                  <div class="mdl-textfield__expandable-holder">
+                    <input class="mdl-textfield__input" type="text" id="search-exp" name="query" />
+                    <label class="mdl-textfield__label" for="search-exp">
+                        {% if query %}
+                        {{ query }}
+                        {% else %}
+                        Write a SPARQL query...
+                        {% endif %}
+                    </label>
+                  </div>
+              </div>
+        </form>
+      </div>
+      <div class="mdl-cell mdl-cell--3-col">
+          <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect" style="min-height: 250px;">
+              <div class="mdl-tabs__tab-bar">
+                <a href="#example-1" class="mdl-tabs__tab is-active">Example-1</a>
+                <a href="#example-2" class="mdl-tabs__tab">Example-2</a>
+                <a href="#example-3" class="mdl-tabs__tab">Example-3</a>
+              </div>
+              <div class="mdl-tabs__panel is-active" id="example-1">
+                <p><b>Find all the satellites of Saturn:</b></p>
+                  <p class="pre">
+                  SELECT * WHERE { ?satellites
+                  &lt;http://ontology.projectchronos.eu/astronomy/orbitsPlanet&gt;
+                  &lt;http://ontology.projectchronos.eu/solarsystem/Saturn&gt;.
+                  }
+                  </p>
+                 <p class="note">Copy and paste the query above in the search box for a try</p>
+              </div>
+              <div class="mdl-tabs__panel" id="example-2">
+                <p><b>Find all the satellites in Solar System:</b></p>
+                  <p class="pre">SELECT * WHERE { ?satellites
+                  &lt;http://ontology.projectchronos.eu/astronomy/orbitsPlanet&gt;
+                  ?planets.
+                  }</p>
+                <p class="note">Copy and paste the query above in the search box for a try</p>
+              </div>
+              <div class="mdl-tabs__panel" id="example-3">
+                <p><b>Find all the Eart-like planets:</b></p>
+                  <p class="pre">
+                      SELECT * WHERE { ?planets
+                      &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;
+                      &lt;http://ontology.projectchronos.eu/astronomy/TerrestrialPlanet&gt; .
+                      }
+                  </p>
+                <p class="note">Copy and paste the query above in the search box for a try</p>
+              </div>
+          </div>
+      </div>
+      <div class="mdl-cell mdl-cell--1-col"></div>
+    </div>
+
+    {% if status == 200 %}
+        <div class="demo-grid-2 mdl-grid">
+             <div class="mdl-cell mdl-cell--12-col">
+                 <h3 class="header">Results</h3>
+                 <h6 class="header">for query: {{query}}</h6>
+             </div>
+        </div>
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--3-col">
+          </div>
+          <div class="mdl-cell mdl-cell--6-col">
+             {{ result|safe }}
+          </div>
+          <div class="mdl-cell mdl-cell--3-col"></div>
+        </div>
+    {% endif %}
+
+    <p class="footer">
+    <span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Project Chronos Ontology</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://projectchronos.org" property="cc:attributionName" rel="cc:attributionURL">http://projectchronos.org</a>
+    <br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="http://ontology.projectchronos.eu" rel="dct:source">http://ontology.projectchronos.eu</a>.
+    </p>
+
+<style>
+    .header {
+        text-align: center;
+    }
+    #search-exp {
+      font-size:18px;
+      padding:10px 10px 10px 5px;
+      display:block;
+      width:500px;
+      border:none;
+      border-bottom:1px solid #757575;
+    }
+
+.pre {
+  overflow: auto;
+  font-family: monospace, monospace;
+  font-size: 1em;
+
+  font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  margin-top: 0;
+  margin-bottom: 16px;
+
+  padding: 10px;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f7f7f7;
+  border-radius: 3px;
+}
+  .note {
+    font-size: 80%;
+    font-style: oblique;
+  }
+
+  .footer {
+    font-size: 11px;
+    text-align: center;
+  }
+
+</style>
+
+</body>
+</html>
