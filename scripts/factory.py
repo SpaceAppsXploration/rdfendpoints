@@ -38,7 +38,7 @@ class SubSystem(object):
     @classmethod
     def is_constraint(cls, attr):
         """
-        Checks if an attribute in the class is a constraints
+        Checks if an attribute in the class or a value is a constraints
         :param attr: the class attribute
         :return: bool
         """
@@ -64,35 +64,70 @@ class SubSystem(object):
         """
         Tools for converting a JSON object taken from  generate_instances() to a compacted JSON-LD
         UNDER CONSTRUCTION
+        see RDFvocab/raw/COTS_example.json for an example of outcome
         :param component: JSON object as dict
         :return: JSON-LD object as dict
         """
         if not isinstance(component, dict):
-            raise TypeError
+            raise ValueError
+
+        result = {
+            "@id": "http://ontology.projectchronos.eu/COTS/" + component['id'],
+            "http://ontology.projectchronos.eu/subsystems/name": component['name'],
+            "http://ontology.projectchronos.eu/subsystems/function": component['kind'],
+            "http://ontology.projectchronos.eu/subsystems/manufacturer": "Chronos",
+            "http://ontology.projectchronos.eu/subsystems/isStandard": "Cubesat",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#label": "e3349c8fe32d4174a405aeee1e441fad",
+        }
 
         maps = {
             "subsystems": "http://ontology.projectchronos.eu/subsystems/",
-            "iri": "http://ontology.projectchronos.eu/COTS/",
-            "mass": "http://sw.opencyc.org/2012/05/10/concept/en/Gram",
-            "currency": "http://sw.opencyc.org/2012/05/10/concept/en/Euro",
-            "power": "http://dbpedia.org/data/Watt.ntriples",
+            "id": "http://ontology.projectchronos.eu/COTS/",
+            "subsystems:hasMass": "http://sw.opencyc.org/2012/05/10/concept/en/Gram",
+            "subsystems:hasMonetaryValue": "http://sw.opencyc.org/2012/05/10/concept/en/Euro",
+            "subsystems:hasPower": "http://dbpedia.org/data/Watt.ntriples",
             "temperature": "http://sw.opencyc.org/2012/05/10/concept/en/DegreeCelsius",
-            "volume": "http://ontology.projectchronos.eu/subsystems/cubicMillimeters"
+            "subsystems:hasVolume": "http://ontology.projectchronos.eu/subsystems/cubicMillimeters",
+            "linked": "@type"
         }
 
-        def format_key(self):
+        def format_key(key):
             """
-            adds the right full URI to a key
+            Gives the right full URI to a key
+            :param key: a string, a dictionary key
+            :return: the right key for the JSON-LD
             """
-            pass
+            # split key :
+            # map elements > maps
+            if key == 'id':
+                return '@id'
+            elif key == 'linked':
+                return '@type'
+            elif key.find(':') != -1:
+                subs = key.split(':')
+                new_key = maps['subsystems'] + subs[1]
+                return new_key
+            else:
+                raise ValueError('input is not a KEY from a component dictionary')
 
-        def format_value(self):
+        def format_value(key, value):
             """
             adds @type and @value to the value
             """
-            pass
+            if all(i(value) for i in (int, long, float, complex)):
+                return {
+                    "@type": maps[key] if 'Temp' not in key else maps['temperature'],
+                    "@value": value
+                }
+            raise ValueError('input is not a VALUE from a component dictionary')
 
-        return component
+        for k, v in component.items():
+            try:
+                result[format_key(k)] = format_value(k, v)
+            except ValueError:
+                pass
+
+        return result
 
 
 class Communication(SubSystem):
