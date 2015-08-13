@@ -98,7 +98,12 @@ def update(q):
 
 
 def query(q):
-    return graph().query(q).serialize(format='json')
+    response = graph().query(q)
+    if response.type == 'CONSTRUCT': #These cannot be JSON-serialized so we extract the data with a SELECT
+        g = Graph()
+        g += response
+        response = g.query("SELECT ?s ?p ?o WHERE {?s ?p ?o}")
+    return response.serialize(format='json')
     
 
 def graph():
