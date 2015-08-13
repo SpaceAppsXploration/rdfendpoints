@@ -30,10 +30,14 @@ def generate_metaclasses():
 n = 1  # number of instances per family of components to be generated
 
 # generate components in JSON format
-jsons = [SubSystem.generate_instances(k, v) for i in range(0, n) for k, v in tech_constrains.items()]
+jsons = [SubSystem.generate_instance(k, v) for i in range(0, n) for k, v in tech_constrains.items()]
 print json.dumps(jsons, indent=4)
 
 # convert JSON in JSON-LD
 # NOT IMPLEMENTED YET
-# jsonlds  = [SubSystem.generate_jsonld(c) for c in jsons]
+jsonlds  = [SubSystem.generate_jsonld(c) for c in jsons]
+print json.dumps(jsonlds, indent=4)
 
+# dump in triples
+
+# upload to datastore

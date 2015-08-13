@@ -18,7 +18,6 @@ def generate_object(name, subsystem):
     """
     Generates random components from given input dictionary
     """
-    print name, subsystem
     result = {}
     result['subsystems:hasMass'] = random_value(subsystem['mass'])
     result['linked'] = subsystem['ontology']

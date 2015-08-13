@@ -19,7 +19,7 @@ class SubSystem(object):
         return " ".join(s).lower()
 
     @classmethod
-    def generate_instances(cls, kind, specs):
+    def generate_instance(cls, kind, specs):
         """
         Take the technical specs of a family of subsystems (communication, propulsion, ...) and create components objects
         :param kind: string representing the kind/family
@@ -39,7 +39,7 @@ class SubSystem(object):
         :param component: JSON object as dict
         :return: JSON-LD object as dict
         """
-        if isinstance(component, dict):
+        if not isinstance(component, dict):
             raise TypeError
 
         maps = {
@@ -63,6 +63,8 @@ class SubSystem(object):
             adds @type and @value to the value
             """
             pass
+
+        return component
 
 
 class Communication(SubSystem):
