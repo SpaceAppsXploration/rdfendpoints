@@ -20,13 +20,13 @@ print c.is_constraint(c.cost)  # True
 print c.is_constraint(c.name)  # False
 print c.is_constraint(c.slug)  # False
 
-print " --- full test for generating components and dumping one of them in JSON-LD"
+print " --- full test for generating components and dumping them in JSON-LD"
 jsons = [SubSystem.generate_instance(k, v) for k, v in tech_constrains.items()]
 jsonlds = [SubSystem.generate_jsonld(c) for c in jsons]
 
 print json.dumps(jsonlds, indent=4)
 
-print " --- Translating the component into ntriples"
+print " --- Translating the component into ntriples via RDFtranslator"
 from RDFvocab.script.make_n3 import _curling
 url = 'http://rdf-translator.appspot.com/convert/json-ld/nt/content'
 _curling(url, {'content': json.dumps(jsonlds)})
