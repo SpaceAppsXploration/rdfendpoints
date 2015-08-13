@@ -3,20 +3,48 @@ __author__ = 'lorenzo'
 import random
 import uuid
 
-from constraints import tech_constrains
+from constraints import tech_constrains  # technical constraints in constraints.py
 from generator import generate_object
 
 
 class SubSystem(object):
+
+    name = None
+
+    def __init__(self):
+        for k, v in tech_constrains[self.name].items():
+            setattr(self, k, v)
+
     @classmethod
     def stringify(cls, name):
+        """
+        natural language to camelCase
+        :param name: str
+        :return: str
+        """
         return name.title().replace(" ", "")
 
     @classmethod
     def naturify(cls, slug):
+        """
+        inverse of stringify
+        :param slug: str
+        :return: str
+        """
         import re
         s = re.sub(r"([A-Z])", r" \1", slug).split()
         return " ".join(s).lower()
+
+    @classmethod
+    def is_constraint(cls, attr):
+        """
+        Checks if an attribute in the class is a constraints
+        :param attr: the class attribute
+        :return: bool
+        """
+        if isinstance(attr, dict) and all(k in attr.keys() for k in ['min', 'max']):
+            return True
+        return False
 
     @classmethod
     def generate_instance(cls, kind, specs):
@@ -69,62 +97,62 @@ class SubSystem(object):
 
 class Communication(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['communication'].items():
-            setattr(self, k, v)
+        self.name = 'communication'
+        super(Communication, self).__init__()
     pass
 
 
 class PrimaryPower(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['primary power'].items():
-            setattr(self, k, v)
+        self.name = 'primary power'
+        super(PrimaryPower, self).__init__()
     pass
 
 
 class Propulsion(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['propulsion'].items():
-            setattr(self, k, v)
+        self.name = 'propulsion'
+        super(Propulsion, self).__init__()
     pass
 
 
 class AttitudeAndOrbitControl(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['attitude and orbit control'].items():
-            setattr(self, k, v)
+        self.name = 'attitude and orbit control'
+        super(AttitudeAndOrbitControl, self).__init__()
     pass
 
 
 class Thermal(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['thermal'].items():
-            setattr(self, k, v)
+        self.name = 'thermal'
+        super(Thermal, self).__init__()
     pass
 
 
 class BackupPower(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['backup power'].items():
-            setattr(self, k, v)
+        self.name = 'backup power'
+        super(BackupPower, self).__init__()
     pass
 
 
 class CommandAndData(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['command and data'].items():
-            setattr(self, k, v)
+        self.name = 'command and data'
+        super(CommandAndData, self).__init__()
     pass
 
 
 class Detector(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['detector'].items():
-            setattr(self, k, v)
+        self.name = 'detector'
+        super(Detector, self).__init__()
     pass
 
 
 class Structure(SubSystem):
     def __init__(self):
-        for k, v in tech_constrains['structure'].items():
-            setattr(self, k, v)
+        self.name = 'structure'
+        super(Structure, self).__init__()
     pass
