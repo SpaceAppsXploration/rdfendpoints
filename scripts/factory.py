@@ -3,7 +3,6 @@ __author__ = 'lorenzo'
 import random
 import uuid
 
-from constraints import tech_constrains  # technical constraints in constraints.py
 from generator import generate_object
 
 
@@ -11,8 +10,13 @@ class SubSystem(object):
 
     name = None
 
-    def __init__(self):
-        for k, v in tech_constrains[self.name].items():
+    def __init__(self, attrs):
+        """
+        Factory for subsystems components
+        :param attrs:
+        :return:
+        """
+        for k, v in attrs.items():
             setattr(self, k, v)
 
     @classmethod
@@ -58,6 +62,20 @@ class SubSystem(object):
         obj = {'id': uuid.uuid4().hex, 'name': name}
         obj = dict(obj.items() + generate_object(kind, specs).items())
         return obj
+
+    @classmethod
+    def generate_py_object(cls, kind, specs):
+        """
+        Take the technical specs of a family of subsystems (communication, propulsion, ...) and create components objects
+        :param kind: string representing the kind/family
+        :param specs: dictionary of specs taken from constraints
+        :return: component as Python object
+        """
+        name = str(random.randrange(0, 200)) + str(random.choice(['T', 'W', 'KV', 'JFG'])) + ' ' + kind
+        obj = {'id': uuid.uuid4().hex, 'name': name}
+        classname = cls.stringify(kind)
+        m = type(obj['id'], (classname,), generate_object(kind, specs))
+        return m
 
     @classmethod
     def generate_jsonld(cls, component):
@@ -126,63 +144,63 @@ class SubSystem(object):
 
 
 class Communication(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'communication'
-        super(Communication, self).__init__()
+        super(Communication, self).__init__(attrs=attrs)
     pass
 
 
 class PrimaryPower(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'primary power'
-        super(PrimaryPower, self).__init__()
+        super(PrimaryPower, self).__init__(attrs)
     pass
 
 
 class Propulsion(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'propulsion'
-        super(Propulsion, self).__init__()
+        super(Propulsion, self).__init__(attrs)
     pass
 
 
 class AttitudeAndOrbitControl(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'attitude and orbit control'
-        super(AttitudeAndOrbitControl, self).__init__()
+        super(AttitudeAndOrbitControl, self).__init__(attrs)
     pass
 
 
 class Thermal(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'thermal'
-        super(Thermal, self).__init__()
+        super(Thermal, self).__init__(attrs)
     pass
 
 
 class BackupPower(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'backup power'
-        super(BackupPower, self).__init__()
+        super(BackupPower, self).__init__(attrs)
     pass
 
 
 class CommandAndData(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'command and data'
-        super(CommandAndData, self).__init__()
+        super(CommandAndData, self).__init__(attrs)
     pass
 
 
 class Detector(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'detector'
-        super(Detector, self).__init__()
+        super(Detector, self).__init__(attrs)
     pass
 
 
 class Structure(SubSystem):
-    def __init__(self):
+    def __init__(self, attrs):
         self.name = 'structure'
-        super(Structure, self).__init__()
+        super(Structure, self).__init__(attrs)
     pass
