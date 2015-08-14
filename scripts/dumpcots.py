@@ -34,10 +34,13 @@ jsons = [SubSystem.generate_instance(k, v) for i in range(0, n) for k, v in tech
 print json.dumps(jsons, indent=4)
 
 # convert JSON in JSON-LD
-# NOT IMPLEMENTED YET
 jsonlds  = [SubSystem.generate_jsonld(c) for c in jsons]
 print json.dumps(jsonlds, indent=4)
 
 # dump in triples
+from RDFvocab.script.make_n3 import _curling
+url = 'http://rdf-translator.appspot.com/convert/json-ld/nt/content'
+_curling(url, {'content': json.dumps(jsonlds)})
+
 
 # upload to datastore

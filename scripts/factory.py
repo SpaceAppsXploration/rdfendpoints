@@ -73,6 +73,7 @@ class SubSystem(object):
 
         result = {
             "@id": "http://ontology.projectchronos.eu/COTS/" + component['id'],
+            "@type": component['linked'],
             "http://ontology.projectchronos.eu/subsystems/name": component['name'],
             "http://ontology.projectchronos.eu/subsystems/function": component['kind'],
             "http://ontology.projectchronos.eu/subsystems/manufacturer": "Chronos",
@@ -82,13 +83,11 @@ class SubSystem(object):
 
         maps = {
             "subsystems": "http://ontology.projectchronos.eu/subsystems/",
-            "id": "http://ontology.projectchronos.eu/COTS/",
             "subsystems:hasMass": "http://sw.opencyc.org/2012/05/10/concept/en/Gram",
             "subsystems:hasMonetaryValue": "http://sw.opencyc.org/2012/05/10/concept/en/Euro",
             "subsystems:hasPower": "http://dbpedia.org/data/Watt.ntriples",
             "temperature": "http://sw.opencyc.org/2012/05/10/concept/en/DegreeCelsius",
-            "subsystems:hasVolume": "http://ontology.projectchronos.eu/subsystems/cubicMillimeters",
-            "linked": "@type"
+            "subsystems:hasVolume": "http://ontology.projectchronos.eu/subsystems/cubicMillimeters"
         }
 
         def format_key(key):
@@ -99,11 +98,7 @@ class SubSystem(object):
             """
             # split key :
             # map elements > maps
-            if key == 'id':
-                return '@id'
-            elif key == 'linked':
-                return '@type'
-            elif key.find(':') != -1:
+            if key.find(':') != -1:
                 subs = key.split(':')
                 new_key = maps['subsystems'] + subs[1]
                 return new_key

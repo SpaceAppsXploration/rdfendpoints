@@ -2,6 +2,7 @@
 Technical constraints for different families/kinds of subsystems.
 From these classes many instances can be generated, with quantities
 generated from given intervals.
+Aerospace support from Giacomo Gatto
 """
 
 __author__ = 'lorenzo'
