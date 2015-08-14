@@ -9,28 +9,34 @@ from constraints import tech_constrains
 
 class BasicObjectCreation(unittest.TestCase):
     kind = 'communication'
-    c = Communication(
-        SubSystem.generate_instance(kind, tech_constrains['communication'])
-    )  # create a random object, generating data from technical constraints
+    c = SubSystem.generate_py_instance(kind, tech_constrains['communication'])
+    # create a random object, generating data from technical constraints
 
-    def test_create_object(self):
+    @classmethod
+    def test_created_object(cls, obj):
+        """
+        Dumps some attributes of an object to test the content
+        :param obj: a class instance
+        :return: None
+        """
         print " --- attributes in a test object of class Communication"
 
-        for v in vars(self.c):
-            print v + '> ', getattr(self.c, v)
+        for v in vars(obj):
+            print v + ' > ', getattr(obj, v)
         print " --- some attrs printing"
-        print self.c.name
-        print getattr(self.c, "subsystems:hasMass")
-        print getattr(self.c, "subsystems:hasMonetaryValue")
-        print self.c.name
-        print self.c.id
+        print getattr(obj, "subsystems:hasMass")
+        print getattr(obj, "subsystems:hasMonetaryValue")
+        print obj.name
+        print obj.id
 
-    def test_dumping_pipe_single(self):
-        pass
-
-    def test_dumping_pipe_full(self):
+    @classmethod
+    def test_dumping_pipe_full(cls):
+        """
+        Tests creating python instances > dumping JSON-LD > translate into N-TRIPLES
+        :return:
+        """
         print " --- full test for generating components and dumping them in JSON-LD"
-        jsons = [SubSystem.generate_instance(k, v) for k, v in tech_constrains.items()]
+        jsons = [SubSystem.generate_py_instance(k, v) for k, v in tech_constrains.items()]
         jsonlds = [SubSystem.generate_jsonld(c) for c in jsons]
 
         print json.dumps(jsonlds, indent=4)
@@ -40,12 +46,9 @@ class BasicObjectCreation(unittest.TestCase):
         url = 'http://rdf-translator.appspot.com/convert/json-ld/nt/content'
         _curling(url, {'content': json.dumps(jsonlds)})
 
-    def runTest(self):
-        pass
-
     def test_run_basic(self):
         t = BasicObjectCreation()
-        t.test_create_object()
+        t.test_created_object(self.c)
         del t
 
     def test_run_pipe(self):
@@ -53,12 +56,48 @@ class BasicObjectCreation(unittest.TestCase):
         t.test_dumping_pipe_full()
         del t
 
+    def runTest(self):
+        pass
+
 
 class FactoryTest(unittest.TestCase):
-    def test_generate_object(self):
-        from generator import generate_object
 
-        specs = tech_constrains['propulsion']
-        kind = 'propulsion'
+    specs = tech_constrains['propulsion']
+    kind = 'propulsion'
 
-        print json.dumps(generate_object(kind, specs), indent=4)
+    @classmethod
+    def test_generate_py_object(cls, kind, specs):
+        """
+        Tests SubSystem.generate_py_instance(kind, specs)
+        :param kind:
+        :param specs:
+        :return:
+        """
+        obj = SubSystem.generate_py_instance(kind, specs)
+        print obj
+        BasicObjectCreation.test_created_object(obj)
+        return obj
+
+    def test_dumping_pipe_single(self):
+        self.test_generate_py_object(self.kind, self.specs)
+
+    def test_dumping_pipe_all_kinds_full(self):
+        for k, v in tech_constrains.items():
+            self.test_generate_py_object(k, v)
+
+    def test_generate_json_ld_single(self):
+        """
+        Tests SubSystem.generate_jsonld(obj)
+        :return:
+        """
+        obj = self.test_generate_py_object(self.kind, self.specs)
+        print json.dumps(SubSystem.generate_jsonld(obj), indent=4)
+
+    def test_generate_json_ld_all_kinds(self):
+        """
+        Tests SubSystem.generate_jsonld(obj) for all the subsytems kinds
+        :return:
+        """
+        for k, v in tech_constrains.items():
+            obj = self.test_generate_py_object(self.kind, self.specs)
+            SubSystem.generate_jsonld(obj)

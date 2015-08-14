@@ -13,8 +13,7 @@ class SubSystem(object):
     def __init__(self, attrs):
         """
         Factory for subsystems components
-        :param attrs:
-        :return:
+        :param attrs: a dictionary with the instance attributes
         """
         for k, v in attrs.items():
             setattr(self, k, v)
@@ -51,31 +50,19 @@ class SubSystem(object):
         return False
 
     @classmethod
-    def generate_instance(cls, kind, specs):
-        """
-        Take the technical specs of a family of subsystems (communication, propulsion, ...) and create components objects
-        :param kind: string representing the kind/family
-        :param specs: dictionary of specs taken from constraints
-        :return: component as a JSON object
-        """
-        name = str(random.randrange(0, 200)) + str(random.choice(['T', 'W', 'KV', 'JFG'])) + ' ' + kind
-        obj = {'id': uuid.uuid4().hex, 'name': name}
-        obj = dict(obj.items() + generate_object(kind, specs).items())
-        return obj
-
-    @classmethod
-    def generate_py_object(cls, kind, specs):
+    def generate_py_instance(cls, kind, specs):
         """
         Take the technical specs of a family of subsystems (communication, propulsion, ...) and create components objects
         :param kind: string representing the kind/family
         :param specs: dictionary of specs taken from constraints
         :return: component as Python object
         """
-        name = str(random.randrange(0, 200)) + str(random.choice(['T', 'W', 'KV', 'JFG'])) + ' ' + kind
-        obj = {'id': uuid.uuid4().hex, 'name': name}
-        classname = cls.stringify(kind)
-        m = type(obj['id'], (classname,), generate_object(kind, specs))
-        return m
+        name = str(random.randrange(0, 200)) + str(random.choice(['T', 'W', 'KV', 'JFG', 'WNT', 'SD'])) + ' ' + kind
+        json_obj = {'id': uuid.uuid4().hex, 'name': name}
+        json_obj = dict(json_obj.items() + generate_object(kind, specs).items())
+        classname = SubSystem.stringify(json_obj['kind'])
+        obj = type(classname, (SubSystem,), json_obj)
+        return obj
 
     @classmethod
     def generate_jsonld(cls, component):
@@ -86,14 +73,14 @@ class SubSystem(object):
         :param component: JSON object as dict
         :return: JSON-LD object as dict
         """
-        if not isinstance(component, dict):
+        if not issubclass(component, SubSystem):
             raise ValueError
 
         result = {
-            "@id": "http://ontology.projectchronos.eu/COTS/" + component['id'],
-            "@type": component['linked'],
-            "http://ontology.projectchronos.eu/subsystems/name": component['name'],
-            "http://ontology.projectchronos.eu/subsystems/function": component['kind'],
+            "@id": "http://ontology.projectchronos.eu/COTS/" + component.id,
+            "@type": component.linked,
+            "http://ontology.projectchronos.eu/subsystems/name": component.name,
+            "http://ontology.projectchronos.eu/subsystems/function": component.kind,
             "http://ontology.projectchronos.eu/subsystems/manufacturer": "Chronos",
             "http://ontology.projectchronos.eu/subsystems/isStandard": "Cubesat",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#label": "e3349c8fe32d4174a405aeee1e441fad",
@@ -134,11 +121,12 @@ class SubSystem(object):
                 }
             raise ValueError('input is not a quantitative VALUE from a component dictionary')
 
-        for k, v in component.items():
-            try:
-                result[format_key(k)] = format_value(k, v)
-            except ValueError:
-                pass
+        for k, v in component.__dict__.items():
+            if v is not None:
+                try:
+                    result[format_key(k)] = format_value(k, v)
+                except ValueError:
+                    pass
 
         return result
 
