@@ -81,7 +81,7 @@ class SubSystem(object):
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#label": "e3349c8fe32d4174a405aeee1e441fad",
         }
 
-        maps = {
+        units = {
             "subsystems": "http://ontology.projectchronos.eu/subsystems/",
             "subsystems:hasMass": "http://sw.opencyc.org/2012/05/10/concept/en/Gram",
             "subsystems:hasMonetaryValue": "http://sw.opencyc.org/2012/05/10/concept/en/Euro",
@@ -100,10 +100,10 @@ class SubSystem(object):
             # map elements > maps
             if key.find(':') != -1:
                 subs = key.split(':')
-                new_key = maps['subsystems'] + subs[1]
+                new_key = units['subsystems'] + subs[1]
                 return new_key
             else:
-                raise ValueError('input is not a KEY from a component dictionary')
+                raise ValueError('input is not a quantitative KEY from a component dictionary')
 
         def format_value(key, value):
             """
@@ -111,10 +111,10 @@ class SubSystem(object):
             """
             if all(i(value) for i in (int, long, float, complex)):
                 return {
-                    "@type": maps[key] if 'Temp' not in key else maps['temperature'],
+                    "@type": units[key] if 'Temp' not in key else units['temperature'],
                     "@value": value
                 }
-            raise ValueError('input is not a VALUE from a component dictionary')
+            raise ValueError('input is not a quantitative VALUE from a component dictionary')
 
         for k, v in component.items():
             try:
