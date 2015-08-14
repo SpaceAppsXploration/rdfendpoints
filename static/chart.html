@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Explore Linked Data</title>
+</head>
+<body>
+<h1>Explore Linked Data</h1>
+ 
+<div id="chartPanel"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+<!-- Jquery BBQ --> 
+<script src="jquery.ba-bbq.min.js"></script>
+
+<link href="chart.css" rel="stylesheet">  
+<script src="chart.js">
+</script>
+<script type="text/template" id="SPARQLtemplate">
+BASE <http://rdfendpoints.appspot.com/tmp-ontology/>
+PREFIX astronomy: <http://ontology.projectchronos.eu/astronomy/>
+PREFIX solarsystem: <http://ontology.projectchronos.eu/solarsystem/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+CONSTRUCT {
+    solarsystem:{0} <setlabel> ?focuslabel .
+    ?other <setlabel> ?compositelabel .
+    ?other <setparent> solarsystem:{0} .
+}
+WHERE {
+    solarsystem:{0} rdfs:label ?focuslabel .
+      { solarsystem:{0} ?pred ?other . BIND ("sub" AS ?klass)}
+      UNION
+      { ?other ?pred solarsystem:{0} . BIND ("obj" AS ?klass)}
+    ?other rdfs:label ?otherlabel .
+    BIND (CONCAT("<p class='", ?klass ,"'>", STR(?pred),"</p>", ?otherlabel) AS ?compositelabel)
+}
+</script>
+<script>
+  $(window).trigger( 'hashchange' );//Start loading AJAX data
+</script>
+
+</body>
+</html>

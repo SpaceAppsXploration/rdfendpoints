@@ -1,0 +1,15 @@
+#chartPanel .google-visualization-orgchart-node {
+  border: none;
+}
+
+h1 {
+    text-align: center;
+}
+.sub {
+    font: xx-small italic;
+    color: green;
+}
+.obj {
+	color: red;
+    font: xx-small italic;
+}
