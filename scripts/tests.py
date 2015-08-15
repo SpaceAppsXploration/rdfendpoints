@@ -62,8 +62,8 @@ class BasicObjectCreation(unittest.TestCase):
 
 class FactoryTest(unittest.TestCase):
 
-    specs = tech_constrains['propulsion']
-    kind = 'propulsion'
+    specs = tech_constrains['detector']
+    kind = 'detector'
 
     @classmethod
     def test_generate_py_object(cls, kind, specs):

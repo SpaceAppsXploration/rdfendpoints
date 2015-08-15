@@ -29,8 +29,9 @@ tech_constrains = dict({
     "detector" : {
         "slug": "DTR",
         "ontology": "http://ontology.projectchronos.eu/subsystems/Spacecraft_Detector",
-        "sensor": ["ImagingDetector", "MassSpectrometer", "SpectroPhotometer", "SingleChannelPhotometer", "Radar",
+        "sensor": ["CCD", "CMOS", "MassSpectrometer", "SpectroPhotometer", "SingleChannelPhotometer", "Radar",
                      "MultiChannelPhotometer", "MichelsonInterferometer", "FabryPerot", "DustDetectors"],
+        "hasFieldOfResearch": ["EarthObservation", "DeepSpace"],
         "power": {"min": -100, "max": -10},
         "mass": {"min": 50, "max": 400},
         "cost": {"min": 2000, "max": 15000},

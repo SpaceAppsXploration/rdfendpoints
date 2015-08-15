@@ -24,7 +24,9 @@ def generate_object(name, subsystem):
     result['kind'] = name
 
     # if it is a detector, defines what kind of sensor it holds
-    if 'sensor' in subsystem.keys(): result['sensor'] = random.choice(subsystem['sensor'])
+    if 'sensor' in subsystem.keys():
+        result['subsystems:holdsSensor'] = random.choice(subsystem['sensor'])
+        result['sensors:hasFieldOfResearch'] = random.choice(subsystem['hasFieldOfResearch'])
 
     # general rule for most of the subsystems families
     if 'minWorkingTemp' in subsystem.keys() and subsystem['slug'] != 'THR':

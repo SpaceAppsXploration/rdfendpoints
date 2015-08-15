@@ -87,7 +87,8 @@ class SubSystem(object):
         }
 
         units = {
-            "subsystems": "http://ontology.projectchronos.eu/subsystems/",
+            "vocabs": "http://ontology.projectchronos.eu/",
+            "subsytems:objective": "http://ontology.projectchronos.eu/subsytems/objective",
             "subsystems:hasMass": "http://sw.opencyc.org/2012/05/10/concept/en/Gram",
             "subsystems:hasMonetaryValue": "http://sw.opencyc.org/2012/05/10/concept/en/Euro",
             "subsystems:hasPower": "http://dbpedia.org/data/Watt.ntriples",
@@ -105,27 +106,38 @@ class SubSystem(object):
             # map elements > maps
             if key.find(':') != -1:
                 subs = key.split(':')
-                new_key = units['subsystems'] + subs[1]
+                new_key = units['vocabs'] + subs[0] + '/' + subs[1]
                 return new_key
             else:
-                raise ValueError('input is not a quantitative KEY from a component dictionary')
+                raise ValueError('input is not a vocabulary KEY from a component dictionary')
 
         def format_value(key, value):
             """
             adds @type and @value to the value
             """
-            if all(i(value) for i in (int, long, float, complex)):
-                return {
-                    "@type": units[key] if 'Temp' not in key else units['temperature'],
-                    "@value": value
-                }
-            raise ValueError('input is not a quantitative VALUE from a component dictionary')
+            try:
+                # look for quantitative values
+                if all(i(value) for i in (int, long, float, complex)):
+                    return {
+                        "@type": units[key] if 'Temp' not in key else units['temperature'],
+                        "@value": value
+                    }
+            except ValueError:
+                # if the value is a link or string
+                if key.find(':') != -1:
+                    subs = key.split(':')
+                    new_value = units['vocabs'] + subs[0] + '/' + value
+                    return new_value
+                else:
+                    raise ValueError('input is not a quantitative VALUE or an object property from a component dictionary')
 
         for k, v in component.__dict__.items():
             if v is not None:
                 try:
+                    print k, v
                     result[format_key(k)] = format_value(k, v)
-                except ValueError:
+                except ValueError as e:
+                    # print e
                     pass
 
         return result
