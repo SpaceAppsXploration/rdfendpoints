@@ -88,7 +88,6 @@ class SubSystem(object):
 
         units = {
             "vocabs": "http://ontology.projectchronos.eu/",
-            "subsytems:objective": "http://ontology.projectchronos.eu/subsytems/objective",
             "subsystems:hasMass": "http://sw.opencyc.org/2012/05/10/concept/en/Gram",
             "subsystems:hasMonetaryValue": "http://sw.opencyc.org/2012/05/10/concept/en/Euro",
             "subsystems:hasPower": "http://dbpedia.org/data/Watt.ntriples",
@@ -102,10 +101,10 @@ class SubSystem(object):
             :param key: a string, a dictionary key
             :return: the right key for the JSON-LD
             """
-            # split key :
-            # map elements > maps
             if key.find(':') != -1:
+                # if key is a vocabulary property
                 subs = key.split(':')
+                # format the key as a linked data property
                 new_key = units['vocabs'] + subs[0] + '/' + subs[1]
                 return new_key
             else:

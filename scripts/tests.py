@@ -99,5 +99,7 @@ class FactoryTest(unittest.TestCase):
         :return:
         """
         for k, v in tech_constrains.items():
-            obj = self.test_generate_py_object(self.kind, self.specs)
-            SubSystem.generate_jsonld(obj)
+            obj = self.test_generate_py_object(k, v)
+            s = SubSystem.generate_jsonld(obj)
+            print json.dumps(s, indent=4)
+            print '-*--*--*--*--*--*--*--*--*--*--*--*--*--*--*-'
