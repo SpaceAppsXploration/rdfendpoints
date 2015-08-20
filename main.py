@@ -31,10 +31,12 @@ class MainPage(webapp2.RequestHandler):
     def post(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if self.request.get('pwd') == _TEMP_SECRET:
-            g = Graph(store=NDBStore(identifier=_GRAPH_ID))
-            triple = self.request.get('triple')
-            g.parse(data=triple, format="nt")
-            return self.response.write("GRAPH STORED OK: " + triple)
+            cache_graph = Graph()
+            cache_graph.parse(data = self.request.get('triple'),
+                              format="nt")
+            app_graph = Graph(store=NDBStore(identifier=_GRAPH_ID))
+            app_graph += cache_graph
+            return self.response.write("GRAPH STORED OK: {} triples".format(len(cache_graph)))
         return self.response.set_status(405)
 
 
