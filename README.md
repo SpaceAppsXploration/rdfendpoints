@@ -7,4 +7,6 @@ cd rdfendpoints
 git clone https://github.com/SpaceAppsXploration/RDFvocab
 ```
 
+to collect the RDF vocabularies.
+
 

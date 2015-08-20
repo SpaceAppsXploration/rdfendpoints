@@ -3,7 +3,7 @@ __author__ = 'lorenzo'
 import random
 import uuid
 
-from generator import generate_object
+from datagenerator.generator import generate_object
 
 
 class SubSystem(object):
@@ -77,7 +77,7 @@ class SubSystem(object):
             raise ValueError
 
         result = {
-            "@id": "http://ontology.projectchronos.eu/COTS/" + component.id,
+            "@id": "http://rdfendpoints.appspot.com/database/cots" + component.id,
             "@type": component.linked,
             "http://ontology.projectchronos.eu/subsystems/name": component.name,
             "http://ontology.projectchronos.eu/subsystems/manufacturer": "Chronos",

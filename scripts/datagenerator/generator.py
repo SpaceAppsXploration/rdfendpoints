@@ -1,3 +1,8 @@
+"""
+Tools to generate random Cubesat COTS Components.
+Aerospace support from Giacomo Gatto
+"""
+
 import random
 
 
@@ -16,7 +21,7 @@ def linear_function():
 
 def generate_object(name, subsystem):
     """
-    Generates random components from given input dictionary
+    Generates random components from given input dictionary from constraints.py
     """
     result = {}
     result['subsystems:hasMass'] = random_value(subsystem['mass'])

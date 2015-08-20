@@ -3,8 +3,8 @@ __author__ = 'lorenzo'
 import json
 import unittest
 
-from factory import SubSystem, Communication
-from constraints import tech_constrains
+from factory import SubSystem
+from scripts.datagenerator.constraints import tech_constrains
 
 
 class BasicObjectCreation(unittest.TestCase):
