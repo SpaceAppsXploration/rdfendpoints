@@ -80,7 +80,6 @@ class SubSystem(object):
             "@id": "http://ontology.projectchronos.eu/COTS/" + component.id,
             "@type": component.linked,
             "http://ontology.projectchronos.eu/subsystems/name": component.name,
-            "http://ontology.projectchronos.eu/subsystems/function": component.kind,
             "http://ontology.projectchronos.eu/subsystems/manufacturer": "Chronos",
             "http://ontology.projectchronos.eu/subsystems/isStandard": "Cubesat",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#label": "e3349c8fe32d4174a405aeee1e441fad",

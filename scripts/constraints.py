@@ -48,7 +48,7 @@ tech_constrains = dict({
         "cost": {"min": 2000, "max": 10000},
         "minWorkingTemp": { "min": -60, "max": -40 },
         "maxWorkingTemp": { "min": 50, "max": 100 },
-        "hasEfficiency": "None"
+        "hasEfficiency": None
     },
     "backup power" : {
         "slug": "BCK",
