@@ -1,64 +1,31 @@
 __author__ = 'lorenzo'
 
 #
-# Dumps vocabularies into remote datastore with POST requests via cURL
+# Dumps vocabularies into remote datastore with POST requests
 #
 
+import sys
 import os
 from os.path import dirname
-from rdflib import Graph
-import pycurl
-from urllib import urlencode
-from config import _TEMP_SECRET
+import urllib
 
-url = 'http://rdfendpoints.appspot.com/ds'
+def _upload_all(url):
+    basepath = os.path.join(dirname(dirname(os.path.abspath(__file__))), 'RDFvocab', 'ntriples')
+    for path, _dirs, files in os.walk(basepath):
+        for filename in files:
+            if filename.endswith(".ntriples"):
+                fullpath = os.path.join(path, filename)
+                print 'Uploading {}...'.format(fullpath)
+                with open(fullpath, 'r') as f:
+                    data = f.read()
+                params = urllib.urlencode({'pwd': '***', 'triple': data})
+                f = urllib.urlopen(url, params)
+                print f.read()
 
-
-def _curling(url, params):
-    """
-    POST to a remote url
-    :param url: target url
-    :param params: parameters in the request
-    :return: None
-    """
-    c = pycurl.Curl()
-    c.setopt(c.URL, url)
-
-    post_data = params
-    # Form data must be provided already urlencoded.
-    postfields = urlencode(post_data)
-    # Sets request method to POST,
-    # Content-Type header to application/x-www-form-urlencoded
-    # and data to send in request body.
-    c.setopt(c.POSTFIELDS, postfields)
-
-    c.perform()
-    c.close()
-    return None
-
-
-def _dumping(fullpath):
-    """
-    Create a RDFLib graph from a N-Triples file
-    :param fullpath: path of the file
-    :return: the Graph instance
-    """
-    with open(fullpath, 'r') as f:
-        g = Graph()
-        g.parse(data=f.read(), format="nt")
-    return g
-
-basepath = os.path.join(dirname(dirname(os.path.abspath(__file__))), 'RDFvocab', 'ntriples')
-print basepath
-vocabularies = ((_dumping(os.path.join(path, filename)), filename) for path, dirs, files in os.walk(basepath) for filename in files if filename.endswith(".ntriples"))
-
-
-for v, f in vocabularies:
-    for stmt in v:
-        g = Graph()
-        g.add(stmt)
-        triple = g.serialize(format='nt')
-        #print triple
-        _curling(url=url, params={'pwd': _TEMP_SECRET, 'triple': triple})
-
+if __name__ == "__main__":
+    #Usage examples:
+    #python uploadtriples.py http://localhost:10080/ds
+    #python uploadtriples.py http://localhost:8080/ds
+    #python uploadtriples.py http://rdfendpoints.appspot.com/ds
+    _upload_all(sys.argv[1])
 
