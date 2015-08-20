@@ -8,6 +8,8 @@ import sys
 import os
 from os.path import dirname
 import urllib
+sys.path.insert(0, '..')
+import config
 
 def _upload_all(url):
     basepath = os.path.join(dirname(dirname(os.path.abspath(__file__))), 'RDFvocab', 'ntriples')
@@ -18,7 +20,7 @@ def _upload_all(url):
                 print 'Uploading {}...'.format(fullpath)
                 with open(fullpath, 'r') as f:
                     data = f.read()
-                params = urllib.urlencode({'pwd': '***', 'triple': data})
+                params = urllib.urlencode({'pwd': config._TEMP_SECRET, 'triple': data})
                 f = urllib.urlopen(url, params)
                 print f.read()
 
