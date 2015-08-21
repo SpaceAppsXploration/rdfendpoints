@@ -48,7 +48,8 @@ class Hello(webapp2.RequestHandler):
 
 class Querying(webapp2.RequestHandler):
     """
-    /ds: responds to SPARQL queries using the ?query= parameter
+    /ds GET: responds to SPARQL queries using the ?query= parameter
+    /ds POST: endpoint to store triples in the datastore
     """
     def get(self):
         if self.request.get('query'):
@@ -78,7 +79,7 @@ class Testing(webapp2.RequestHandler):
 
 class Endpoints(webapp2.RequestHandler):
     """
-    Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
+    /database GET: Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
     """
     def get(self, keywd):
         self.response.headers['Access-Control-Allow-Origin'] = '*'

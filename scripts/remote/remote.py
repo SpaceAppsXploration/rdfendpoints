@@ -25,6 +25,7 @@ def dump_to_ds_post(url, data):
 def dump_to_endpoint_post(url, data):
     """
     open a connection and dump via POST to /database endpoint
+    UNDER-CONSTRUCTION
     :param url: the server url
     :param data: the triples
     :return: urllib response

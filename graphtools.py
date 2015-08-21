@@ -17,6 +17,11 @@ def update(q):
 
 
 def query(q):
+    """
+    queries the Graph() instance
+    :param q:
+    :return:
+    """
     response = graph().query(q)
     if response.type == 'CONSTRUCT': #These cannot be JSON-serialized so we extract the data with a SELECT
         g = Graph()
@@ -26,13 +31,21 @@ def query(q):
 
 
 def graph():
+    """
+    returns the NFBStore
+    :return: a Graph() instance
+    """
     return Graph(store=NDBStore(identifier=_GRAPH_ID))
 
 
 def store_triples(triples):
+    """
+    Caches and store the new triples
+    :param triples: triples POSted
+    :return: graphs
+    """
     cache_graph = Graph()
-    cache_graph.parse(data=triples,
-                      format="nt")
+    cache_graph.parse(data=triples, format="nt")
     app_graph = graph()
     app_graph += cache_graph
     return app_graph, cache_graph

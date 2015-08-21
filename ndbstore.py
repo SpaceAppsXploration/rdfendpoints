@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Created on 12 Sep 2014
 
 @author: Niels Christensen
 A triple store using NDB on GAE (Google App Engine)
 
 This code borrows heavily from the Memory Store class by Michel Pelletier, Daniel Krech, Stefan Niederhauser
-'''
+"""
 
 from rdflib.store import Store
 from google.appengine.ext import ndb
@@ -29,38 +29,38 @@ ANY = None #Convention used by rdflib
 
 
 def sha1(node):
-    '''@param node: Some basestring or rdflib.term, encodable in UTF-8
+    """@param node: Some basestring or rdflib.term, encodable in UTF-8
        @return: The hex SHA1 of the given string
-    '''
+    """
     m = hashlib.sha1()
     m.update(node.encode('utf-8'))
     return m.hexdigest()
 
 
 class GraphShard(ndb.Model):
-    '''Stores a subset of all triples in a Graph
+    """Stores a subset of all triples in a Graph
        A single GraphShard will typically contain triples for one specific predicate
        or a selection of subjects.
        A GraphShard can be retrieved quickly and cheaply by its key.
        The triples are stored in the N3 format, gzip compressed by NDB.
-    '''
+    """
     graph_n3 = ndb.TextProperty(compressed = True)
     graph_ID = ndb.StringProperty()
 
-    '''A cache for previously retrieved GraphShard that haven't yet been garbage collected.
+    """A cache for previously retrieved GraphShard that haven't yet been garbage collected.
        This is important because all joins will be performed lazily, which means the query evaluator
-       will ask for the same triples over and over again within milliseconds.'''
+       will ask for the same triples over and over again within milliseconds."""
     _graph_cache = WeakValueDictionary()
-    _not_found = set() #Placeholder used in _graph_cache because None or object() cannot be weakref'ed
+    _not_found = set()  # Placeholder used in _graph_cache because None or object() cannot be weakref'ed
 
-    '''Retrieve an rdflib.Graph() containing the triples in this GraphShard.
+    """Retrieve an rdflib.Graph() containing the triples in this GraphShard.
        This method searches three layers of store in order:
          * a local WeakValueDictionary containing rdflib.Graph() objects (very, very fast)
          * The Memcache provided by NDB containing pickled rdflib.Graph() objects (needs unpickling, takes 0-300ms in my experience)
          * NDB itself containing compressed N3 data (needs decompression and parsing, takes 0-1500ms in my experience)
        The method stores the returned object in the two first layers before returning.
        @return The rdflib.Graph() containing the triples in this GraphShard.
-    '''    
+    """    
     def rdflib_graph(self):
         g = GraphShard._graph_cache.get(self._parsed_memcache_key(), GraphShard._not_found)
         if g is not GraphShard._not_found:
@@ -76,29 +76,29 @@ class GraphShard(ndb.Model):
         return g
     
     def _parsed_memcache_key(self):
-        '''@return The key used for caching self.rdflib_graph() in Memcache and
+        """@return The key used for caching self.rdflib_graph() in Memcache and
            the internal _graph_cache
-        '''
+        """
         return 'IOMemory({})'.format(self.key.id())
     
     @staticmethod
     def invalidate(instances):
-        '''Removes all cached copies of the given GraphShard instances.
+        """Removes all cached copies of the given GraphShard instances.
            @param instances: A collection of GraphShard instances
-        '''
+        """
         for instance in instances:
             GraphShard._graph_cache[instance._parsed_memcache_key()] = GraphShard._not_found
         memcache.delete_multi([instance._parsed_memcache_key() for instance in instances])
         
     def spo(self):
-        '''Checks whether this GraphShard stores triples for specific subjects, predicates, or objects.
+        """Checks whether this GraphShard stores triples for specific subjects, predicates, or objects.
            @return either 's', 'p' or 'o'.
-        '''
+        """
         return self.key.id().split('-')[0]
     
 
-'''Map from the number of shards for something to the number of hex digits needed to get this.
-E.g. to get 16 shards for subjects, we need to use one hex digit.'''
+"""Map from the number of shards for something to the number of hex digits needed to get this.
+E.g. to get 16 shards for subjects, we need to use one hex digit."""
 _NO_OF_SHARDS_TO_NO_OF_HEX_DIGITS = { 1    : 0,
                                       16   : 1,
                                       256  : 2,
@@ -110,6 +110,7 @@ _HEX_DIGITS = [str(i) for i in range(10)] + [chr(i) for i in range(ord('a'), ord
 _VALID_NO_SHARDS = _NO_OF_SHARDS_TO_NO_OF_HEX_DIGITS.keys()
 
 _CONF_ERR_MSG = "NDBStore configuration must set {} to be in {}, not {}"
+
 
 class NDBStore(Store):
     """
@@ -135,10 +136,10 @@ class NDBStore(Store):
     """
     
     def __init__(self, configuration={}, identifier=None):
-        '''@param configuration: A dict mapping 'log' to True or False
+        """@param configuration: A dict mapping 'log' to True or False
            @param identifier: A nonempty string or unicode. It's length must be <64
            to keep internal keys reasonably small.
-        '''
+        """
         super(NDBStore, self).__init__(configuration)
         assert identifier is not None, "NDBStore requires a basestring identifier"
         assert isinstance(identifier, basestring), "NDBStore requires a basestring identifier"
@@ -170,14 +171,14 @@ class NDBStore(Store):
         return _NO_OF_SHARDS_TO_NO_OF_HEX_DIGITS[no_of_shards]
     
     def keys_for(self, graph_ID, uri_ref, index):
-        '''Assemble all NDB keys for the GraphShards containing triples relevant to the given parameters.
+        """Assemble all NDB keys for the GraphShards containing triples relevant to the given parameters.
            @param graph_ID: The name of the graph to get triples from, e.g. 'current'
            @param uri_ref: The rdflib.URIRef to get triples for
            @param index: 0, or 1 to indicate at which position the triples should have the given uri_ref.
                          0=subject, 1=predicate
            @return A list of ndb.Keys for the relevant GraphShards.
                    Example Key: 'p-prov#endedAtTime_6f11f819383b6a6bb619fbea25b5696372ba0b62--newdata'
-        '''
+        """
         assert index in range(2), 'index was {}, must be one of 0 for subject, 1 for predicate'.format(index)
         if index == 1: #A predicate
             no_of_hex_digits = self._hex_digits(uri_ref)
@@ -193,17 +194,17 @@ class NDBStore(Store):
         return [ndb.Key(GraphShard, '{}-{}-{}-{}'.format('spo'[index], uri_ref_digest, r, graph_ID)) for r in random_sub_shards]
 
     def log(self, msg):
-        '''Add a message to this objects internal log.
+        """Add a message to this objects internal log.
            @param msg: The message, a string. It may contain newlines.
-        '''
+        """
         if self._is_logging:
             self._log.write('\n{:.3f}s: '.format(time() - self._log_begin))
             self._log.write(msg)
 
     def flush_log(self, level):
-        '''Logs all stored log messages on the given level and clears the internal log.
+        """Logs all stored log messages on the given level and clears the internal log.
            @level: The (integer) level from the logging module, e.g. logging.DEBUG 
-        '''
+        """
         if self._is_logging:
             logging.log(level, self._log.getvalue())
             self._log = StringIO()
@@ -245,7 +246,7 @@ class NDBStore(Store):
             ndb.put_multi(updated)
 
     def add(self, (subject, predicate, o), context, quoted=False):
-        """\
+        """
         Redirects to addN() because NDB heavily favours batch updates.
         """
         logging.warn('Inefficient use: 1 triple being added')
@@ -291,8 +292,8 @@ class NDBStore(Store):
         self.log('{} done'.format(log_id))
 
     def _all_predicate_shard_models(self):
-        '''Generator yielding every GraphShard for the identified graph.
-        '''
+        """Generator yielding every GraphShard for the identified graph.
+        """
         logging.warn('Inefficient usage: Traversing all triples')
         for m in GraphShard.query().filter(GraphShard.graph_ID == self._ID).iter():
             if m is not None and m.spo() == 'p': #Avoid yield each triple twice (once for each GraphShard it is stored in)
@@ -302,19 +303,20 @@ class NDBStore(Store):
         return sum([len(m.rdflib_graph()) for m in self._all_predicate_shard_models()])
 
     def __contexts(self):
-        '''Empty generator
-        '''
+        """Empty generator
+        """
         if False:
             yield
 # ------------------------------------------------------------------------
 # The following defines the custom SPARQL query evaluator for Graphs backed by an NDBStore
- 
+
+
 def _evalPartWithLoggingAndLazyJoins(ctx, part):
-    '''Supplement to rdflib.plugins.sparql.evaluate.evalPart().
+    """Supplement to rdflib.plugins.sparql.evaluate.evalPart().
        Only active when ctx.graph is backed by an NDBStore
        Dumps any SELECT query to the NDBStores internal log.
        Executes every join as a lazy join.
-    '''
+    """
     if not isinstance(ctx.graph.store, NDBStore):
         raise NotImplementedError
     if part.name == 'SelectQuery':
@@ -328,12 +330,12 @@ def _evalPartWithLoggingAndLazyJoins(ctx, part):
         raise NotImplementedError
 
 def _dump(part, indent, dest):
-    '''Pretty printer for a SPARQL query parsed by rdflib.
+    """Pretty printer for a SPARQL query parsed by rdflib.
        The query will be written on multiple lines.
        @param part: Part of a parsed SPARQL query
        @param indent: A string that is prepended to every lines printed for this part of the query
        @param dest: A file-like object to which the output is written
-    '''
+    """
     if part is None:
         return None
     if part.name == 'BGP':
@@ -350,6 +352,6 @@ def _dump(part, indent, dest):
                 _dump(child, '{}  '.format(indent), dest)
     return
 
-'''Register the above SPARQL query evaluator in rdflib'''
+"""Register the above SPARQL query evaluator in rdflib"""
 CUSTOM_EVALS['ndbstore'] = _evalPartWithLoggingAndLazyJoins
 logging.info('Activated specialized query evaluation in rdflib')
