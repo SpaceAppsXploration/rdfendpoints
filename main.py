@@ -79,7 +79,8 @@ class Testing(webapp2.RequestHandler):
 
 class Endpoints(webapp2.RequestHandler):
     """
-    /database GET: Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
+    /database/cots GET: Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
+    /database/cots/store POST: store component instance in the datastore
     """
     def get(self, keywd):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -105,6 +106,14 @@ class Endpoints(webapp2.RequestHandler):
             pass
 
         return self.response.write(keywd)
+
+    def post(self, keywd):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        if keywd == 'store' and self.request.get('pwd') == _TEMP_SECRET:
+            # jsonld = self.request.get('jsonld')
+            # from models import Component
+            # key = Component.dump_from_jsonld(jsonld)
+            pass
 
 
 class FourOhFour(webapp2.RequestHandler):
