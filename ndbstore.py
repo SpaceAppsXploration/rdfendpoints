@@ -105,7 +105,7 @@ _NO_OF_SHARDS_TO_NO_OF_HEX_DIGITS = { 1    : 0,
                                       4096 : 3,
                                      }
 
-_HEX_DIGITS = [str(i) for i in range(10)] + [chr(i) for i in range(ord('a'), ord('g'))] #Each of the 16 hex digits
+_HEX_DIGITS = [str(i) for i in range(10)] + [chr(i) for i in range(ord('a'), ord('g'))] # Each of the 16 hex digits
 
 _VALID_NO_SHARDS = _NO_OF_SHARDS_TO_NO_OF_HEX_DIGITS.keys()
 
@@ -180,15 +180,15 @@ class NDBStore(Store):
                    Example Key: 'p-prov#endedAtTime_6f11f819383b6a6bb619fbea25b5696372ba0b62--newdata'
         """
         assert index in range(2), 'index was {}, must be one of 0 for subject, 1 for predicate'.format(index)
-        if index == 1: #A predicate
+        if index == 1: # A predicate
             no_of_hex_digits = self._hex_digits(uri_ref)
             random_sub_shards = [''.join(t) for t in product(_HEX_DIGITS, repeat = no_of_hex_digits)]
             #Keep last part of the URIRef as a "whiff". This is useful when inspecting data in GAE's datastore viewer
             whiff = uri_ref.split('/')[-1].replace('-','')
             if len(whiff) > 20:
                 whiff = whiff[-20:]
-            uri_ref_digest = '{}_{}'.format(whiff, sha1(uri_ref))#Example: prov#endedAtTime_6f11f819383b6a6bb619fbea25b5696372ba0b62
-        else: #A subject
+            uri_ref_digest = '{}_{}'.format(whiff, sha1(uri_ref))# Example: prov#endedAtTime_6f11f819383b6a6bb619fbea25b5696372ba0b62
+        else: # A subject
             uri_ref_digest = sha1(uri_ref)[-self._no_of_subject_shard_digits:]
             random_sub_shards = ['']
         return [ndb.Key(GraphShard, '{}-{}-{}-{}'.format('spo'[index], uri_ref_digest, r, graph_ID)) for r in random_sub_shards]
@@ -218,19 +218,19 @@ class NDBStore(Store):
             ndb.delete_multi(results)
         
     def addN(self, quads):
-        #TODO: Handle splitting large graphs into two entities
-        #Note: quads is a generator, not a list. It cannot be traversed twice.
-        #Step 1: Collect the triples into the Graphs reflecting the GraphShards they will be added to.
+        # TODO: Handle splitting large graphs into two entities
+        # Note: quads is a generator, not a list. It cannot be traversed twice.
+        # Step 1: Collect the triples into the Graphs reflecting the GraphShards they will be added to.
         new_shard_dict = defaultdict(Graph)
-        for (s, p, o, _) in quads: #Last component ignored as this Store is not context_aware
+        for (s, p, o, _) in quads: # Last component ignored as this Store is not context_aware
             subject_shard = choice(self.keys_for(self._ID, s, 0))
             new_shard_dict[subject_shard].add((s, p, o))
             predicate_shard = choice(self.keys_for(self._ID, p, 1))
             new_shard_dict[predicate_shard].add((s, p, o))
         keys = list(new_shard_dict.keys())
-        #Step 2: Load all existing, corresponding GraphShards
-        keys_models = zip(keys, ndb.get_multi(keys)) #TODO: Use async get
-        #Step 3: Update or create GraphShards with the added triples
+        # Step 2: Load all existing, corresponding GraphShards
+        keys_models = zip(keys, ndb.get_multi(keys)) # TODO: Use async get
+        # Step 3: Update or create GraphShards with the added triples
         updated = list()
         for index in range(len(keys_models)):
             (key, model) = keys_models[index]
@@ -240,7 +240,7 @@ class NDBStore(Store):
                 new_shard_dict[key].parse(data = model.graph_n3, format='n3')
                 model.graph_n3 = new_shard_dict[key].serialize(format='n3')
             updated.append(model)
-        #Step 4: Invalidate and store all created/updated GraphShards
+        # Step 4: Invalidate and store all created/updated GraphShards
         if len(updated) > 0:
             GraphShard.invalidate(updated)
             ndb.put_multi(updated)
@@ -253,9 +253,9 @@ class NDBStore(Store):
         self.addN([(subject, predicate, o, context)])
 
     def remove(self, (s, p, o), context=None):
-        #Step 1: Get all relevant GraphShards
+        # Step 1: Get all relevant GraphShards
         graph_shards = ndb.get_multi(self.keys_for(self._ID, s, 0)) + ndb.get_multi(self.keys_for(self._ID, p, 1))
-        #Step 2: Remove the given triple from the found GraphShards
+        # Step 2: Remove the given triple from the found GraphShards
         updated = []
         for m in graph_shards:
             if m is not None:
@@ -263,27 +263,27 @@ class NDBStore(Store):
                 g.remove((s, p, o))
                 m.graph_n3 = g.serialize(format='n3')
                 updated.append(m)
-        #Step 3: Invalidate and store the updated GraphShards
+        # Step 3: Invalidate and store the updated GraphShards
         if len(updated) > 0:
             GraphShard.invalidate(updated)
             ndb.put_multi(updated)
 
     def triples(self, (s, p, o), context=None):
-        #Log execution data using a random ID
+        # Log execution data using a random ID
         log_id = '{:04d}'.format(randrange(1000))
         self.log('{} triples({}, {}, {})'.format(log_id, s, p, o))
-        #Analyse bindings to see if the query can be answered using a single GraphShard
+        # Analyse bindings to see if the query can be answered using a single GraphShard
         if p == ANY:
             if s == ANY:
-                #(s,p,o) == (ANY,ANY,o), so all GraphShards must be consulted
+                # (s,p,o) == (ANY,ANY,o), so all GraphShards must be consulted
                 models = self._all_predicate_shard_models()
                 pattern = (s, p, o)
-            else:#s is bound so only the GraphShard for s (and subjects with same hash) needs to be consulted
+            else:# s is bound so only the GraphShard for s (and subjects with same hash) needs to be consulted
                 models = ndb.get_multi(self.keys_for(self._ID, s, 0))
                 pattern = (s, p, o)
-        else:#p is bound so only the GraphShard for p needs to be consulted
+        else:# p is bound so only the GraphShard for p needs to be consulted
             models = ndb.get_multi(self.keys_for(self._ID, p, 1))
-            pattern = (s, ANY, o) #Remove p because IOMemory is slower if you provide a redundant binding
+            pattern = (s, ANY, o) # Remove p because IOMemory is slower if you provide a redundant binding
         for m in models:
             if m is not None:
                 g = m.rdflib_graph()
@@ -296,7 +296,7 @@ class NDBStore(Store):
         """
         logging.warn('Inefficient usage: Traversing all triples')
         for m in GraphShard.query().filter(GraphShard.graph_ID == self._ID).iter():
-            if m is not None and m.spo() == 'p': #Avoid yield each triple twice (once for each GraphShard it is stored in)
+            if m is not None and m.spo() == 'p': # Avoid yield each triple twice (once for each GraphShard it is stored in)
                 yield m
                 
     def __len__(self, context=None):
