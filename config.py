@@ -15,11 +15,12 @@ _VOCS = {
     'exploration': 'http://ontology.projectchronos.eu/exploration'
 }
 
-_TEMP_SECRET = '***'
+_TEMP_SECRET = "***"
 
-_SERVICE = 'http://rdfendpoints.appspot.com/ds'
+_SERVICE = "http://rdfendpoints.appspot.com"
+_REST_SERVICE = "http://rdfendpoints.appspot.com/database/cots/"
 
-_COMPONENTS_REMOTE = 'http://rdfendpoints.appspot.com/database/cots/store'
-_COMPONENTS_LOCALHOST = 'http://localhost:8080/database/cots/store'
+_COMPONENTS_REMOTE = "http://rdfendpoints.appspot.com/database/cots/store"
+_COMPONENTS_LOCALHOST = "http://localhost:8080/database/cots/store"
 
 _PATH = os.path.join(os.path.dirname(__file__), 'templates')

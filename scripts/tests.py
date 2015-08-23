@@ -1,7 +1,6 @@
 __author__ = 'lorenzo'
 
 import json
-from remote.remote import dump_to_endpoint_post, dump_to_ds_post
 import unittest
 
 from factory import SubSystem

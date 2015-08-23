@@ -26,6 +26,7 @@ class Component(ndb.Model):
     # other info
     isStandard = ndb.StringProperty()
     manufacturer = ndb.StringProperty()
+    holdsSensor = ndb.StringProperty()  # only for collection Spacecraft_Detector, else None
 
     # full jsonld of the component (to find a better solution, may lead to storage/computation overload)
     linked = ndb.JsonProperty(compressed=True)
@@ -58,13 +59,31 @@ class Component(ndb.Model):
         returns the full JSON-LD from the uuid/key name/id
         ENHANCEMENT: needs memcache
         :param k_id: the id
-        :return: serialized json
+        :return: serialized JSON-LD
         """
         key = ndb.Key('Component', k_id)
         obj = key.get()
         if not obj:
             raise ValueError('Wrong KEY/ID')
         return json.dumps(obj.linked)
+
+    @classmethod
+    def parse_to_json(cls, k_id):
+        """
+        returns a JSON (implementing HATEOAS)
+        https://github.com/SpaceAppsXploration/rdfendpoints/issues/3
+        :param k_id: the key id
+        :return: serialized JSON
+        """
+        key = ndb.Key('Component', k_id)
+        obj = key.get()
+        if not obj:
+            raise ValueError('Wrong KEY/ID')
+        j_obj = {}
+        for k, v in obj.to_dict().items():
+            if k not in ['linked'] and v:
+                j_obj[k] = v
+        return json.dumps(j_obj)
 
 
 

@@ -49,7 +49,6 @@ def _upload_subsystems(n):
         instances = [SubSystem.generate_py_instance(k, v) for k, v in tech_constrains.items()]
         jsonlds = [SubSystem.generate_jsonld(c) for c in instances]
 
-        from remote import dump_to_endpoint_post
         for j in jsonlds:
             # upload to datastore (under construction)
             post_curling(url=_COMPONENTS_LOCALHOST,

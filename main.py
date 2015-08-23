@@ -18,7 +18,7 @@ import urllib
 from json2html import *
 
 from graphtools import query, store_triples
-from config import _TEMP_SECRET, _PATH
+from config import _TEMP_SECRET, _PATH, _REST_SERVICE
 from models import Component
 
 # generic tools are in tools.py module
@@ -95,14 +95,23 @@ class Endpoints(webapp2.RequestHandler):
         elif valid_uuid(keywd):
             # if the url parameter is an hex, this should be a uuid
             # print a single component (in JSON with a link to N-Triples)
+            if self.request.get('format') and self.request.get('format') == 'jsonld':
+                # if user asks for JSON-LD
+                self.response.headers['Content-Type'] = 'application/ld+json'
+                try:
+                    body = Component.parse_to_jsonld(keywd)
+                except ValueError as e:
+                    return self.response.write(str({"error": 1, "exception": e, "back": _REST_SERVICE}))
+                return self.response.write(body)
+            else:
+                # serve JSON
+                try:
+                    body = Component.parse_to_json(keywd)
+                except ValueError as e:
+                    return self.response.write(str({"error": 1, "exception": e, "back": _REST_SERVICE}))
+                self.response.headers['Content-Type'] = 'application/json'
+                return self.response.write(body)
 
-            # self.response.headers['Content-Type'] = 'application/ld+json'
-            self.response.headers['Content-Type'] = 'text/plain'  # only for debug purpose, use the header above
-            try:
-                body = Component.parse_to_jsonld(keywd)
-            except ValueError as e:
-                return self.response.write(str({"error": 1, "exception": e}))
-            return self.response.write(body)
         elif keywd in families:
             # if the url parameter is a family name
             # print the list of all the components in that family

@@ -12,7 +12,8 @@ import sys
 import os
 from os.path import dirname
 
-from remote import dump_to_ds_post
+from remote import post_curling
+from config import _TEMP_SECRET
 
 
 def _upload_all(url):
@@ -24,7 +25,7 @@ def _upload_all(url):
                 print 'Uploading {}...'.format(fullpath)
                 with open(fullpath, 'r') as f:
                     data = f.read()
-                dump_to_ds_post(url, data)
+                post_curling(url, {'pwd': _TEMP_SECRET, 'triple': data}, display=True)
 
 if __name__ == "__main__":
     _upload_all(sys.argv[1])
