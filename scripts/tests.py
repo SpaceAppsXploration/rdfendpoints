@@ -1,10 +1,12 @@
 __author__ = 'lorenzo'
 
 import json
+from remote.remote import dump_to_endpoint_post, dump_to_ds_post
 import unittest
 
 from factory import SubSystem
 from scripts.datagenerator.constraints import tech_constrains
+from config import _TEMP_SECRET
 
 
 class BasicObjectCreation(unittest.TestCase):
@@ -58,6 +60,22 @@ class BasicObjectCreation(unittest.TestCase):
 
     def runTest(self):
         pass
+
+    def test_post_to_component_endpoint(self):
+        """
+        WARNING: it stores in the local datastore the json-ld in testdata.component
+        :return:
+        """
+        #from models import Component
+        from scripts.testdata.component import component
+        from remote.remote import post_curling
+
+        post_curling(url='http://localhost:8080/database/cots/store',
+                     params={'pwd': _TEMP_SECRET, 'data': component},
+                     display=True)
+
+        #c = Component.dump_from_jsonld(component)
+        #print c
 
 
 class FactoryTest(unittest.TestCase):

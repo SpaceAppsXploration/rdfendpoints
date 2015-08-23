@@ -77,7 +77,7 @@ class SubSystem(object):
             raise ValueError
 
         result = {
-            "@id": "http://rdfendpoints.appspot.com/database/cots" + component.id,
+            "uuid": component.id,
             "@type": component.linked,
             "http://ontology.projectchronos.eu/subsystems/name": component.name,
             "http://ontology.projectchronos.eu/subsystems/manufacturer": "Chronos",

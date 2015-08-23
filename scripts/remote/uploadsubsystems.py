@@ -7,6 +7,9 @@ __author__ = 'lorenzo'
 
 import sys
 import json
+from remote import post_curling
+from config import _TEMP_SECRET, _COMPONENTS_REMOTE, _COMPONENTS_LOCALHOST
+
 
 from scripts.datagenerator.constraints import tech_constrains
 from scripts.factory import SubSystem
@@ -27,30 +30,32 @@ def generate_metaclasses():
     return classes
 
 
-def _upload_subsystems(url, n):
+def _upload_subsystems(n):
     """
     upload to server the subsystems instances
     NOTE: dumped via a REST endpoint /database that has not been created yet
+    endpoint: POST /database/cots/store {"pwd": ***, "data": {...} }
     :param url: the server endpoint
     :param n: number of iteration per family to be generated
     :return:
     """
-    for i in range(0, n):
+    try:
+        int(n)
+    except ValueError:
+        raise ValueError('Argument must be an integer')
+
+    for i in range(0, int(n)):
         # generate py instance components and translate in JSON-LD format
-        jsons = [SubSystem.generate_py_instance(k, v) for k, v in tech_constrains.items()]
-        jsonlds = [SubSystem.generate_jsonld(c) for c in jsons]
+        instances = [SubSystem.generate_py_instance(k, v) for k, v in tech_constrains.items()]
+        jsonlds = [SubSystem.generate_jsonld(c) for c in instances]
 
-        # dump in triples
-        from RDFvocab.script.make_n3 import _curling
-        translator = 'http://rdf-translator.appspot.com/convert/json-ld/nt/content'
+        from remote import dump_to_endpoint_post
         for j in jsonlds:
-            triples = _curling(translator, {'content': json.dumps(j)})
-            print triples
-
             # upload to datastore (under construction)
-            # from remote import dump_to_endpoint_post
-            # dump_to_endpoint_post(url=url, data=triples)
+            post_curling(url=_COMPONENTS_LOCALHOST,
+                         params={'pwd': _TEMP_SECRET, 'data': json.dumps(j)},
+                         display=True)
 
 
 if __name__ == "__main__":
-    _upload_subsystems(sys.argv[1], sys.argv[2])
+    _upload_subsystems(sys.argv[1])

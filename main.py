@@ -19,6 +19,7 @@ from json2html import *
 
 from graphtools import query, store_triples
 from config import _TEMP_SECRET, _PATH
+from models import Component
 
 # generic tools are in tools.py module
 # tools using Graph() and NDBstore are in graphtools.py module
@@ -87,19 +88,21 @@ class Endpoints(webapp2.RequestHandler):
         from tools import valid_uuid, families
 
         if keywd == 'ntriples' and self.request.get('uuid'):
-            # url is "url/cots/ntriples?uuid=<uuid>"
+            # url is "url/cots/ntriples?key=<uuid>"
             uuid = self.request.get('uuid')
             # return ntriples of the object
             pass
         elif valid_uuid(keywd):
             # if the url parameter is an hex, this should be a uuid
             # print a single component (in JSON with a link to N-Triples)
-            #
-            # { <id>: { name: ...,
-            #           mass: ...,
-            #           ... : ...,
-            #           n-triples: "url/cots/ntriples?uuid=<uuid>" } }
-            pass
+
+            # self.response.headers['Content-Type'] = 'application/ld+json'
+            self.response.headers['Content-Type'] = 'text/plain'  # only for debug purpose, use the header above
+            try:
+                body = Component.parse_to_jsonld(keywd)
+            except ValueError as e:
+                return self.response.write(str({"error": 1, "exception": e}))
+            return self.response.write(body)
         elif keywd in families:
             # if the url parameter is a family name
             # print the list of all the components in that family
@@ -110,10 +113,13 @@ class Endpoints(webapp2.RequestHandler):
     def post(self, keywd):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if keywd == 'store' and self.request.get('pwd') == _TEMP_SECRET:
-            # jsonld = self.request.get('jsonld')
-            # from models import Component
-            # key = Component.dump_from_jsonld(jsonld)
-            pass
+            jsonld = self.request.get('data')
+            from models import Component
+            key = Component.dump_from_jsonld(jsonld)
+            return self.response.write("COMPONENT STORED OK: {}".format(key))
+        else:
+            self.response.status = 405
+            return self.response.write('Not Authorized')
 
 
 class FourOhFour(webapp2.RequestHandler):
