@@ -17,9 +17,10 @@ from google.appengine.ext.webapp import template
 import urllib
 from json2html import *
 
-from graphtools import query, store_triples
-from config import _TEMP_SECRET, _PATH, _REST_SERVICE
-from models import Component
+from flankers.graphtools import query, store_triples
+from flankers.errors import format_message
+from config import _TEMP_SECRET, _PATH
+from datastore.models import Component
 
 # generic tools are in tools.py module
 # tools using Graph() and NDBstore are in graphtools.py module
@@ -84,14 +85,24 @@ class Endpoints(webapp2.RequestHandler):
     /database/cots/store POST: store component instance in the datastore
     """
     def get(self, keywd):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        from tools import valid_uuid, families
+        from flankers.tools import valid_uuid, families
 
-        if keywd == 'ntriples' and self.request.get('uuid'):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Content-Type'] = 'application/json'
+        if not keywd:
+            from config import _VOCS, _REST_SERVICE
+            results = [{"name": f[f.rfind('_') + 1:],
+                        "collection_ld+json_description": _VOCS['subsystems'] + f + '/' + '?format=jsonld',
+                        "collection_n-triples_description": _VOCS['subsystems'] + f,
+                        "go_to_collection": _REST_SERVICE + f}
+                       for f in families]
+            return self.response.write(json.dumps(results, indent=2))
+        elif keywd == 'ntriples' and self.request.get('uuid'):
             # url is "url/cots/ntriples?key=<uuid>"
             uuid = self.request.get('uuid')
-            # return ntriples of the object
-            pass
+            if valid_uuid(uuid):
+                # return ntriples of the object
+                return self.response.write(format_message("N-Triples not yet implemented"))
         elif valid_uuid(keywd):
             # if the url parameter is an hex, this should be a uuid
             # print a single component (in JSON with a link to N-Triples)
@@ -101,29 +112,30 @@ class Endpoints(webapp2.RequestHandler):
                 try:
                     body = Component.parse_to_jsonld(keywd)
                 except ValueError as e:
-                    return self.response.write(str({"error": 1, "exception": e, "back": _REST_SERVICE}))
+                    return self.response.write(format_message(e))
                 return self.response.write(body)
             else:
                 # serve JSON
                 try:
                     body = Component.parse_to_json(keywd)
                 except ValueError as e:
-                    return self.response.write(str({"error": 1, "exception": e, "back": _REST_SERVICE}))
-                self.response.headers['Content-Type'] = 'application/json'
+                    return self.response.write(format_message(e))
                 return self.response.write(body)
 
         elif keywd in families:
             # if the url parameter is a family name
             # print the list of all the components in that family
-            pass
-
-        return self.response.write(keywd)
+            results = Component.get_by_collection(keywd)
+            return self.response.write(results)
+        else:
+            # wrong url parameters
+            return self.response.write(format_message("Not a valid key/id in URL"))
 
     def post(self, keywd):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if keywd == 'store' and self.request.get('pwd') == _TEMP_SECRET:
             jsonld = self.request.get('data')
-            from models import Component
+            from datastore.models import Component
             key = Component.dump_from_jsonld(jsonld)
             return self.response.write("COMPONENT STORED OK: {}".format(key))
         else:
@@ -138,7 +150,7 @@ class FourOhFour(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
-    webapp2.Route('/database/cots/<keywd>', Endpoints),
+    webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/ds', Querying),
     webapp2.Route('/', Hello),
 ], debug=True)

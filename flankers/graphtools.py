@@ -7,8 +7,8 @@ Try to collect here all the operations that involves Graph()
 __author__ = 'niels'
 
 from rdflib import Graph
-from ndbstore import NDBStore
 
+from datastore.ndbstore import NDBStore
 from config import _GRAPH_ID
 
 

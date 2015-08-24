@@ -75,15 +75,41 @@ class Component(ndb.Model):
         :param k_id: the key id
         :return: serialized JSON
         """
+        from config import _REST_SERVICE
         key = ndb.Key('Component', k_id)
         obj = key.get()
         if not obj:
             raise ValueError('Wrong KEY/ID')
-        j_obj = {}
+        j_obj = dict()
+        j_obj['ld+json'] = _REST_SERVICE + "%s?format=jsonld" % k_id
+        j_obj['uid'] = k_id
+        j_obj['collection'] = _REST_SERVICE + obj.type[obj.type.rfind('/')+1:]
         for k, v in obj.to_dict().items():
             if k not in ['linked'] and v:
                 j_obj[k] = v
-        return json.dumps(j_obj)
+        return json.dumps(j_obj, indent=2)
+
+    @classmethod
+    def get_by_collection(cls, collection):
+        from config import _REST_SERVICE
+        target = "http://ontology.projectchronos.eu/subsystems/%s" % collection
+        query = Component.query(Component.type == target)
+        if not query:
+            raise ValueError('Wrong collection name')
+        results = list()
+        for q in query:
+            print q.key.id(), q.type
+            obj = {'id': q.key.id(),
+                   'name': q.name,
+                   'ld+json': _REST_SERVICE + "%s?format=jsonld" % q.key.id(),
+                   'go_to_json': _REST_SERVICE + q.key.id(),
+                   'type': {
+                       'ld+json': q.type,
+                       'go_to_collection': _REST_SERVICE + q.type[q.type.rfind('/')+1:]
+                   }
+            }
+            results.append(obj)
+        return json.dumps(results, indent=2)
 
 
 

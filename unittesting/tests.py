@@ -3,7 +3,7 @@ __author__ = 'lorenzo'
 import json
 import unittest
 
-from factory import SubSystem
+from scripts.factory import  SubSystem
 from scripts.datagenerator.constraints import tech_constrains
 from config import _TEMP_SECRET
 
@@ -67,7 +67,7 @@ class BasicObjectCreation(unittest.TestCase):
         """
         #from models import Component
         from scripts.testdata.component import component
-        from remote.remote import post_curling
+        from scripts.remote.remote import post_curling
 
         post_curling(url='http://localhost:8080/database/cots/store',
                      params={'pwd': _TEMP_SECRET, 'data': component},

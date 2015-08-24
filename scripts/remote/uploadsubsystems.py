@@ -8,7 +8,7 @@ __author__ = 'lorenzo'
 import sys
 import json
 from remote import post_curling
-from config import _TEMP_SECRET, _COMPONENTS_REMOTE, _COMPONENTS_LOCALHOST
+from config import _TEMP_SECRET, _COMPONENTS_URL
 
 
 from scripts.datagenerator.constraints import tech_constrains
@@ -30,7 +30,7 @@ def generate_metaclasses():
     return classes
 
 
-def _upload_subsystems(n):
+def _upload_subsystems(n, url=_COMPONENTS_URL):
     """
     upload to server the subsystems instances
     NOTE: dumped via a REST endpoint /database that has not been created yet
@@ -51,10 +51,14 @@ def _upload_subsystems(n):
 
         for j in jsonlds:
             # upload to datastore (under construction)
-            post_curling(url=_COMPONENTS_LOCALHOST,
+            post_curling(url=url,
                          params={'pwd': _TEMP_SECRET, 'data': json.dumps(j)},
                          display=True)
 
 
 if __name__ == "__main__":
-    _upload_subsystems(sys.argv[1])
+    try:
+        _upload_subsystems(sys.argv[1], sys.argv[2])
+    except IndexError:
+        _upload_subsystems(sys.argv[1])
+
