@@ -144,6 +144,31 @@ class Endpoints(webapp2.RequestHandler):
             return self.response.write('Not Authorized')
 
 
+class Articles(webapp2.RequestHandler):
+    def get(self):
+        from google.appengine.ext import ndb
+        from datastore.models import WebResource
+
+        # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
+
+        page_size = 50
+        cursor = None
+        bookmark = self.request.get('bookmark')
+        if bookmark:
+            cursor = ndb.Cursor.from_websafe_string(bookmark)
+
+        query = WebResource.query()
+        articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
+
+        next_bookmark = None
+        if more:
+            next_bookmark = next_cursor.to_websafe_string()
+
+        path = os.path.join(_PATH, 'articles.html')
+        return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
+                                                              'articles': articles}))
+
+
 class Crawling(webapp2.RequestHandler):
     """
     Service handler for operations on crawled resources
@@ -171,6 +196,7 @@ class FourOhFour(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
+    webapp2.Route('/visualize/articles/', Articles),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),

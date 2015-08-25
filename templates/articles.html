@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Articles</title>
+  </head>
+  <body>
+
+   <h3>A list of resources indexed by <span style="color:#ff846d">keyword</span></h3>
+
+    <ol>
+    {% for article in articles %}
+        <li>{{ article.title }} - <span style="color:#ff846d">{{ article.keyword }}</span> - <a href="{{ article.url }}">Go to ></a></li>
+    {% endfor %}
+    </ol>
+
+    {% if bookmark %}
+      <p><a href="?bookmark={{ bookmark }}">Next</a></p>
+    {% endif %}
+
+  </body>
+</html>
