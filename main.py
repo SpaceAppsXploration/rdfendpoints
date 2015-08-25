@@ -19,7 +19,7 @@ from json2html import *
 
 from flankers.graphtools import query, store_triples
 from flankers.errors import format_message
-from config import _TEMP_SECRET, _PATH
+from config import _TEMP_SECRET, _PATH, _DEBUG
 from datastore.models import Component
 
 # generic tools are in tools.py module
@@ -28,7 +28,7 @@ from datastore.models import Component
 
 class Hello(webapp2.RequestHandler):
     """
-    /: Homepage
+    / Homepage
     """
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -81,7 +81,7 @@ class Testing(webapp2.RequestHandler):
 
 class Endpoints(webapp2.RequestHandler):
     """
-    /database/cots GET: Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
+    /database/cots/ GET: Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
     /database/cots/store POST: store component instance in the datastore
     """
     def get(self, keywd):
@@ -90,6 +90,7 @@ class Endpoints(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Content-Type'] = 'application/json'
         if not keywd:
+            # keywd is None serves Entrypoint
             from config import _VOCS, _REST_SERVICE
             results = [{"name": f[f.rfind('_') + 1:],
                         "collection_ld+json_description": _VOCS['subsystems'] + f + '/' + '?format=jsonld',
@@ -143,6 +144,26 @@ class Endpoints(webapp2.RequestHandler):
             return self.response.write('Not Authorized')
 
 
+class Crawling(webapp2.RequestHandler):
+    """
+    Service handler for operations on crawled resources
+    """
+    def post(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        if self.request.get('pwd') == _TEMP_SECRET and self.request.get('resource'):
+            from datastore.models import WebResource
+            try:
+                oid = WebResource.dump_from_json(self.request.get('resource'))
+            except (Exception, ValueError) as e:
+                self.response.status = 400
+                return self.response.write('The request could not be understood, wrong resource format or syntax: ' + str(e))
+            self.response.status = 200
+            return self.response.write('Resource Stored: ' + str(oid))
+        else:
+            self.response.status = 405
+            return self.response.write('Not Authorized')
+
+
 class FourOhFour(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -151,7 +172,8 @@ class FourOhFour(webapp2.RequestHandler):
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
+    webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),
     webapp2.Route('/', Hello),
-], debug=True)
+], debug=_DEBUG)
 

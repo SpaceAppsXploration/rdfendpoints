@@ -112,6 +112,26 @@ class Component(ndb.Model):
         return json.dumps(results, indent=2)
 
 
+class WebResource(ndb.Model):
+    title = ndb.StringProperty()
+    abstract = ndb.TextProperty()
+    url = ndb.StringProperty()
+    keyword = ndb.StringProperty()
+    slug = ndb.StringProperty()
 
-
+    @classmethod
+    def dump_from_json(cls, j):
+        print j.decode('utf-8')
+        try:
+            j = json.loads(j)
+            m = WebResource(id=j['hashed'])
+            m.title = j['title']
+            m.abstract = j['abstract']
+            m.url = j['url']
+            m.keyword = j['key']
+            m.slug = j['keyword']
+            obj = m.put()
+        except Exception as e:
+            raise Exception('Error in WeResource storage', e)
+        return obj
 
