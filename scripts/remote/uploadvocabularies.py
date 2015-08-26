@@ -9,23 +9,16 @@ Usage examples:
 __author__ = ['lorenzo', 'niels']
 
 import sys
-import os
-from os.path import dirname
+import urllib
 
 from remote import post_curling
-from config import _TEMP_SECRET
+from config import _TEMP_SECRET, _VOCS
 
 
 def _upload_all(url):
-    basepath = os.path.join(dirname(dirname(dirname(os.path.abspath(__file__)))), 'RDFvocab', 'ntriples')
-    for path, _dirs, files in os.walk(basepath):
-        for filename in files:
-            if filename.endswith(".ntriples"):
-                fullpath = os.path.join(path, filename)
-                print 'Uploading {}...'.format(fullpath)
-                with open(fullpath, 'r') as f:
-                    data = f.read()
-                post_curling(url, {'pwd': _TEMP_SECRET, 'triple': data}, display=True)
+    for k, v in _VOCS.items():
+        triples = urllib.urlopen(v)
+        post_curling(url, {'pwd': _TEMP_SECRET, 'triple': triples.read()}, display=True)
 
 if __name__ == "__main__":
     _upload_all(sys.argv[1])
