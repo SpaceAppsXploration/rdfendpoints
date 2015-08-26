@@ -63,7 +63,7 @@ target/
 appengine-generated/
 
 RDFvocab
-six.py
-pyparsing.py
+# six.py
+# pyparsing.py
 .idea/
 app.old# Created by .ignore support plugin (hsz.mobi)
