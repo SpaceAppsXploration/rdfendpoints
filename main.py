@@ -158,6 +158,7 @@ class Articles(webapp2.RequestHandler):
             cursor = ndb.Cursor.from_websafe_string(bookmark)
 
         query = WebResource.query()
+        print query.count()
         articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
 
         next_bookmark = None
