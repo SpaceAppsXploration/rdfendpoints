@@ -1,12 +1,6 @@
 Forked from [https://github.com/mr-niels-christensen/rdflib-appengine](https://github.com/mr-niels-christensen/rdflib-appengine)
 
-Once cloned:
-
-```
-cd rdfendpoints
-git clone https://github.com/SpaceAppsXploration/RDFvocab
-```
-
-to collect the RDF vocabularies.
+Check Issues to know what's going on: https://github.com/SpaceAppsXploration/rdfendpoints/issues
+Check the wiki to have a wider look: https://github.com/SpaceAppsXploration/rdfendpoints/wiki
 
 

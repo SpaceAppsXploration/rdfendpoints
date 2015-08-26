@@ -6,7 +6,7 @@ __author__ = 'lorenzo'
 
 import sys
 sys.path.insert(0, '../..')
-from config import _TEMP_SECRET
+from config.config import _TEMP_SECRET
 
 
 def dump_to_ds_post(url, data):

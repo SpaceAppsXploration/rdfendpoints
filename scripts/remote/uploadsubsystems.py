@@ -8,7 +8,7 @@ __author__ = 'lorenzo'
 import sys
 import json
 from remote import post_curling
-from config import _TEMP_SECRET, _COMPONENTS_URL
+from config.config import _TEMP_SECRET, _COMPONENTS_URL
 
 
 from scripts.datagenerator.constraints import tech_constrains

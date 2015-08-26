@@ -75,7 +75,7 @@ class Component(ndb.Model):
         :param k_id: the key id
         :return: serialized JSON
         """
-        from config import _REST_SERVICE
+        from config.config import _REST_SERVICE
         key = ndb.Key('Component', k_id)
         obj = key.get()
         if not obj:
@@ -91,7 +91,7 @@ class Component(ndb.Model):
 
     @classmethod
     def get_by_collection(cls, collection):
-        from config import _REST_SERVICE
+        from config.config import _REST_SERVICE
         target = "http://ontology.projectchronos.eu/subsystems/%s" % collection
         query = Component.query(Component.type == target)
         if not query:

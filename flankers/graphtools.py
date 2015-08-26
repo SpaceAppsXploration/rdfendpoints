@@ -9,7 +9,7 @@ __author__ = 'niels'
 from rdflib import Graph
 
 from datastore.ndbstore import NDBStore
-from config import _GRAPH_ID
+from config.config import _GRAPH_ID
 
 
 def update(q):

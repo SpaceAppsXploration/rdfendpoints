@@ -1,6 +1,6 @@
 __author__ = 'lorenzo'
 
-from config import _REST_SERVICE
+from config.config import _REST_SERVICE
 
 
 def format_message(exception):

@@ -12,7 +12,7 @@ import sys
 import urllib
 
 from remote import post_curling
-from config import _TEMP_SECRET, _VOCS
+from config.config import _TEMP_SECRET, _VOCS
 
 
 def _upload_all(url):

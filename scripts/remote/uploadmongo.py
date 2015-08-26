@@ -1,7 +1,7 @@
 __author__ = 'lorenzo'
 
 from pymongo import MongoClient
-from config import _CRAWLING_POST, _TEMP_SECRET
+from config.config import _CRAWLING_POST, _TEMP_SECRET
 
 
 connection = MongoClient('localhost', 27017)

@@ -5,7 +5,7 @@ import unittest
 
 from scripts.factory import  SubSystem
 from scripts.datagenerator.constraints import tech_constrains
-from config import _TEMP_SECRET
+from config.config import _TEMP_SECRET
 
 
 class BasicObjectCreation(unittest.TestCase):

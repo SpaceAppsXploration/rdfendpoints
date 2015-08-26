@@ -19,7 +19,7 @@ from json2html import *
 
 from flankers.graphtools import query, store_triples
 from flankers.errors import format_message
-from config import _TEMP_SECRET, _PATH, _DEBUG
+from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA
 from datastore.models import Component
 
 # generic tools are in tools.py module
@@ -33,6 +33,7 @@ class Hello(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         path = os.path.join(_PATH, 'index.html')
+        print path
         return self.response.out.write(template.render(path, {}))
 
     def post(self):
@@ -90,8 +91,9 @@ class Endpoints(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Content-Type'] = 'application/json'
         if not keywd:
-            # keywd is None serves Entrypoint
-            from config import _VOCS, _REST_SERVICE
+            # keywd is None serves the entrypoint view
+            from config.config import _VOCS, _REST_SERVICE
+            self.response.headers['Link'] = '<' + _HYDRA + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
             results = [{"name": f[f.rfind('_') + 1:],
                         "collection_ld+json_description": _VOCS['subsystems'] + f + '/' + '?format=jsonld',
                         "collection_n-triples_description": _VOCS['subsystems'] + f,
@@ -190,6 +192,14 @@ class Crawling(webapp2.RequestHandler):
             return self.response.write('Not Authorized')
 
 
+class HydraVocabulary(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Content-Type'] = 'application/ld+json'
+        api_doc = {}
+        return self.response.write(api_doc)
+
+
 class FourOhFour(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -201,6 +211,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),
+    webapp2.Route('/hydra/vocab', HydraVocabulary),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 
