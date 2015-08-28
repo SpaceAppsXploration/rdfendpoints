@@ -16,11 +16,14 @@ from google.appengine.ext.webapp import template
 
 import urllib
 from json2html import *
+import json
 
 from flankers.graphtools import query, store_triples
 from flankers.errors import format_message
+
 from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA_VOCAB
-from datastore.models import Component
+from datastore.models import Component, WebResource
+
 
 # generic tools are in tools.py module
 # tools using Graph() and NDBstore are in graphtools.py module
@@ -78,6 +81,15 @@ class Testing(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write('test')
 
+class Keywords(webapp2.RequestHandler):
+    """
+    /database/keywords: deliver all keywords as JSON
+    """
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'
+        result = list(res.keyword for res in 
+            WebResource.query(projection=[WebResource.keyword]).iter())
+        json.dump(result, self.response)
 
 class Endpoints(webapp2.RequestHandler):
     """
@@ -202,6 +214,7 @@ from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/visualize/articles/', Articles),
+    webapp2.Route('/database/keywords.json', Keywords),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),
