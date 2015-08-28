@@ -34,6 +34,7 @@ def post_curling(url, params, file=None, display=False):
     """
     import pycurl
     from urllib import urlencode
+    from StringIO import StringIO
 
     c = pycurl.Curl()
     c.setopt(c.URL, url)
@@ -56,7 +57,6 @@ def post_curling(url, params, file=None, display=False):
         c.close()
         return None
     if display:
-        from StringIO import StringIO
         storage = StringIO()
         c.setopt(c.WRITEFUNCTION, storage.write)
         c.perform()
@@ -65,9 +65,27 @@ def post_curling(url, params, file=None, display=False):
         return None
 
     # else it returns a string
-    from StringIO import StringIO
     storage = StringIO()
     c.setopt(c.WRITEFUNCTION, storage.write)
     c.perform()
     c.close()
     return storage.getvalue()
+
+
+def get_curling(url):
+    import pycurl
+    from StringIO import StringIO
+
+    buffer = StringIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, url)
+    c.setopt(c.WRITEDATA, buffer)
+    # For older PycURL versions:
+    #c.setopt(c.WRITEFUNCTION, buffer.write)
+    c.perform()
+    c.close()
+
+    body = buffer.getvalue()
+    # Body is a string in some encoding.
+    # In Python 2, we can print it without knowing what the encoding is.
+    return body
