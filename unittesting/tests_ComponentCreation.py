@@ -8,7 +8,7 @@ from scripts.datagenerator.constraints import tech_constrains
 from config.config import _TEMP_SECRET
 
 
-class BasicObjectCreation(unittest.TestCase):
+class BasicComponentCreation(unittest.TestCase):
     kind = 'communication'
     c = SubSystem.generate_py_instance(kind, tech_constrains['communication'])
     # create a random object, generating data from technical constraints
@@ -54,12 +54,12 @@ class BasicObjectCreation(unittest.TestCase):
         post_curling(url, {'content': json.dumps(jsonlds)}, display=True)
 
     def test_run_basic(self):
-        t = BasicObjectCreation()
+        t = BasicComponentCreation()
         t.test_created_object(self.c)
         del t
 
     def test_run_pipe(self):
-        t = BasicObjectCreation()
+        t = BasicComponentCreation()
         t.test_dumping_pipe_full()
         del t
 
@@ -98,7 +98,7 @@ class FactoryTest(unittest.TestCase):
         """
         obj = SubSystem.generate_py_instance(kind, specs)
         print obj
-        BasicObjectCreation.test_created_object(obj)
+        BasicComponentCreation.test_created_object(obj)
         return obj
 
     def test_dumping_pipe_single(self):
