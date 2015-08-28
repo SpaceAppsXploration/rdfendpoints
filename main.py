@@ -16,11 +16,12 @@ from google.appengine.ext.webapp import template
 
 import urllib
 from json2html import *
+import json
 
 from flankers.graphtools import query, store_triples
 from flankers.errors import format_message
 from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA
-from datastore.models import Component
+from datastore.models import Component, WebResource
 
 # generic tools are in tools.py module
 # tools using Graph() and NDBstore are in graphtools.py module
@@ -78,6 +79,14 @@ class Testing(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write('test')
 
+class Keywords(webapp2.RequestHandler):
+    """
+    /database/keywords: deliver all keywords as JSON
+    """
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'
+        result = list(res.keyword for res in WebResource.query(projection=[WebResource.keyword]).iter())
+        json.dump(result, self.response)
 
 class Endpoints(webapp2.RequestHandler):
     """
@@ -197,16 +206,17 @@ class FourOhFour(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.set_status(404)
 
-from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
-from flankers.Scrawler import Scrawler
+#from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
+#from flankers.Scrawler import Scrawler
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/visualize/articles/', Articles),
+    webapp2.Route('/database/keywords', Keywords),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),
-    webapp2.Route('/startcrawling', Scrawler),
+    #webapp2.Route('/startcrawling', Scrawler),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 
