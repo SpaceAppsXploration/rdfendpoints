@@ -207,7 +207,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/ds', Querying),
     webapp2.Route('/hydra/vocab', HydraVocabulary),
     webapp2.Route('/hydra/contexts/<name:\w+.>', PublishContexts),
-    webapp2.Route('/hypermedia/<name:\w*>', PublishEndpoints),
+    webapp2.Route('/hypermedia/spacecraft/<name:\w*>', PublishEndpoints),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 

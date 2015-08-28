@@ -15,6 +15,8 @@ class HydraVocabulary(webapp2.RequestHandler):
         """
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Content-Type'] = 'application/ld+json'
+        self.response.headers['Access-Control-Expose-Headers'] = 'Link'
+        self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"'
         from contexts import ApiDocumentation
         return self.response.write(json.dumps(ApiDocumentation, indent=2))
 
@@ -29,7 +31,7 @@ class PublishContexts(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Content-Type'] = 'application/ld+json'
         self.response.headers['Access-Control-Expose-Headers'] = 'Link'
-        self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
+        self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"'
         if name == 'EntryPoint':
             from contexts import EntryPoint
             self.response.status = 200
@@ -64,30 +66,30 @@ class PublishEndpoints(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Content-Type'] = 'application/ld+json'
         self.response.headers['Access-Control-Expose-Headers'] = 'Link'
-        self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
+        self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"'
 
         if not name:
-            # return a hydra:EntryPoint > GET: /hypermedia/
+            # return a hydra:EntryPoint > GET: /hypermedia/spacecraft/
             self.response.status = 200
             return self.response.write(json.dumps({
                 "@context": _SERVICE + "/hydra/contexts/EntryPoint",
-                "@id": _SERVICE + "/hypermedia/",
+                "@id": _SERVICE + "/hypermedia/spacecraft/",
                 "@type": "EntryPoint",
-                "subsystems": _SERVICE + "/hypermedia/subsystems",
+                "subsystems": _SERVICE + "/hypermedia/spacecraft/subsystems",
                 "register_component": "under-construction"
             }, indent=2))
             pass
         elif name == 'subsystems':
             uuid = self.request.get('uuid')
             if uuid and uuid in families:
-                # return a hydra:Resource component > GET: /hypermedia/subsystems?uuid=<uuid>
+                # return a hydra:Resource component > GET: /hypermedia/spacecraft/subsystems?uuid=<uuid>
                 result = {
                     "@context": _SERVICE + "/hydra/api-demo/contexts/Subsystem.jsonld",
-                    "@id": _SERVICE + "/hypermedia/subsystems?uuid={}".format(uuid),
+                    "@id": _SERVICE + "/hypermedia/spacecraft/subsystems?uuid={}".format(uuid),
                     "@type": "Subsystem",
                     "name": uuid,
                     "application/n-triples": "http://ontology.projectchronos.eu/subsystems/{}".format(uuid),
-                    "go_to_components": "http://localhost:8080/hypermedia/components?uuid={}".format(uuid),
+                    "go_to_components": _SERVICE + "/hypermedia/spacecraft/components?uuid={}".format(uuid),
                     "application/ld+json": "http://ontology.projectchronos.eu/subsystems/{}/?format=jsonld".format(uuid),
                     "is_open": True,
 
@@ -97,11 +99,11 @@ class PublishEndpoints(webapp2.RequestHandler):
             results = {
                 "@context": "/hydra/api-demo/contexts/Collection.jsonld",
                 "@type": "Collection",
-                "@id": _SERVICE + "/hypermedia/subsystems",
+                "@id": _SERVICE + "/hypermedia/spacecraft/subsystems",
                 "members": []
             }
             [results["members"].append({
-                "@id": _SERVICE + "/hypermedia/subsystems?uuid={}".format(f),
+                "@id": _SERVICE + "/hypermedia/spacecraft/subsystems?uuid={}".format(f),
                 "@type": "vocab:Subsystem"})
                 for f in families]
             self.response.status = 200
@@ -110,7 +112,7 @@ class PublishEndpoints(webapp2.RequestHandler):
         elif name == 'components':
             uuid = self.request.get('uuid')
             if uuid and valid_uuid(uuid):
-                # return a hydra:Resource component > /hypermedia/components?uuid=<uuid>
+                # return a hydra:Resource component > /hypermedia/spacecraft/components?uuid=<uuid>
                 try:
                     from datastore.models import Component
                     body = Component.parse_to_jsonld(uuid)
@@ -118,12 +120,12 @@ class PublishEndpoints(webapp2.RequestHandler):
                     return self.response.write(format_message(e))
                 return self.response.write(body)
             elif uuid in families:
-                # return hydra:Collection components by family > /hypermedia/components?uuid=<subsystem_name>
+                # return hydra:Collection components by family > /hypermedia/spacecraft/components?uuid=<subsystem_name>
                 from datastore.models import Component
                 results = Component.hydrafy(Component.get_by_collection(uuid))
                 return self.response.write(results)
-            # return hydra:Collection > /rest/subsystems
+            # return hydra:Collection > /hypermedia/spacecraft/subsystems
             self.response.status = 404
             return self.response.write(
-                format_message('/hypermedia/components/ GET: needs a "uuid" parameter to be specified; it can be an hex or a subsystem-name', root='hydra')
+                format_message('/hypermedia/spacecraft/components/ GET: needs a "uuid" parameter to be specified; it can be an hex or a subsystem-name', root='hydra')
             )
