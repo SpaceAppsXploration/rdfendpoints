@@ -43,21 +43,26 @@ class Scrawler(webapp2.RequestHandler):
             except Exception as e:
                 raise e
 
-        # print links
-        return links
+        print links[0]
+        return [links[0]]
 
     def read_feed(self):
 
         feeds = [feedparser.parse(f) for f in self.load_links()]
+        print feeds
 
-        for feed in feeds["items"]:
-            querry = Item.gql("WHERE link = :1", feed["link"])
-            if(querry.count() == 0):
-                item = Item()
-                item.title = feed["title"]
-                item.link = feed["link"]
-                item.date = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-                item.put()
+        if feeds:
+            for feed in feeds:
+                for f in feed:
+                    querry = Item.gql("WHERE link = :1", f["link"])
+                    if(querry.count() == 0):
+                        item = Item()
+                        item.title = f["title"]
+                        item.link = f["link"]
+                        item.date = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+                        item.put()
+        else:
+            raise ValueError('No links. Or cannot parse them.')
 
     def print_items(self):
         s = "All items:<br>"
