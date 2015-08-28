@@ -33,7 +33,6 @@ class Hello(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         path = os.path.join(_PATH, 'index.html')
-        print path
         return self.response.out.write(template.render(path, {}))
 
     def post(self):
@@ -93,6 +92,7 @@ class Endpoints(webapp2.RequestHandler):
         if not keywd:
             # keywd is None serves the entrypoint view
             from config.config import _VOCS, _REST_SERVICE
+            self.response.headers['Access-Control-Expose-Headers'] = 'Link'
             self.response.headers['Link'] = '<' + _HYDRA + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
             results = [{"name": f[f.rfind('_') + 1:],
                         "collection_ld+json_description": _VOCS['subsystems'] + f + '/' + '?format=jsonld',
@@ -192,18 +192,13 @@ class Crawling(webapp2.RequestHandler):
             return self.response.write('Not Authorized')
 
 
-class HydraVocabulary(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Content-Type'] = 'application/ld+json'
-        api_doc = {}
-        return self.response.write(api_doc)
-
-
 class FourOhFour(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.set_status(404)
+
+from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
+from flankers.Scrawler import Scrawler
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
@@ -211,7 +206,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),
-    webapp2.Route('/hydra/vocab', HydraVocabulary),
+    webapp2.Route('/startcrawling', Scrawler),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 

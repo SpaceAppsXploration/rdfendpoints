@@ -13,6 +13,9 @@ handlers:
   static_files: static/\1
   upload: static/.*\.(html|js|css)$
 
+- url: /startcrawling
+  script: Scrawler.py
+
 - url: .*
   script: main.application
 
@@ -22,3 +25,8 @@ libraries:
 
 builtins:
 - remote_api: on
+
+cron:
+- description: scrawler
+  url: /startcrawling
+  schedule: every 12 hours
