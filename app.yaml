@@ -13,8 +13,8 @@ handlers:
   static_files: static/\1
   upload: static/.*\.(html|js|css)$
 
-- url: /startcrawling
-  script: flankers.Scrawler.Scrawler
+- url: /cron/startcrawling
+  script: flankers.Scrawler.application
 
 - url: .*
   script: main.application

@@ -10,6 +10,10 @@ import feedparser
 import webapp2
 from google.appengine.ext import ndb
 
+from config.config import _DEBUG
+
+# Adapted from http://tuhrig.de/writing-an-online-scraper-on-google-app-engine-python/
+
 
 class Item(ndb.Model):
     title = ndb.StringProperty(required=False)
@@ -62,3 +66,6 @@ class Scrawler(webapp2.RequestHandler):
         return s
 
 
+application = webapp2.WSGIApplication([
+    webapp2.Route('/cron/startcrawling', Scrawler),
+], debug=_DEBUG)

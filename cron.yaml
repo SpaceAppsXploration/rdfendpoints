@@ -1,4 +1,4 @@
 cron:
 - description: scrawler
-  url: /startcrawling
+  url: /cron/startcrawling
   schedule: every 12 hours
