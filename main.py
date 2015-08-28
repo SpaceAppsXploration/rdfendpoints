@@ -207,8 +207,8 @@ class FourOhFour(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.set_status(404)
 
-#from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
-#from flankers.Scrawler import Scrawler
+from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
+from flankers.Scrawler import Scrawler
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
@@ -217,7 +217,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),
-    #webapp2.Route('/startcrawling', Scrawler),
+    webapp2.Route('/startcrawling', Scrawler),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 
