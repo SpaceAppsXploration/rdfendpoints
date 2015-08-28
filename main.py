@@ -85,7 +85,8 @@ class Keywords(webapp2.RequestHandler):
     """
     def get(self):
         self.response.headers['Content-Type'] = 'application/json'
-        result = list(res.keyword for res in WebResource.query(projection=[WebResource.keyword]).iter())
+        result = list(res.keyword for res in 
+            WebResource.query(projection=[WebResource.keyword]).iter())
         json.dump(result, self.response)
 
 class Endpoints(webapp2.RequestHandler):
@@ -212,7 +213,7 @@ class FourOhFour(webapp2.RequestHandler):
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/visualize/articles/', Articles),
-    webapp2.Route('/database/keywords', Keywords),
+    webapp2.Route('/database/keywords.json', Keywords),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),

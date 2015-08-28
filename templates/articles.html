@@ -8,6 +8,10 @@
 
    <h3>A list of resources indexed by <span style="color:#ff846d">keyword</span></h3>
 
+    <div id="autocomplete">
+      <input class="typeahead" type="text" placeholder="Keywords">
+    </div>
+
     <ol>
     {% for article in articles %}
         <li>{{ article.title }} - <span style="color:#ff846d">{{ article.keyword }}</span> - <a href="{{ article.url }}">Go to ></a></li>
@@ -17,6 +21,10 @@
     {% if bookmark %}
       <p><a href="?bookmark={{ bookmark }}">Next</a></p>
     {% endif %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="/typeahead.bundle.min.js"></script>
+<script src="/articles.js"></script>
 
   </body>
 </html>
