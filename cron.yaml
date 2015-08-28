@@ -1,0 +1,4 @@
+cron:
+- description: scrawler
+  url: /startcrawling
+  schedule: every 12 hours
