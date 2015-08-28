@@ -40,11 +40,16 @@ def generate_object(name, subsystem):
         result['subsystems:minWorkingTemp'] = random_value(subsystem['minWorkingTemp'])
         result['subsystems:maxWorkingTemp'] = random_value(subsystem['maxWorkingTemp'])
 
+        # rule for propulsion
+        if 'propellant' in subsystem.keys():
+            result['subsystems:typeOfPropellant'] = random.choice(subsystem['propellant'])
+
         # rule for primary power or backup
         if 'density' in subsystem.keys():
             result['subsystems:hasVolume'] = int(result['subsystems:hasMass'] / subsystem['density']) // 1        
             if name == 'primary power':
                 result['subsystems:hasMonetaryValue'] = result['subsystems:hasPower'] * 5
+                result['subsystems:hasEfficiency'] = random_value(subsystem['hasEfficiency']) / 100
                 return result
             elif name == 'backup power':
                 result['subsystems:hasMonetaryValue'] = result['subsystems:hasPower'] * 16

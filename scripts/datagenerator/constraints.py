@@ -25,7 +25,7 @@ tech_constrains = dict({
         "cost": {"min": 5000, "max": 25000},
         "minWorkingTemp": { "min": -30, "max": -10 },
         "maxWorkingTemp": { "min": 20, "max": 80 },
-        "propellant": None
+        "propellant": ["hydrazine", "LOX/LH2", "Nitrogen Gas"]
     },
     "detector" : {
         "slug": "DTR",
@@ -48,7 +48,7 @@ tech_constrains = dict({
         "cost": {"min": 2000, "max": 10000},
         "minWorkingTemp": { "min": -60, "max": -40 },
         "maxWorkingTemp": { "min": 50, "max": 100 },
-        "hasEfficiency": None
+        "hasEfficiency": { "min": 20, "max": 30 }
     },
     "backup power" : {
         "slug": "BCK",

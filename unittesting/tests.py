@@ -31,6 +31,12 @@ class BasicObjectCreation(unittest.TestCase):
         print obj.id
 
     @classmethod
+    def test_generate_py_objects_from_constraints(cls):
+        jsons = [SubSystem.generate_py_instance(k, v) for k, v in tech_constrains.items()]
+        print jsons[1].__dict__
+        return None
+
+    @classmethod
     def test_dumping_pipe_full(cls):
         """
         Tests creating python instances > dumping JSON-LD > translate into N-TRIPLES
@@ -43,9 +49,9 @@ class BasicObjectCreation(unittest.TestCase):
         print json.dumps(jsonlds, indent=4)
 
         print " --- Translating the component into ntriples via RDFtranslator"
-        from RDFvocab.script.make_n3 import _curling
+        from scripts.remote.remote import post_curling
         url = 'http://rdf-translator.appspot.com/convert/json-ld/nt/content'
-        _curling(url, {'content': json.dumps(jsonlds)})
+        post_curling(url, {'content': json.dumps(jsonlds)}, display=True)
 
     def test_run_basic(self):
         t = BasicObjectCreation()
