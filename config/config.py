@@ -15,7 +15,7 @@ _VOCS = {
     'exploration': 'http://ontology.projectchronos.eu/exploration/'
 }
 
-_TEMP_SECRET = "************"
+_TEMP_SECRET = "***********"
 
 
 def set_env_variables():
@@ -23,18 +23,18 @@ def set_env_variables():
         _SERVICE = "http://localhost:8080"
         _REST_SERVICE = "http://localhost:8080/database/cots/"
         _COMPONENTS_URL = "http://localhost:8080/database/cots/store"
-        _HYDRA = "http://localhost:8080/hydra/vocab"
+        _HYDRA_VOCAB = "http://localhost:8080/hydra/vocab"
         _DEBUG = True
     else:
         _SERVICE = "http://rdfendpoints.appspot.com"
         _REST_SERVICE = "http://rdfendpoints.appspot.com/database/cots/"
         _COMPONENTS_URL = "http://rdfendpoints.appspot.com/database/cots/store"
-        _HYDRA = "http://rdfendpoints.appspot.com/hydra/vocab"
+        _HYDRA_VOCAB = "http://rdfendpoints.appspot.com/hydra/vocab"
         _DEBUG = True
 
-    return _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA, _DEBUG
+    return _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG
 
-_SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA, _DEBUG = set_env_variables()
+_SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG = set_env_variables()
 
 _CRAWLING_POST = {'local': 'http://localhost:8080/database/crawling/store',
                   'remote': 'http://rdfendpoints.appspot.com/database/crawling/store'}

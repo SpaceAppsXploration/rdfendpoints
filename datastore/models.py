@@ -65,7 +65,7 @@ class Component(ndb.Model):
         obj = key.get()
         if not obj:
             raise ValueError('Wrong KEY/ID')
-        return json.dumps(obj.linked)
+        return json.dumps(obj.linked, indent=2)
 
     @classmethod
     def parse_to_json(cls, k_id):
@@ -91,25 +91,60 @@ class Component(ndb.Model):
 
     @classmethod
     def get_by_collection(cls, collection):
-        from config.config import _REST_SERVICE
+        """
+        Get components by subsystem family (Spacecraft_Detector, Spacecraft_Propulsion, etc. )
+        :param collection: standard string for a subsystem, see flankers.tools.families
+        :return: a Query object
+        """
         target = "http://ontology.projectchronos.eu/subsystems/%s" % collection
         query = Component.query(Component.type == target)
         if not query:
             raise ValueError('Wrong collection name')
+        return query
+
+    @classmethod
+    def restify(cls, query):
+        """
+        Dumps into JSON for REST a Component.query()
+        :param query: a Query object
+        :return: a formatted and dumped JSON
+        """
+        from config.config import _REST_SERVICE
         results = list()
         for q in query:
             print q.key.id(), q.type
             obj = {'id': q.key.id(),
                    'name': q.name,
-                   'ld+json': _REST_SERVICE + "%s?format=jsonld" % q.key.id(),
+                   'application/ld+json': _REST_SERVICE + "%s?format=jsonld" % q.key.id(),
                    'go_to_json': _REST_SERVICE + q.key.id(),
                    'type': {
-                       'ld+json': q.type,
+                       'application/ld+json': q.type,
                        'go_to_collection': _REST_SERVICE + q.type[q.type.rfind('/')+1:]
                    }
             }
             results.append(obj)
         return json.dumps(results, indent=2)
+
+    @classmethod
+    def hydrafy(cls, query):
+        """
+        Dumps into a JSON-LD for HYDRA a Component.query()
+        :param query: a Query object
+        :return: a formatted JSON-LD
+        """
+        from config.config import _SERVICE
+        results = list()
+        for q in query:
+            print q.key.id(), q.type
+            obj = {
+                '@context': _SERVICE + "/hydra/context/Component",
+                '@id': _SERVICE + "/hypermedia/components?uuid={}".format(q.key.id()),
+                '@type': 'Component',
+                'name': q.name
+                }
+            results.append(obj)
+        return json.dumps(results, indent=2)
+
 
 
 class WebResource(ndb.Model):

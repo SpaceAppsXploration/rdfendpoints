@@ -19,7 +19,7 @@ from json2html import *
 
 from flankers.graphtools import query, store_triples
 from flankers.errors import format_message
-from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA
+from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA_VOCAB
 from datastore.models import Component
 
 # generic tools are in tools.py module
@@ -93,7 +93,7 @@ class Endpoints(webapp2.RequestHandler):
             # keywd is None serves the entrypoint view
             from config.config import _VOCS, _REST_SERVICE
             self.response.headers['Access-Control-Expose-Headers'] = 'Link'
-            self.response.headers['Link'] = '<' + _HYDRA + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
+            self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
             results = [{"name": f[f.rfind('_') + 1:],
                         "collection_ld+json_description": _VOCS['subsystems'] + f + '/' + '?format=jsonld',
                         "collection_n-triples_description": _VOCS['subsystems'] + f,
@@ -128,7 +128,7 @@ class Endpoints(webapp2.RequestHandler):
         elif keywd in families:
             # if the url parameter is a family name
             # print the list of all the components in that family
-            results = Component.get_by_collection(keywd)
+            results = Component.restify(Component.get_by_collection(keywd))
             return self.response.write(results)
         else:
             # wrong url parameters
@@ -207,7 +207,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/ds', Querying),
     webapp2.Route('/hydra/vocab', HydraVocabulary),
     webapp2.Route('/hydra/contexts/<name:\w+.>', PublishContexts),
-    webapp2.Route('/rest/<name:\w*>/<uuid:\w*>', PublishEndpoints),
+    webapp2.Route('/hypermedia/<name:\w*>', PublishEndpoints),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 
