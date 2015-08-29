@@ -32,22 +32,12 @@ class PublishContexts(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'application/ld+json'
         self.response.headers['Access-Control-Expose-Headers'] = 'Link'
         self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"'
-        if name == 'EntryPoint':
-            from contexts import EntryPoint
+        import contexts
+        print type(dir(contexts))
+        if name in dir(contexts) and not name.startswith('_'):
+            # load the right variable in the 'contexts' module
             self.response.status = 200
-            return self.response.write(json.dumps(EntryPoint, indent=2))
-        elif name == 'Collection':
-            from contexts import Collection
-            self.response.status = 200
-            return self.response.write(json.dumps(Collection, indent=2))
-        elif name == 'Subsystem':
-            from contexts import Subsystem
-            self.response.status = 200
-            return self.response.write(json.dumps(Subsystem, indent=2))
-        elif name == 'Component':
-            from contexts import Component
-            self.response.status = 200
-            return self.response.write(json.dumps(Component, indent=2))
+            return self.response.write(json.dumps(getattr(contexts, name), indent=2))
         # return context based on name
         self.response.status = 404
         return self.response.write(
@@ -129,3 +119,8 @@ class PublishEndpoints(webapp2.RequestHandler):
             return self.response.write(
                 format_message('/hypermedia/spacecraft/components/ GET: needs a "uuid" parameter to be specified; it can be an hex or a subsystem-name', root='hydra')
             )
+
+        self.response.status = 404
+        return self.response.write(
+            format_message('Wrong URL', root='hydra')
+        )
