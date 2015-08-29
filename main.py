@@ -31,7 +31,7 @@ from datastore.models import Component, WebResource
 
 class Hello(webapp2.RequestHandler):
     """
-    / Homepage
+    / GET: Homepage
     """
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -81,15 +81,18 @@ class Testing(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write('test')
 
+
 class Keywords(webapp2.RequestHandler):
     """
-    /database/keywords: deliver all keywords as JSON
+    /database/keywords GET: deliver all keywords as JSON
+    UNDER-CONSTRUCTION: implement memcache, to avoid hit the datastore each time
     """
     def get(self):
         self.response.headers['Content-Type'] = 'application/json'
         result = list(res.keyword for res in 
             WebResource.query(projection=[WebResource.keyword]).iter())
         json.dump(result, self.response)
+
 
 class Endpoints(webapp2.RequestHandler):
     """
@@ -186,7 +189,7 @@ class Articles(webapp2.RequestHandler):
 
 class Crawling(webapp2.RequestHandler):
     """
-    Service handler for operations on crawled resources
+    /database/crawling/store POST: Service handler for operations on crawled resources
     """
     def post(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
