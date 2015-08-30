@@ -146,7 +146,6 @@ class Component(ndb.Model):
         return json.dumps(results, indent=2)
 
 
-
 class WebResource(ndb.Model):
     title = ndb.StringProperty()
     abstract = ndb.TextProperty()
@@ -170,3 +169,32 @@ class WebResource(ndb.Model):
             raise Exception('Error in WeResource storage', e)
         return obj
 
+
+class Item(ndb.Model):
+    """
+    Single entry of a crawled RSS-feed
+    """
+    title = ndb.StringProperty(required=False)
+    link = ndb.StringProperty(required=False)
+    stored = ndb.DateTimeProperty()
+    published = ndb.DateTimeProperty()
+    summary = ndb.TextProperty()
+
+    @classmethod
+    def store(cls, entry):
+        try:
+            item = Item()
+            from time import localtime
+            item.title = str(entry['title'])
+            item.link = str(entry['link'])
+            from datetime import datetime
+            item.stored = datetime(*localtime()[:6])
+            item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
+            try:
+                item.summary = entry['summary'].encode('utf-8')
+            except Exception:
+                item.summary = ''
+            i = item.put()
+            return i
+        except Exception as e:
+            raise Exception(str(e))

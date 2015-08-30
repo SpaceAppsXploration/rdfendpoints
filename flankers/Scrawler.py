@@ -3,31 +3,35 @@ from __future__ import unicode_literals
 __author__ = 'lorenzo'
 
 import os
-import time
 from bs4 import BeautifulSoup
 import feedparser
 
 import webapp2
-from google.appengine.ext import ndb
 
+from datastore.models import Item
 from config.config import _DEBUG
 
 # Adapted from http://tuhrig.de/writing-an-online-scraper-on-google-app-engine-python/
 
 
-class Item(ndb.Model):
-    title = ndb.StringProperty(required=False)
-    link = ndb.StringProperty(required=False)
-    date = ndb.StringProperty(required=False)
-
-
 class Scrawler(webapp2.RequestHandler):
+    """
+    A very basic crawler for RSS links
+    """
 
     def get(self):
-        self.read_feed()
-        self.response.out.write(self.print_items())
+        """
+        Handler for the cronjob: /cron/startcrawling
+        :return:
+        """
+        for l in self.load_links():
+            self.read_feed(l)
 
     def load_links(self):
+        """
+        Loads RSS links from a local file. They are in an XML file with tag <outline/>
+        :return:
+        """
         #print os.path.dirname(__file__)
         feeds_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'scripts', 'files', 'newsfox.xml')
         with open(feeds_file) as f:
@@ -43,28 +47,38 @@ class Scrawler(webapp2.RequestHandler):
             except Exception as e:
                 raise e
 
-        print links[0]
-        return [links[0]]
+        #print links
+        return links
 
-    def read_feed(self):
+    def read_feed(self, ln):
+        """
+        Parse a link with feedparser library. And store the result in the Item() model
+        :param ln: a link to a RSS-feed
+        :return: None
+        """
+        feed = feedparser.parse(ln)
 
-        feeds = [feedparser.parse(f) for f in self.load_links()]
-        print feeds
-
-        if feeds:
-            for feed in feeds:
-                for f in feed:
-                    querry = Item.gql("WHERE link = :1", f["link"])
-                    if(querry.count() == 0):
-                        item = Item()
-                        item.title = f["title"]
-                        item.link = f["link"]
-                        item.date = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-                        item.put()
+        if feed and feed["entries"]:
+            for entry in feed["entries"]:
+                print entry["link"]
+                query = Item.query().filter(Item.link == entry["link"])
+                print query.count()
+                if query.count() == 0:
+                    print entry["link"]
+                    try:
+                        i = Item.store(entry)
+                    except Exception as e:
+                        print "Cannot Store: " + str(e) + entry['link']
+                        pass
         else:
-            raise ValueError('No links. Or cannot parse them.')
+            print ValueError('No links. Or cannot parse them in: ' + str(feed))
+            return None
 
     def print_items(self):
+        """
+        utility handler to diplay Item() instances
+        :return:
+        """
         s = "All items:<br>"
         for item in Item.query():
             s += item.date + " - <a href='" + item.link + "'>" + item.title + "</a><br>"
