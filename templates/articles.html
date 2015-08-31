@@ -14,7 +14,13 @@
 
     <ol>
     {% for article in articles %}
-        <li>{{ article.title }} - <span style="color:#ff846d">{{ article.keyword }}</span> - <a href="{{ article.url }}">Go to ></a></li>
+        <li>{{ article.title }} -
+            {% if article.keyword is not None %}
+            <span style="color:#ff846d"> {{ article.keyword }} </span>
+            {% else %}
+            <span style="color:#393eff"> No keyword: newsfeed </span>
+            {% endif %}
+            - <a href="{{ article.url }}">Go to ></a></li>
     {% endfor %}
     </ol>
 
