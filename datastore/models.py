@@ -194,3 +194,16 @@ class WebResource(ndb.Model):
         i = item.put()
         return i
 
+    def dump_to_json(self):
+        """
+        make property values of an instance JSON serializable
+        """
+        from datetime import datetime, date, time
+        result = {}
+        for prop, value in self.to_dict().items():
+            # If this is a key, you might want to grab the actual model.
+            if isinstance(self, ndb.Model):
+                result[prop] = str(value)
+
+        return result
+

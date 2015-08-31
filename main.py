@@ -21,7 +21,7 @@ import json
 from flankers.graphtools import query, store_triples
 from flankers.errors import format_message
 
-from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA_VOCAB
+from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA_VOCAB, _SERVICE
 from datastore.models import Component, WebResource
 
 
@@ -181,7 +181,17 @@ class Articles(webapp2.RequestHandler):
         next_bookmark = None
         if more:
             next_bookmark = next_cursor.to_websafe_string()
+        print next_bookmark
 
+        if self.request.get("api"):
+            # return JSON
+            self.response.headers['Access-Control-Allow-Origin'] = '*'
+            self.response.headers['Content-Type'] = 'application/json'
+            listed = [p.dump_to_json() for p in articles] + [{'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}]
+            return self.response.out.write(
+                json.dumps(listed)
+            )
+        # return template
         path = os.path.join(_PATH, 'articles.html')
         return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
                                                               'articles': articles}))

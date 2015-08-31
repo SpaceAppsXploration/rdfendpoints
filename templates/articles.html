@@ -15,7 +15,7 @@
     <ol>
     {% for article in articles %}
         <li>{{ article.title }} -
-            {% if article.keyword is not None %}
+            {% if article.keyword != None %}
             <span style="color:#ff846d"> {{ article.keyword }} </span>
             {% else %}
             <span style="color:#393eff"> No keyword: newsfeed </span>
