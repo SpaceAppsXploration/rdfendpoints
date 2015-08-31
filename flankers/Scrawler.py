@@ -24,15 +24,13 @@ class Scrawler(webapp2.RequestHandler):
         Handler for the cronjob: /cron/startcrawling
         :return:
         """
-        for l in self.load_links():
-            self.read_feed(l)
+        self.store_feeds()
 
     def load_links(self):
         """
         Loads RSS links from a local file. They are in an XML file with tag <outline/>
-        :return:
+        :return: A list of URLs of RSS-feeds
         """
-        #print os.path.dirname(__file__)
         feeds_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'scripts', 'files', 'newsfox.xml')
         with open(feeds_file) as f:
             markup = f.read()
@@ -46,43 +44,38 @@ class Scrawler(webapp2.RequestHandler):
                 pass
             except Exception as e:
                 raise e
-
-        #print links
         return links
 
     def read_feed(self, ln):
         """
-        Parse a link with feedparser library. And store the result in the Item() model
+        Parse a link with feedparser library.
         :param ln: a link to a RSS-feed
-        :return: None
+        :return: a list of dictionaries containing news from the feed
         """
         feed = feedparser.parse(ln)
 
         if feed and feed["entries"]:
-            for entry in feed["entries"]:
-                print entry["link"]
-                query = Item.query().filter(Item.link == entry["link"])
-                print query.count()
-                if query.count() == 0:
-                    print entry["link"]
-                    try:
-                        i = Item.store(entry)
-                    except Exception as e:
-                        print "Cannot Store: " + str(e) + entry['link']
-                        pass
+                return feed["entries"]
         else:
             print ValueError('No links. Or cannot parse them in: ' + str(feed))
             return None
 
-    def print_items(self):
-        """
-        utility handler to diplay Item() instances
-        :return:
-        """
-        s = "All items:<br>"
-        for item in Item.query():
-            s += item.date + " - <a href='" + item.link + "'>" + item.title + "</a><br>"
-        return s
+    def store_feeds(self):
+        for l in self.load_links():
+            entries = self.read_feed(l)
+            if entries:
+                for entry in entries:
+                    query = Item.query().filter(Item.link == entry["link"])
+                    if query.count() == 0:
+                        print "STORING: " + entry["link"]
+                        try:
+                            if 'summary' in entry:
+                                s, t = BeautifulSoup(entry['summary'], "lxml"), BeautifulSoup(entry['title'], "lxml")
+                                entry['summary'], entry['title'] = s.get_text(), t.get_text()
+                            i = Item.store(entry)
+                            print "STORED: " + str(i)
+                        except Exception as e:
+                            print "Cannot Store: " + str(e) + entry['link']
 
 
 application = webapp2.WSGIApplication([

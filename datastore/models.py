@@ -1,8 +1,12 @@
+#!/usr/bin/python
+# coding=utf-8
+
 __author__ = 'lorenzo'
 
 import json
 from google.appengine.ext import ndb
 
+unicode_blacklist = ['\u2019', '\u2018', '\u2013', '\xa0', '\u201c', '\xe9', '\xf1', '\u2014']
 
 class Component(ndb.Model):
     """
@@ -182,19 +186,16 @@ class Item(ndb.Model):
 
     @classmethod
     def store(cls, entry):
-        try:
-            item = Item()
-            from time import localtime
-            item.title = str(entry['title'])
-            item.link = str(entry['link'])
-            from datetime import datetime
-            item.stored = datetime(*localtime()[:6])
-            item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
-            try:
-                item.summary = entry['summary'].encode('utf-8')
-            except Exception:
-                item.summary = ''
-            i = item.put()
-            return i
-        except Exception as e:
-            raise Exception(str(e))
+        item = Item()
+        from time import localtime
+        item.title = " ".join(entry['title'].encode('ascii', 'ignore').split())
+        print item.title
+
+        item.link = str(entry['link'])
+        from datetime import datetime
+        item.stored = datetime(*localtime()[:6])
+        item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
+
+        item.summary = " ".join(entry['summary'].encode('ascii', 'ignore').split())
+        i = item.put()
+        return i
