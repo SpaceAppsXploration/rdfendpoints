@@ -8,7 +8,7 @@ import feedparser
 
 import webapp2
 
-from datastore.models import Item
+from datastore.models import WebResource
 from config.config import _DEBUG
 
 # Adapted from http://tuhrig.de/writing-an-online-scraper-on-google-app-engine-python/
@@ -65,14 +65,14 @@ class Scrawler(webapp2.RequestHandler):
             entries = self.read_feed(l)
             if entries:
                 for entry in entries:
-                    query = Item.query().filter(Item.link == entry["link"])
+                    query = WebResource.query().filter(WebResource.url == entry["link"])
                     if query.count() == 0:
                         print "STORING: " + entry["link"]
                         try:
                             if 'summary' in entry:
                                 s, t = BeautifulSoup(entry['summary'], "lxml"), BeautifulSoup(entry['title'], "lxml")
                                 entry['summary'], entry['title'] = s.get_text(), t.get_text()
-                            i = Item.store(entry)
+                            i = WebResource.store_feed(entry)
                             print "STORED: " + str(i)
                         except Exception as e:
                             print "Cannot Store: " + str(e) + entry['link']

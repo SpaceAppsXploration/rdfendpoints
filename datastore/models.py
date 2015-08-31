@@ -4,9 +4,11 @@
 __author__ = 'lorenzo'
 
 import json
+from time import localtime
+from datetime import datetime
+
 from google.appengine.ext import ndb
 
-unicode_blacklist = ['\u2019', '\u2018', '\u2013', '\xa0', '\u201c', '\xe9', '\xf1', '\u2014']
 
 class Component(ndb.Model):
     """
@@ -151,11 +153,16 @@ class Component(ndb.Model):
 
 
 class WebResource(ndb.Model):
+    """
+    Indexed Web pages and single entries of a crawled RSS-feed
+    """
     title = ndb.StringProperty()
     abstract = ndb.TextProperty()
     url = ndb.StringProperty()
     keyword = ndb.StringProperty()
     slug = ndb.StringProperty()
+    stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
+    published = ndb.DateTimeProperty()
 
     @classmethod
     def dump_from_json(cls, j):
@@ -173,29 +180,17 @@ class WebResource(ndb.Model):
             raise Exception('Error in WeResource storage', e)
         return obj
 
-
-class Item(ndb.Model):
-    """
-    Single entry of a crawled RSS-feed
-    """
-    title = ndb.StringProperty(required=False)
-    link = ndb.StringProperty(required=False)
-    stored = ndb.DateTimeProperty()
-    published = ndb.DateTimeProperty()
-    summary = ndb.TextProperty()
-
     @classmethod
-    def store(cls, entry):
-        item = Item()
-        from time import localtime
+    def store_feed(cls, entry):
+        item = WebResource()
+
         item.title = " ".join(entry['title'].encode('ascii', 'ignore').split())
         print item.title
-
-        item.link = str(entry['link'])
-        from datetime import datetime
+        item.url = str(entry['link'])
         item.stored = datetime(*localtime()[:6])
         item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
 
-        item.summary = " ".join(entry['summary'].encode('ascii', 'ignore').split())
+        item.abstract = " ".join(entry['summary'].encode('ascii', 'ignore').split())
         i = item.put()
         return i
+
