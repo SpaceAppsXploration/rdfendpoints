@@ -159,46 +159,61 @@ class WebResource(ndb.Model):
     title = ndb.StringProperty()
     abstract = ndb.TextProperty()
     url = ndb.StringProperty()
-    keyword = ndb.StringProperty()
-    slug = ndb.StringProperty()
     stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
-    published = ndb.DateTimeProperty()
+    published = ndb.DateTimeProperty(default=None)
 
     @classmethod
     def dump_from_json(cls, j):
+        """
+        Store a WebResource from a JSON object
+        :param j: a JSON
+        :return: a WebResource
+        """
         print j.decode('utf-8')
         try:
             j = json.loads(j)
-            m = WebResource(id=j['hashed'])
+            m = WebResource()
             m.title = j['title']
             m.abstract = j['abstract']
             m.url = j['url']
-            m.keyword = j['key']
             m.slug = j['keyword']
             obj = m.put()
+            index = Indexer(keyword=j['key'], webres=obj)
+            index.put()
         except Exception as e:
             raise Exception('Error in WeResource storage', e)
         return obj
 
     @classmethod
     def store_feed(cls, entry):
+        """
+        Store RSS-feed entry coming from Scrawler, and related index entries
+        """
+        # define the WebResource
         item = WebResource()
-
         item.title = " ".join(entry['title'].encode('ascii', 'ignore').split())
         print item.title
         item.url = str(entry['link'])
         item.stored = datetime(*localtime()[:6])
         item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
 
-        item.abstract = " ".join(entry['summary'].encode('ascii', 'ignore').split())
+        item.abstract = ' '.join(entry['summary'].strip().encode('ascii', 'ignore').split()) if entry['summary'] is not None else ''
         i = item.put()
+
+        # create the Index entries
+        from flankers.textsemantics import find_related_concepts
+        text = item.abstract if entry['summary'] is not None else item.title
+        labels = find_related_concepts(text)
+        for l in labels:
+            print l
+            index = Indexer(keyword=l, webres=i)
+            index.put()
         return i
 
     def dump_to_json(self):
         """
         make property values of an instance JSON serializable
         """
-        from datetime import datetime, date, time
         result = {}
         for prop, value in self.to_dict().items():
             # If this is a key, you might want to grab the actual model.
@@ -207,3 +222,7 @@ class WebResource(ndb.Model):
 
         return result
 
+
+class Indexer(ndb.Model):
+    keyword = ndb.StringProperty()
+    webres = ndb.KeyProperty(kind=WebResource)
