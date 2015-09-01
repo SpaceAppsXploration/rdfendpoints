@@ -206,7 +206,7 @@ class WebResource(ndb.Model):
         labels = find_related_concepts(text)
         for l in labels:
             print l
-            index = Indexer(keyword=l, webres=i)
+            index = Indexer(keyword=l.strip(), webres=i)
             index.put()
         return i
 
