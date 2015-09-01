@@ -2,13 +2,13 @@
 # A basic API to query TagMe RESTful services
 #
 
-__author__ = ['lorenzo@pramantha.net']
+__author__ = ['lorenzo']
 
 
-import requests
 import time
 from pprint import pprint
 import urllib
+import urllib2
 
 from flankers.tagmeapi.secret.keys import return_api_key
 from flankers.tools import retrieve_json
@@ -37,11 +37,10 @@ class TagMeService:
         :param text: the text to analyze
         :return: dictionary with a flag message ('spotted') and a loaded JSON from response ('value')
         """
-        import simplejson as json
+        import json
         endpoint = "http://tagme.di.unipi.it/spot"
 
         body = str(text)
-
 
         params = {
             "key": api_key,
@@ -49,7 +48,7 @@ class TagMeService:
         }
         url = endpoint + '?' + urllib.urlencode(params)
         try:
-            answer = json.loads(requests.get(url).text)
+            answer = json.loads(urllib2.urlopen(url).read())
         except (Exception, UnicodeDecodeError):
             print(">>>>>>>>>>>>>>>>> ERROR >>>>>>>>>>", text)
             return {"spotted": False, "value": None}
@@ -101,7 +100,7 @@ class TagMeService:
         raise BadRequest('retrieve_taggings() Failed')
 
     @classmethod
-    def relate(cls, titles, comparing=None, min_rho=0.44):
+    def relate(cls, titles, comparing=None, min_rho=0.42):
         """
         Implement the TagMe's 'relating API'
         :param titles: a string that is wikipedia title or a list of titles
@@ -137,16 +136,16 @@ class TagMeService:
             elif isinstance(comparing, str):
                 params["tt"].append(titles + ' ' + comparing)
 
-        url = endpoint + '?' + urlencode(params, True)
+        url = endpoint + '?' + urllib.urlencode(params, True)
 
         try:
             results = retrieve_json(url)
-            pprint(results)
+            #pprint(results)
         except (Exception, ValueError):
             raise BadRequest('Error in connection or in JSON parsing the response from TagMe Relating API')
 
         try:
-            if int(results["errors"]) == 0 or len(results["result"]) == 0:
+            if int(results["errors"]) == 0 and len(results["result"]) != 0:
                 output = [r for r in results["result"] if float(r["rel"]) > min_rho]
                 return output
             else:
@@ -158,6 +157,37 @@ class TagMeService:
             raise e
 
         raise BadRequest('TagMe API responded with an error: ' + str(results))
+
+    @staticmethod
+    def check_if_rho_fits_spaceknowledge(output, level=0.42):
+        """
+        Takes as input the results of a TagMeService.relate() function and check if the mean of resulting rhos is
+        above a level. Used to check if a term is semantically related to a list of fields
+        [refer to argument "comparing" in relate()]
+        :param output: what returns the TagMeService.relate()
+        :param level: the level at which to filter the mean of the rhos in the results
+        :return: boolean
+        """
+        if output:
+            result = tuple()
+            count = len(output)
+            zeros = 0
+            if count != 0:
+                name = str()
+                total = 0.0
+                for o in output:
+                    if float(o["rel"]) == 0.0000:
+                        zeros += 1
+                    else:
+                        name = o['couple'].split(' ')[0]
+                        total += float(o["rel"])
+                mean = total / count
+                if level < mean < 0.61 and zeros < 8:  # the interval is { min: 'level' max: 0.61 }
+                    return True, name, mean
+                else:
+                    return False, result
+            return False
+        return False
 
 
 class ConceptNotInDBpedia(Exception):

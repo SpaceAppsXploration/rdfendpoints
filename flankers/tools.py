@@ -36,10 +36,10 @@ def retrieve_json(url, method='GET', data=None):
     :param data: if method is POST, pass also some data for request's body
     :return: dictionary from the response's body
     """
-    print(url)
+    # print url
     if method == 'GET':
         # avoid HTML escaping problems using bs4
-        return json.loads(str(BeautifulSoup(urllib2.urlopen(url).read())))
+        return json.loads(urllib2.urlopen(url).read())
     elif method == 'POST':
         if data is not None:
             import urllib
@@ -47,7 +47,7 @@ def retrieve_json(url, method='GET', data=None):
             data = urllib.urlencode(data)
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req)
-            return json.loads(str(BeautifulSoup(response.read())))
+            return json.loads(response.read())
         else:
             raise Exception('retrieve_json(): data for POST cannot be None')
     else:
