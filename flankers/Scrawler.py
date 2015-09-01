@@ -72,6 +72,9 @@ class Scrawler(webapp2.RequestHandler):
                             if 'summary' in entry:
                                 s, t = BeautifulSoup(entry['summary'], "lxml"), BeautifulSoup(entry['title'], "lxml")
                                 entry['summary'], entry['title'] = s.get_text(), t.get_text()
+                            else:
+                                t = BeautifulSoup(entry['title'], "lxml")
+                                entry['summary'], entry['title'] = None , t.get_text()
                             i = WebResource.store_feed(entry)
                             print "STORED: " + str(i)
                         except Exception as e:
