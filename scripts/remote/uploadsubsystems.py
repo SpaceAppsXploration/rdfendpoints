@@ -1,6 +1,7 @@
 """
 Main Script for generating and converting JSON to JSON-LD about components for subsystems
 (to be dumped and uploaded as triples)
+python uploadsubsystems.py http://rdfendpoints.appspot.com/ds
 """
 
 __author__ = 'lorenzo'

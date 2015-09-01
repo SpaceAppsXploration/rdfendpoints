@@ -45,7 +45,7 @@ def find_related_concepts(text):
         except Exception as e:
             print Exception('Cannot fetch taxonomy: ' + res + ' ' + str(e))
 
-        if 'relatedConcepts' in resource.keys() and resource:
+        if resource and 'relatedConcepts' in resource.keys():
             for c in resource['relatedConcepts']:
                 if c:
                     label = c[c.rfind('/') + 1:].replace('+', ' ')
