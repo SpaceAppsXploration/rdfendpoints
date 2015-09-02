@@ -155,7 +155,7 @@ class Endpoints(webapp2.RequestHandler):
 class Articles(webapp2.RequestHandler):
     def get(self):
         from google.appengine.ext import ndb
-        from datastore.models import WebResource
+        from datastore.models import WebResource, Indexer
 
         # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
 
@@ -164,16 +164,15 @@ class Articles(webapp2.RequestHandler):
         bookmark = self.request.get('bookmark')
         if bookmark:
             cursor = ndb.Cursor.from_websafe_string(bookmark)
-
-        query = WebResource.query()
-        print query.count()
-        articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
-
+        keyword = self.request.get('keyword')
+        if keyword is not None: # Page through articles with the specified keyword
+            refs, next_cursor, more = Indexer.query(ndb.GenericProperty('keyword') == keyword).fetch_page(page_size, start_cursor=cursor)
+            articles = ndb.get_multi(ref.webres for ref in refs)
+        else: # Page through all articles
+            articles, next_cursor, more = WebResource.query().fetch_page(page_size, start_cursor=cursor)
         next_bookmark = None
         if more:
             next_bookmark = next_cursor.to_websafe_string()
-        print next_bookmark
-
         if self.request.get("api"):
             # return JSON
             self.response.headers['Access-Control-Allow-Origin'] = '*'
