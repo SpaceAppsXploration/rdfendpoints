@@ -222,7 +222,7 @@ class FourOhFour(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.set_status(404)
 
-from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
+from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),

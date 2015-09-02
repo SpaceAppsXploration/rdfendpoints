@@ -74,7 +74,7 @@ class PublishEndpoints(webapp2.RequestHandler):
             if uuid and uuid in families:
                 # return a hydra:Resource component > GET: /hypermedia/spacecraft/subsystems?uuid=<uuid>
                 result = {
-                    "@context": _SERVICE + "/hydra/api-demo/contexts/Subsystem.jsonld",
+                    "@context": _SERVICE + "/hydra/contexts/Subsystem",
                     "@id": _SERVICE + "/hypermedia/spacecraft/subsystems?uuid={}".format(uuid),
                     "@type": "Subsystem",
                     "name": uuid,
@@ -87,7 +87,7 @@ class PublishEndpoints(webapp2.RequestHandler):
                 return self.response.write(json.dumps(result, indent=2))
             # return hydra:Collection
             results = {
-                "@context": "/hydra/api-demo/contexts/Collection.jsonld",
+                "@context": "/hydra/contexts/Collection",
                 "@type": "Collection",
                 "@id": _SERVICE + "/hypermedia/spacecraft/subsystems",
                 "members": []
