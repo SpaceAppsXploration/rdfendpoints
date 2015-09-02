@@ -20,8 +20,10 @@ import json
 
 from flankers.graphtools import query, store_triples
 from flankers.errors import format_message
-from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA
+
+from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA_VOCAB, _SERVICE
 from datastore.models import Component, WebResource
+
 
 # generic tools are in tools.py module
 # tools using Graph() and NDBstore are in graphtools.py module
@@ -29,7 +31,7 @@ from datastore.models import Component, WebResource
 
 class Hello(webapp2.RequestHandler):
     """
-    / Homepage
+    / GET: Homepage
     """
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -71,23 +73,17 @@ class Querying(webapp2.RequestHandler):
         return self.response.set_status(405)
 
 
-class Testing(webapp2.RequestHandler):
-    """
-    /test: test handler
-    """
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('test')
-
 class Keywords(webapp2.RequestHandler):
     """
-    /database/keywords: deliver all keywords as JSON
+    /database/keywords GET: deliver all keywords as JSON
+    UNDER-CONSTRUCTION: implement memcache, to avoid hit the datastore each time
     """
     def get(self):
         self.response.headers['Content-Type'] = 'application/json'
         result = list(res.keyword for res in 
             WebResource.query(projection=[WebResource.keyword]).iter())
         json.dump(result, self.response)
+
 
 class Endpoints(webapp2.RequestHandler):
     """
@@ -103,7 +99,7 @@ class Endpoints(webapp2.RequestHandler):
             # keywd is None serves the entrypoint view
             from config.config import _VOCS, _REST_SERVICE
             self.response.headers['Access-Control-Expose-Headers'] = 'Link'
-            self.response.headers['Link'] = '<' + _HYDRA + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
+            self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
             results = [{"name": f[f.rfind('_') + 1:],
                         "collection_ld+json_description": _VOCS['subsystems'] + f + '/' + '?format=jsonld',
                         "collection_n-triples_description": _VOCS['subsystems'] + f,
@@ -138,7 +134,7 @@ class Endpoints(webapp2.RequestHandler):
         elif keywd in families:
             # if the url parameter is a family name
             # print the list of all the components in that family
-            results = Component.get_by_collection(keywd)
+            results = Component.restify(Component.get_by_collection(keywd))
             return self.response.write(results)
         else:
             # wrong url parameters
@@ -176,7 +172,17 @@ class Articles(webapp2.RequestHandler):
         next_bookmark = None
         if more:
             next_bookmark = next_cursor.to_websafe_string()
+        print next_bookmark
 
+        if self.request.get("api"):
+            # return JSON
+            self.response.headers['Access-Control-Allow-Origin'] = '*'
+            self.response.headers['Content-Type'] = 'application/json'
+            listed = [p.dump_to_json() for p in articles] + [{'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}]
+            return self.response.out.write(
+                json.dumps(listed)
+            )
+        # return template
         path = os.path.join(_PATH, 'articles.html')
         return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
                                                               'articles': articles}))
@@ -184,7 +190,7 @@ class Articles(webapp2.RequestHandler):
 
 class Crawling(webapp2.RequestHandler):
     """
-    Service handler for operations on crawled resources
+    /database/crawling/store POST: Service handler for operations on crawled resources
     """
     def post(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -207,7 +213,21 @@ class FourOhFour(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.set_status(404)
 
-from hydra.hydra import HydraVocabulary, PublishContexts, PublishEndpoints
+
+class Testing(webapp2.RequestHandler):
+    """
+    /test: test handler
+    """
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        try:
+            from bs4 import BeautifulSoup
+            from json2html import __version__
+        except Exception as e:
+            raise e
+        self.response.write('test passed')
+
+from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
@@ -218,7 +238,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/ds', Querying),
     webapp2.Route('/hydra/vocab', HydraVocabulary),
     webapp2.Route('/hydra/contexts/<name:\w+.>', PublishContexts),
-    webapp2.Route('/rest/<name:\w*>/<uuid:\w*>', PublishEndpoints),
+    webapp2.Route('/hydra/spacecraft/<name:\w*>', PublishEndpoints),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 

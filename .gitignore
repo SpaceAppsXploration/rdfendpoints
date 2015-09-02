@@ -66,4 +66,5 @@ RDFvocab
 # six.py
 # pyparsing.py
 .idea/
+flankers/tagmeapi/secret/keys.py
 app.old# Created by .ignore support plugin (hsz.mobi)

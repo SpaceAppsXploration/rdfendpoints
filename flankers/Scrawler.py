@@ -3,32 +3,34 @@ from __future__ import unicode_literals
 __author__ = 'lorenzo'
 
 import os
-import time
 from bs4 import BeautifulSoup
 import feedparser
 
 import webapp2
-from google.appengine.ext import ndb
 
+from datastore.models import WebResource
 from config.config import _DEBUG
 
 # Adapted from http://tuhrig.de/writing-an-online-scraper-on-google-app-engine-python/
 
 
-class Item(ndb.Model):
-    title = ndb.StringProperty(required=False)
-    link = ndb.StringProperty(required=False)
-    date = ndb.StringProperty(required=False)
-
-
 class Scrawler(webapp2.RequestHandler):
+    """
+    A very basic crawler for RSS links
+    """
 
     def get(self):
-        self.read_feed()
-        self.response.out.write(self.print_items())
+        """
+        Handler for the cronjob: /cron/startcrawling
+        :return:
+        """
+        self.store_feeds()
 
     def load_links(self):
-        #print os.path.dirname(__file__)
+        """
+        Loads RSS links from a local file. They are in an XML file with tag <outline/>
+        :return: A list of URLs of RSS-feeds
+        """
         feeds_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'scripts', 'files', 'newsfox.xml')
         with open(feeds_file) as f:
             markup = f.read()
@@ -42,33 +44,41 @@ class Scrawler(webapp2.RequestHandler):
                 pass
             except Exception as e:
                 raise e
+        return links
 
-        print links[0]
-        return [links[0]]
+    def read_feed(self, ln):
+        """
+        Parse a link with feedparser library.
+        :param ln: a link to a RSS-feed
+        :return: a list of dictionaries containing news from the feed
+        """
+        feed = feedparser.parse(ln)
 
-    def read_feed(self):
-
-        feeds = [feedparser.parse(f) for f in self.load_links()]
-        print feeds
-
-        if feeds:
-            for feed in feeds:
-                for f in feed:
-                    querry = Item.gql("WHERE link = :1", f["link"])
-                    if(querry.count() == 0):
-                        item = Item()
-                        item.title = f["title"]
-                        item.link = f["link"]
-                        item.date = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-                        item.put()
+        if feed and feed["entries"]:
+                return feed["entries"]
         else:
-            raise ValueError('No links. Or cannot parse them.')
+            print ValueError('No links. Or cannot parse them in: ' + str(feed))
+            return None
 
-    def print_items(self):
-        s = "All items:<br>"
-        for item in Item.query():
-            s += item.date + " - <a href='" + item.link + "'>" + item.title + "</a><br>"
-        return s
+    def store_feeds(self):
+        for l in self.load_links():
+            entries = self.read_feed(l)
+            if entries:
+                for entry in entries:
+                    query = WebResource.query().filter(WebResource.url == entry["link"])
+                    if query.count() == 0:
+                        print "STORING: " + entry["link"]
+                        try:
+                            if 'summary' in entry:
+                                s, t = BeautifulSoup(entry['summary'], "lxml"), BeautifulSoup(entry['title'], "lxml")
+                                entry['summary'], entry['title'] = s.get_text(), t.get_text()
+                            else:
+                                t = BeautifulSoup(entry['title'], "lxml")
+                                entry['summary'], entry['title'] = None , t.get_text()
+                            i = WebResource.store_feed(entry)
+                            print "STORED: " + str(i)
+                        except Exception as e:
+                            print "Cannot Store: " + str(e) + entry['link']
 
 
 application = webapp2.WSGIApplication([
