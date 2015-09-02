@@ -12,11 +12,6 @@ EntryPoint = {
             "@type": "@id",
             "hydra:method": "GET"
         },
-        "components": {
-            "@id": "vocab:EntryPoint/components",
-            "@type": "@id",
-            "hydra:method": "GET"
-        },
         "register_component": {
             "@id": "vocab:EntryPoint/components",
             "@type": "@id",

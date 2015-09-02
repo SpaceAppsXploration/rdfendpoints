@@ -6,6 +6,8 @@ import json
 from flankers.errors import format_message
 from config.config import _HYDRA_VOCAB, _SERVICE
 
+_CONTENT_TYPE = 'application/ld+json'
+
 
 class HydraVocabulary(webapp2.RequestHandler):
     def get(self):
@@ -14,7 +16,7 @@ class HydraVocabulary(webapp2.RequestHandler):
         :return: Json
         """
         self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Content-Type'] = 'application/ld+json'
+        self.response.headers['Content-Type'] = _CONTENT_TYPE
         self.response.headers['Access-Control-Expose-Headers'] = 'Link'
         self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"'
         from contexts import ApiDocumentation
@@ -29,7 +31,7 @@ class PublishContexts(webapp2.RequestHandler):
         :return: Json
         """
         self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Content-Type'] = 'application/ld+json'
+        self.response.headers['Content-Type'] = _CONTENT_TYPE
         self.response.headers['Access-Control-Expose-Headers'] = 'Link'
         self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"'
         import contexts
@@ -54,7 +56,7 @@ class PublishEndpoints(webapp2.RequestHandler):
         from flankers.tools import valid_uuid, families
 
         self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Content-Type'] = 'application/ld+json'
+        self.response.headers['Content-Type'] = _CONTENT_TYPE
         self.response.headers['Access-Control-Expose-Headers'] = 'Link'
         self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>; rel="http://www.w3.org/ns/hydra/core#apiDocumentation"'
 
@@ -65,7 +67,7 @@ class PublishEndpoints(webapp2.RequestHandler):
                 "@context": _SERVICE + "/hydra/contexts/EntryPoint",
                 "@id": _SERVICE + "/hydra/spacecraft/",
                 "@type": "EntryPoint",
-                "subsystems": _SERVICE + "/hydra/spacecraft/subsystems",
+                "go_to_subsystems": _SERVICE + "/hydra/spacecraft/subsystems",
                 "register_component": "under-construction"
             }, indent=2))
             pass
