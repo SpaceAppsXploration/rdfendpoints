@@ -1,6 +1,6 @@
 feedparser==5.2.1
 BeautifulSoup4==4.4.0
-pycurl=7.19.5.1
+pycurl==7.19.5.1
 six
 pyparsing
 ordereddict
