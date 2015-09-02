@@ -6,7 +6,7 @@ import json
 from flankers.errors import format_message
 from config.config import _HYDRA_VOCAB, _SERVICE
 
-_CONTENT_TYPE = 'application/json'
+_CONTENT_TYPE = 'application/ld+json'
 
 
 class HydraVocabulary(webapp2.RequestHandler):
