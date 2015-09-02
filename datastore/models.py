@@ -144,7 +144,7 @@ class Component(ndb.Model):
             print q.key.id(), q.type
             obj = {
                 '@context': _SERVICE + "/hydra/context/Component",
-                '@id': _SERVICE + "/hypermedia/spacecraft/components?uuid={}".format(q.key.id()),
+                '@id': _SERVICE + "/hydra/spacecraft/components?uuid={}".format(q.key.id()),
                 '@type': 'Component',
                 'name': q.name
                 }

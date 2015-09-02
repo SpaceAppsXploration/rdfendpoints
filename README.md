@@ -1,10 +1,7 @@
 # Project Chronos
 ## rdfendpoints
 
-Forked from [mr-niels-christensen/rdflib-appengine](https://github.com/mr-niels-christensen/rdflib-appengine)
-
 Check the [repo Issues](https://github.com/SpaceAppsXploration/rdfendpoints/issues) to know what's going on.
-
 
 ## To-Do
 * Write tests! (:
@@ -28,3 +25,5 @@ This repo is part of the Chronos' Cloud:
 * [Scientific & Technical Information](http://taxonomy.projectchronos.eu)  | [pramantha-nodejs-backend](https://github.com/SpaceAppsXploration/pramantha-nodejs-backend)
 * [RDF Vocabularies](http://ontology.projectchronos.eu)  | [ontologies](https://github.com/SpaceAppsXploration/ontologies) and [RDFvocab](https://github.com/SpaceAppsXploration/RDFvocab)  
 
+
+Forked from [mr-niels-christensen/rdflib-appengine](https://github.com/mr-niels-christensen/rdflib-appengine)

@@ -73,15 +73,6 @@ class Querying(webapp2.RequestHandler):
         return self.response.set_status(405)
 
 
-class Testing(webapp2.RequestHandler):
-    """
-    /test: test handler
-    """
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('test')
-
-
 class Keywords(webapp2.RequestHandler):
     """
     /database/keywords GET: deliver all keywords as JSON
@@ -222,6 +213,20 @@ class FourOhFour(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.set_status(404)
 
+
+class Testing(webapp2.RequestHandler):
+    """
+    /test: test handler
+    """
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        try:
+            from bs4 import BeautifulSoup
+            from json2html import __version__
+        except Exception as e:
+            raise e
+        self.response.write('test passed')
+
 from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 
 application = webapp2.WSGIApplication([
@@ -233,7 +238,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/ds', Querying),
     webapp2.Route('/hydra/vocab', HydraVocabulary),
     webapp2.Route('/hydra/contexts/<name:\w+.>', PublishContexts),
-    webapp2.Route('/hypermedia/spacecraft/<name:\w*>', PublishEndpoints),
+    webapp2.Route('/hydra/spacecraft/<name:\w*>', PublishEndpoints),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 
