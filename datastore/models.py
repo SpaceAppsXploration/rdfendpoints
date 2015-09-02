@@ -139,16 +139,22 @@ class Component(ndb.Model):
         :return: a formatted JSON-LD
         """
         from config.config import _SERVICE
-        results = list()
+        results = {'@type': "Collection",
+                   '@context': _SERVICE +  "/hydra/contexts/Collection",
+                   'members': list()}
+        uuid = None
         for q in query:
             print q.key.id(), q.type
+            if not uuid:
+                uuid = q.type[q.type.rfind('/') + 1:]
             obj = {
                 '@context': _SERVICE + "/hydra/context/Component",
                 '@id': _SERVICE + "/hydra/spacecraft/components?uuid={}".format(q.key.id()),
                 '@type': 'Component',
                 'name': q.name
                 }
-            results.append(obj)
+            results['members'].append(obj)
+        results['@id'] = _SERVICE + "/hydra/spacecraft/components?uuid={}".format(uuid)
         return json.dumps(results, indent=2)
 
 

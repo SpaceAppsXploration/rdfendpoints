@@ -1,4 +1,4 @@
 cron:
 - description: scrawler
   url: /cron/startcrawling
-  schedule: every 96 hours
+  schedule: every 36 hours
