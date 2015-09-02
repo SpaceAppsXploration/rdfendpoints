@@ -224,7 +224,13 @@ class WebResource(ndb.Model):
         for prop, value in self.to_dict().items():
             # If this is a key, you might want to grab the actual model.
             if isinstance(self, ndb.Model):
-                result[prop] = str(value)
+                if isinstance(value, datetime):
+                    result[prop] = value.strftime("%d %m %Y")
+                    continue
+                elif value is None:
+                    result[prop] = None
+                    continue
+                result[prop] = str(value.encode('ascii', 'ignore').strip())
 
         return result
 
