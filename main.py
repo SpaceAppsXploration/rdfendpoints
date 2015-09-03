@@ -186,6 +186,7 @@ class Articles(webapp2.RequestHandler):
             mkey = "Articles_" + next_bookmark
             if not memcache.get(key=mkey):
                 listed = {'articles': [webres.dump_to_json() for webres in articles], 'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
+                memcache.add(key=mkey, value=listed)
             else:
                 listed = memcache.get(key=mkey)
             return self.response.out.write(
