@@ -215,21 +215,38 @@ class WebResource(ndb.Model):
         """
         make property values of an instance JSON serializable
         """
-        result = {}
+        result = {
+            'article': {},
+            'keywords': []
+        }
         for prop, value in self.to_dict().items():
             # If this is a key, you might want to grab the actual model.
             if isinstance(self, ndb.Model):
                 if isinstance(value, datetime):
-                    result[prop] = value.strftime("%d %m %Y")
+                    result['article'][prop] = value.strftime("%d %m %Y")
                     continue
                 elif value is None:
-                    result[prop] = None
+                    result['article'][prop] = None
                     continue
-                result[prop] = str(value.encode('ascii', 'ignore').strip())
-
+                result['article'][prop] = str(value.encode('ascii', 'replace').strip())
+        result['keywords'] = self.get_indexers()
         return result
+
+    def get_indexers(self):
+        """
+        For a given WebResource, get the keywords stored in Indexer for that resource
+        :return: a list of keywords
+        """
+        query = Indexer.query().filter(Indexer.webres == self.key)
+        if query.count() != 0:
+            results = [q.keyword for q in query]
+            return results
+        return []
 
 
 class Indexer(ndb.Model):
+    """
+    A map between keywords and urls
+    """
     keyword = ndb.StringProperty()
     webres = ndb.KeyProperty(kind=WebResource)
