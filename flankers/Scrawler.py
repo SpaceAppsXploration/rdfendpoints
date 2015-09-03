@@ -59,9 +59,9 @@ class Scrawler(webapp2.RequestHandler):
         feed = feedparser.parse(ln)
 
         if feed and feed["entries"]:
-                return feed["entries"]
+            return feed["entries"]
         else:
-            print ValueError('No links. Or cannot parse them in: ' + str(feed))
+            print ValueError('No links. Or cannot parse them in: ' + str(ln))
             return None
 
     @staticmethod

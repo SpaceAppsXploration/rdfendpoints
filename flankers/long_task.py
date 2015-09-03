@@ -13,7 +13,7 @@ class storeFeeds(longtask.LongRunningTaskHandler):
             entries = Scrawler.read_feed(l)
             if entries:
                 for entry in entries:
-                    time.sleep(0.5)
+                    # time.sleep(0.1)
                     query = WebResource.query().filter(WebResource.url == entry["link"])
                     if query.count() == 0:
                         print "STORING: " + entry["link"]
