@@ -8,8 +8,8 @@ import feedparser
 
 import webapp2
 
-from datastore.models import WebResource
 from config.config import _DEBUG
+
 
 # Adapted from http://tuhrig.de/writing-an-online-scraper-on-google-app-engine-python/
 
@@ -26,7 +26,8 @@ class Scrawler(webapp2.RequestHandler):
         """
         self.store_feeds()
 
-    def load_links(self):
+    @staticmethod
+    def load_links():
         """
         Loads RSS links from a local file. They are in an XML file with tag <outline/>
         :return: A list of URLs of RSS-feeds
@@ -46,7 +47,8 @@ class Scrawler(webapp2.RequestHandler):
                 raise e
         return links
 
-    def read_feed(self, ln):
+    @staticmethod
+    def read_feed(ln):
         """
         Parse a link with feedparser library.
         :param ln: a link to a RSS-feed
@@ -60,25 +62,19 @@ class Scrawler(webapp2.RequestHandler):
             print ValueError('No links. Or cannot parse them in: ' + str(feed))
             return None
 
-    def store_feeds(self):
-        for l in self.load_links():
-            entries = self.read_feed(l)
-            if entries:
-                for entry in entries:
-                    query = WebResource.query().filter(WebResource.url == entry["link"])
-                    if query.count() == 0:
-                        print "STORING: " + entry["link"]
-                        try:
-                            if 'summary' in entry:
-                                s, t = BeautifulSoup(entry['summary'], "lxml"), BeautifulSoup(entry['title'], "lxml")
-                                entry['summary'], entry['title'] = s.get_text(), t.get_text()
-                            else:
-                                t = BeautifulSoup(entry['title'], "lxml")
-                                entry['summary'], entry['title'] = None , t.get_text()
-                            i = WebResource.store_feed(entry)
-                            print "STORED: " + str(i)
-                        except Exception as e:
-                            print "Cannot Store: " + str(e) + entry['link']
+    @staticmethod
+    def store_feeds():
+        """
+        Use long task class to store feeds
+        :return:
+        """
+        from flankers.long_task import storeFeeds
+        s = storeFeeds()
+        s.execute_task()
+
+
+
+
 
 
 application = webapp2.WSGIApplication([
