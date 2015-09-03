@@ -18,6 +18,7 @@ class Scrawler(webapp2.RequestHandler):
     """
     A very basic crawler for RSS links
     """
+    queue = []
 
     def get(self):
         """
@@ -32,6 +33,7 @@ class Scrawler(webapp2.RequestHandler):
         Loads RSS links from a local file. They are in an XML file with tag <outline/>
         :return: A list of URLs of RSS-feeds
         """
+
         feeds_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'scripts', 'files', 'newsfox.xml')
         with open(feeds_file) as f:
             markup = f.read()
@@ -71,10 +73,6 @@ class Scrawler(webapp2.RequestHandler):
         from flankers.long_task import storeFeeds
         s = storeFeeds()
         s.execute_task()
-
-
-
-
 
 
 application = webapp2.WSGIApplication([

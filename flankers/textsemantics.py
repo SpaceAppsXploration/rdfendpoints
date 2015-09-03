@@ -22,6 +22,7 @@ def find_related_concepts(text):
     #
     # Find wikipedia terms in text
     #
+    text = text.encode('ascii', 'replace')
     results = TagMeService.check_spotting(text)
     if results['spotted']:
         results = []

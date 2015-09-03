@@ -1,3 +1,4 @@
+import time
 from bs4 import BeautifulSoup
 import lib.longtask as longtask
 from datastore.models import Indexer, WebResource
@@ -12,6 +13,7 @@ class storeFeeds(longtask.LongRunningTaskHandler):
             entries = Scrawler.read_feed(l)
             if entries:
                 for entry in entries:
+                    time.sleep(0.5)
                     query = WebResource.query().filter(WebResource.url == entry["link"])
                     if query.count() == 0:
                         print "STORING: " + entry["link"]

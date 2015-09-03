@@ -12,11 +12,14 @@
       <input class="typeahead form-control" type="text" placeholder="Keywords">
     </div>
 
+
     <ol>
-    {% for article in articles %}
-        <li>{{ article.title }} -
-            {% if article.keyword != None %}
-            <span style="color:#ff846d"> {{ article.keyword }} </span>
+    {% for article in articles.articles %}
+        <li>{{ article.article.title }} -
+            {% if article.keywords.length != 0 %}
+                {% for k in article.keywords|slice:":5" %}
+                    <span style="color:#ff846d"> {{ k }} - </span>
+                {% endfor %}
             {% else %}
             <span style="color:#393eff"> No keyword: newsfeed </span>
             {% endif %}

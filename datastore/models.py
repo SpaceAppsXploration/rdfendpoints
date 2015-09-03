@@ -205,10 +205,6 @@ class WebResource(ndb.Model):
             item.abstract = ' '.join(entry['summary'].strip().encode('ascii', 'replace').split()) if entry['summary'] is not None else ''
             i = item.put()
 
-            # create the Index entries
-            from flankers.long_task import storeIndexer
-            s = storeIndexer()
-            s.execute_task(item, i)
             return i
 
     def dump_to_json(self):

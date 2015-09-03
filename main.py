@@ -179,23 +179,24 @@ class Articles(webapp2.RequestHandler):
             next_bookmark = next_cursor.to_websafe_string()
         print next_bookmark
 
+        mkey = "Articles_" + next_bookmark
+        if not memcache.get(key=mkey):
+            listed = {'articles': [webres.dump_to_json() for webres in articles], 'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
+            memcache.add(key=mkey, value=listed)
+        else:
+            listed = memcache.get(key=mkey)
+
         if self.request.get("api"):
             # return JSON
             self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Content-Type'] = 'application/json'
-            mkey = "Articles_" + next_bookmark
-            if not memcache.get(key=mkey):
-                listed = {'articles': [webres.dump_to_json() for webres in articles], 'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
-                memcache.add(key=mkey, value=listed)
-            else:
-                listed = memcache.get(key=mkey)
             return self.response.out.write(
                 json.dumps(listed)
             )
         # return template
         path = os.path.join(_PATH, 'articles.html')
         return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
-                                                              'articles': articles}))
+                                                              'articles': listed}))
 
 
 class Crawling(webapp2.RequestHandler):
@@ -236,6 +237,7 @@ class Testing(webapp2.RequestHandler):
         except Exception as e:
             raise e
         self.response.write('test passed')
+
 
 from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 

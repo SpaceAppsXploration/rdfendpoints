@@ -16,6 +16,9 @@ handlers:
 - url: /cron/startcrawling
   script: flankers.Scrawler.application
 
+- url: /cron/indexing
+  script: flankers.Indexing.application
+
 - url: .*
   script: main.application
 
@@ -26,4 +29,4 @@ libraries:
   version: "latest"
 
 builtins:
-- remote_api: on
+- appstats: on

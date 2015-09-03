@@ -15,7 +15,7 @@ _VOCS = {
     'exploration': 'http://ontology.projectchronos.eu/exploration/'
 }
 
-_TEMP_SECRET = "***********"
+_TEMP_SECRET = "*********************"
 
 
 def set_env_variables():
