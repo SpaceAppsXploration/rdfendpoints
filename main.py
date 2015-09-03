@@ -166,7 +166,7 @@ class Articles(webapp2.RequestHandler):
         else:
             query = memcache.get(key="WebResource_all")
 
-        page_size = 50
+        page_size = 25
         cursor = None
         bookmark = self.request.get('bookmark')
         if bookmark:
@@ -183,7 +183,11 @@ class Articles(webapp2.RequestHandler):
             # return JSON
             self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Content-Type'] = 'application/json'
-            listed = [p.dump_to_json() for p in articles] + [{'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}]
+            mkey = "Articles_" + next_bookmark
+            if not memcache.get(key=mkey):
+                listed = {'articles': [webres.dump_to_json() for webres in articles], 'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
+            else:
+                listed = memcache.get(key=mkey)
             return self.response.out.write(
                 json.dumps(listed)
             )
