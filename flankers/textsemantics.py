@@ -10,32 +10,44 @@ def find_related_concepts(text):
     :param text: a given abstract or title
     :return: a list of taxonomy keywords (see http://taxonomy.projectchronos.eu/concepts/c/infrared+telescopes)
     """
-    # TagMeService.spot
-    # TagMeService.tag
-    # lookup tags in taxonomy.projectchronos.eu
-    # if lookup:
-    #    fetch(url) > relatedConcepts
-    # for relatedConcepts:
-    #    fetch(url) > label
-    # return [labels]
-
     #
     # Find wikipedia terms in text
-    #
+    # Spot terms in text
     text = text.encode('ascii', 'replace')
-    results = TagMeService.check_spotting(text)
-    if results['spotted']:
-        results = []
-        for spot in [s['spot'] for s in TagMeService.check_spotting(text)['value']['spots']]:
-            result = TagMeService.retrieve_taggings(spot.encode('utf-8'), method='POST')
-            for n in result['annotations']:
-                title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
-                results.append(title)
+    response = TagMeService.check_spotting(text)
+
+    results = return_wikipedia_term(response)
 
     #
     # Lookup terms in taxonomy and fetch relatedConcepts (keywords)
-    #
+    # return related terms if they are found in the taxonomy
 
+    return lookup_in_taxonomy(results)
+
+
+def return_wikipedia_term(res):
+    """
+    from spotted terms returns wikipedia slugs
+    :param res: the JSON received from the Spotting API
+    :return: a list of wikipedia slugs in an article
+    """
+    rst = []
+    if res['spotted']:
+        for s in [s['spot'] for s in res['value']['spots']]:
+            r = TagMeService.retrieve_taggings(s.encode('utf-8'), method='POST')
+            if len(r) != 0:
+                for n in r['annotations']:
+                    title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
+                    rst.append(title)
+    return rst
+
+
+def lookup_in_taxonomy(results):
+    """
+    from wikipedia slugs fetch relatedConcepts in the taxonomy
+    :param results: a list of wikipedia slugs
+    :return: a set of related concepts to the slugs
+    """
     base_url = "http://taxonomy.projectchronos.eu/space/dbpediadocs/{}"
     labels = []
     resource = None
@@ -53,5 +65,3 @@ def find_related_concepts(text):
                     # print 'Found! ' + label
                     labels.append(str(label))
     return set(labels)
-
-
