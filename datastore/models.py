@@ -196,7 +196,7 @@ class WebResource(ndb.Model):
         if cls.query().filter(cls.url == str(entry['link'])).count() == 0:
             # define the WebResource
             item = WebResource()
-            item.title = " ".join(entry['title'].encode('ascii', 'ignore').split())
+            item.title = " ".join(entry['title'].encode('ascii', 'replace').split())
             print item.title
             item.url = str(entry['link'])
             item.stored = datetime(*localtime()[:6])
