@@ -13,6 +13,7 @@ sys.path.insert(0, 'lib')
 
 import webapp2
 from google.appengine.ext.webapp import template
+from google.appengine.api import memcache
 
 import urllib
 from json2html import *
@@ -159,14 +160,18 @@ class Articles(webapp2.RequestHandler):
 
         # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
 
+        if not memcache.get(key="WebResource_all"):
+            query = WebResource.query()
+            memcache.add(key="WebResource_all", value=query)
+        else:
+            query = memcache.get(key="WebResource_all")
+
         page_size = 50
         cursor = None
         bookmark = self.request.get('bookmark')
         if bookmark:
             cursor = ndb.Cursor.from_websafe_string(bookmark)
 
-        query = WebResource.query()
-        print query.count()
         articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
 
         next_bookmark = None
