@@ -202,17 +202,13 @@ class WebResource(ndb.Model):
             item.stored = datetime(*localtime()[:6])
             item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
 
-            item.abstract = ' '.join(entry['summary'].strip().encode('ascii', 'ignore').split()) if entry['summary'] is not None else ''
+            item.abstract = ' '.join(entry['summary'].strip().encode('ascii', 'replace').split()) if entry['summary'] is not None else ''
             i = item.put()
 
             # create the Index entries
-            from flankers.textsemantics import find_related_concepts
-            text = item.abstract if entry['summary'] is not None else item.title
-            labels = find_related_concepts(text)
-            for l in labels:
-                print l
-                index = Indexer(keyword=l.strip(), webres=i)
-                index.put()
+            from flankers.long_task import storeIndexer
+            s = storeIndexer()
+            s.execute_task(item, i)
             return i
 
     def dump_to_json(self):
