@@ -74,18 +74,6 @@ class Querying(webapp2.RequestHandler):
         return self.response.set_status(405)
 
 
-class Keywords(webapp2.RequestHandler):
-    """
-    /database/keywords GET: deliver all keywords as JSON
-    UNDER-CONSTRUCTION: implement memcache, to avoid hit the datastore each time
-    """
-    def get(self):
-        self.response.headers['Content-Type'] = 'application/json'
-        result = list(res.keyword for res in 
-            WebResource.query(projection=[WebResource.keyword]).iter())
-        json.dump(result, self.response)
-
-
 class Endpoints(webapp2.RequestHandler):
     """
     /database/cots/ GET: Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
@@ -260,7 +248,6 @@ from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/visualize/articles/', Articles),
-    webapp2.Route('/database/keywords.json', Keywords),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/ds', Querying),
