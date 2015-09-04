@@ -1,9 +1,9 @@
 """
 Dumps vocabularies into remote datastore with POST requests.
 Usage examples:
-    python uploadvocabularies.py http://localhost:10080/ds
-    python uploadvocabularies.py http://localhost:8080/ds
-    python uploadvocabularies.py http://rdfendpoints.appspot.com/ds
+    python uploadvocabularies.py http://localhost:10080/sparql
+    python uploadvocabularies.py http://localhost:8080/sparql
+    python uploadvocabularies.py http://chronostriples.appspot.com/sparql
 """
 
 __author__ = ['lorenzo', 'niels']
