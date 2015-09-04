@@ -9,6 +9,8 @@ from datetime import datetime
 
 from google.appengine.ext import ndb
 
+from config.config import _ARTICLES_API
+
 
 class Component(ndb.Model):
     """
@@ -212,20 +214,21 @@ class WebResource(ndb.Model):
         make property values of an instance JSON serializable
         """
         result = {
-            'article': {},
-            'keywords': []
         }
         for prop, value in self.to_dict().items():
             # If this is a key, you might want to grab the actual model.
+            if prop == 'url':
+                result['keywords'] = _ARTICLES_API[1] + value
+                continue
             if isinstance(self, ndb.Model):
                 if isinstance(value, datetime):
-                    result['article'][prop] = value.strftime("%d %m %Y")
+                    result[prop] = value.strftime("%d %m %Y")
                     continue
                 elif value is None:
-                    result['article'][prop] = None
+                    result[prop] = None
                     continue
-                result['article'][prop] = str(value.encode('ascii', 'replace').strip())
-        result['keywords'] = self.get_indexers()
+                result[prop] = str(value.encode('ascii', 'replace').strip())
+
         return result
 
     def get_indexers(self):

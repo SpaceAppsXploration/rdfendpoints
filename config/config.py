@@ -15,7 +15,7 @@ _VOCS = {
     'exploration': 'http://ontology.projectchronos.eu/exploration/'
 }
 
-_TEMP_SECRET = "*********************"
+_TEMP_SECRET = "***************"
 
 
 def set_env_variables():
@@ -33,6 +33,8 @@ def set_env_variables():
     return _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG
 
 _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG = set_env_variables()
+
+_ARTICLES_API = [_SERVICE + '/visualize/articles/?api=true', _SERVICE + '/visualize/articles/?api=true&url=']
 
 _CRAWLING_POST = {'local': 'http://localhost:8080/database/crawling/store',
                   'remote': 'http://hypermedia.projectchronos.eu/database/crawling/store'}
