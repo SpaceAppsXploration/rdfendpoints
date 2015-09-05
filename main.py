@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-Main entrypoint for the rdfendpoints app
+Main entrypoint for the chronostriples app.
+Publishing at http://hypermedia.projectchronos.eu
 
 FORKED FROM https://github.com/mr-niels-christensen/rdflib-appengine/blob/master/src/example/httpserver.py
 """
@@ -12,22 +12,36 @@ import sys
 sys.path.insert(0, 'lib')
 
 import webapp2
-from google.appengine.ext.webapp import template
-from google.appengine.api import memcache
-
 import urllib
+from google.appengine.ext.webapp import template
 from json2html import *
-import json
 
-from flankers.graphtools import query, store_triples
-from flankers.errors import format_message
+# * generic tools are in tools.py module
+# * tools using Graph() and NDBstore are in graphtools.py module
+# * handlers are in the handlers/ package
 
-from config.config import _TEMP_SECRET, _PATH, _DEBUG, _HYDRA_VOCAB, _SERVICE
-from datastore.models import Component, WebResource
+#
+# all the static variables are in config/config.py
+#
+from config.config import _PATH, _DEBUG
 
+#
+# utilities that are used inside handlers are in flankers/
+#
+from flankers.graphtools import query
 
-# generic tools are in tools.py module
-# tools using Graph() and NDBstore are in graphtools.py module
+#
+# handlers loaded from handlers/
+#
+from handlers.sparql import Querying
+from handlers.componentjsonapi import Endpoints
+from handlers.articlesjsonapi import Articles
+from handlers.servicehandlers import Testing, Crawling
+
+#
+# hydra handlers loaded from hydra/
+#
+from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 
 
 class Hello(webapp2.RequestHandler):
@@ -51,199 +65,6 @@ class Hello(webapp2.RequestHandler):
             return self.response.out.write(template.render(path, params))
         return self.response.set_status(405)
 
-
-class Querying(webapp2.RequestHandler):
-    """
-    /ds GET: responds to SPARQL queries using the ?query= parameter
-    /ds POST: endpoint to store triples in the datastore
-    """
-    def get(self):
-        if self.request.get('query'):
-            self.response.headers['Access-Control-Allow-Origin'] = '*'
-            self.response.headers['Content-Type'] = 'application/sparql-results+json; charset=utf-8'
-            print(self.request.get('query'))
-            return self.response.write(query(self.request.get('query')))
-        return self.response.write("Query not defined")
-
-    def post(self):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        if self.request.get('pwd') == _TEMP_SECRET:
-            # use graphtools.store_triples()
-            app_graph, cache_graph = store_triples(self.request.get('triple'))
-            return self.response.write("GRAPH STORED OK: {} triples".format(len(cache_graph)))
-        return self.response.set_status(405)
-
-
-class Endpoints(webapp2.RequestHandler):
-    """
-    /database/cots/ GET: Serves (HATEOAS) JSON objects from the datastore, mostly COTS components
-    /database/cots/store POST: store component instance in the datastore
-    """
-    def get(self, keywd):
-        from flankers.tools import valid_uuid, families
-
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Content-Type'] = 'application/json'
-        if not keywd:
-            # keywd is None serves the entrypoint view
-            from config.config import _VOCS, _REST_SERVICE
-            self.response.headers['Access-Control-Expose-Headers'] = 'Link'
-            self.response.headers['Link'] = '<' + _HYDRA_VOCAB + '>;rel="http://www.w3.org/ns/hydra/core#apiDocumentation'
-            results = [{"name": f[f.rfind('_') + 1:],
-                        "collection_ld+json_description": _VOCS['subsystems'] + f + '/' + '?format=jsonld',
-                        "collection_n-triples_description": _VOCS['subsystems'] + f,
-                        "go_to_collection": _REST_SERVICE + f}
-                       for f in families]
-            return self.response.write(json.dumps(results, indent=2))
-        elif keywd == 'ntriples' and self.request.get('uuid'):
-            # url is "url/cots/ntriples?key=<uuid>"
-            uuid = self.request.get('uuid')
-            if valid_uuid(uuid):
-                # return ntriples of the object
-                return self.response.write(format_message("N-Triples not yet implemented"))
-        elif valid_uuid(keywd):
-            # if the url parameter is an hex, this should be a uuid
-            # print a single component (in JSON with a link to N-Triples)
-            if self.request.get('format') and self.request.get('format') == 'jsonld':
-                # if user asks for JSON-LD
-                self.response.headers['Content-Type'] = 'application/ld+json'
-                try:
-                    body = Component.parse_to_jsonld(keywd)
-                except ValueError as e:
-                    return self.response.write(format_message(e))
-                return self.response.write(body)
-            else:
-                # serve JSON
-                try:
-                    body = Component.parse_to_json(keywd)
-                except ValueError as e:
-                    return self.response.write(format_message(e))
-                return self.response.write(body)
-
-        elif keywd in families:
-            # if the url parameter is a family name
-            # print the list of all the components in that family
-            results = Component.restify(Component.get_by_collection(keywd))
-            return self.response.write(results)
-        else:
-            # wrong url parameters
-            return self.response.write(format_message("Not a valid key/id in URL"))
-
-    def post(self, keywd):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        if keywd == 'store' and self.request.get('pwd') == _TEMP_SECRET:
-            jsonld = self.request.get('data')
-            from datastore.models import Component
-            key = Component.dump_from_jsonld(jsonld)
-            return self.response.write("COMPONENT STORED OK: {}".format(key))
-        else:
-            self.response.status = 405
-            return self.response.write('Not Authorized')
-
-
-class Articles(webapp2.RequestHandler):
-    def get(self):
-        from google.appengine.ext import ndb
-        from datastore.models import WebResource
-
-        # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
-
-        if self.request.get("api") and self.request.get("url"):
-            # serve keywords for a given article's url
-            self.response.headers['Access-Control-Allow-Origin'] = '*'
-            self.response.headers['Content-Type'] = 'application/json'
-            if not memcache.get(key="Keyword_" + self.request.get("url")):
-                q = WebResource.query().filter(WebResource.url == self.request.get("url")).fetch(1)
-                response = q[0].get_indexers() if len(q) == 1 else []
-                memcache.add(key="Keyword_for_" + self.request.get("url"), value=response)
-            else:
-                response = memcache.get(key="Keyword_for_" + self.request.get("url"))
-
-            return self.response.out.write(
-                json.dumps(response)
-            )
-        else:
-            # serve articles
-            if not memcache.get(key="WebResource_all"):
-                query = WebResource.query()
-                memcache.add(key="WebResource_all", value=query)
-            else:
-                query = memcache.get(key="WebResource_all")
-
-            page_size = 25
-            cursor = None
-            bookmark = self.request.get('bookmark')
-            if bookmark:
-                cursor = ndb.Cursor.from_websafe_string(bookmark)
-
-            articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
-
-            next_bookmark = None
-            if more:
-                next_bookmark = next_cursor.to_websafe_string()
-            print next_bookmark
-
-            mkey = "Articles_" + next_bookmark
-            if not memcache.get(key=mkey):
-                listed = {'articles': [webres.dump_to_json() for webres in articles], 'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
-                memcache.add(key=mkey, value=listed)
-            else:
-                listed = memcache.get(key=mkey)
-
-            if self.request.get("api"):
-                # return JSON
-                self.response.headers['Access-Control-Allow-Origin'] = '*'
-                self.response.headers['Content-Type'] = 'application/json'
-                return self.response.out.write(
-                    json.dumps(listed)
-                )
-            # return template
-            path = os.path.join(_PATH, 'articles.html')
-            return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
-                                                                  'articles': listed}))
-
-
-class Crawling(webapp2.RequestHandler):
-    """
-    /database/crawling/store POST: Service handler for operations on crawled resources
-    """
-    def post(self):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        if self.request.get('pwd') == _TEMP_SECRET and self.request.get('resource'):
-            from datastore.models import WebResource
-            try:
-                oid = WebResource.dump_from_json(self.request.get('resource'))
-            except (Exception, ValueError) as e:
-                self.response.status = 400
-                return self.response.write('The request could not be understood, wrong resource format or syntax: ' + str(e))
-            self.response.status = 200
-            return self.response.write('Resource Stored: ' + str(oid))
-        else:
-            self.response.status = 405
-            return self.response.write('Not Authorized')
-
-
-class FourOhFour(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.set_status(404)
-
-
-class Testing(webapp2.RequestHandler):
-    """
-    /test: test handler
-    """
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        try:
-            from bs4 import BeautifulSoup
-            from json2html import __version__
-        except Exception as e:
-            raise e
-        self.response.write('test passed')
-
-
-from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),

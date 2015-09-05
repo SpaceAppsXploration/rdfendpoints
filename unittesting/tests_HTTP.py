@@ -7,14 +7,26 @@ from flankers.tools import families
 __author__ = 'Lorenzo'
 
 
+def test_integrity(res):
+    try:
+        res = json.loads(res)
+        return res
+    except Exception:
+        print "the endpoint response was in the wrong format or status 400 or 500"
+        assert False
+
+
 class HTTPendpointsTest(unittest.TestCase):
 
-    def test_sparql(self, env='online'):
+    test_env = 'offline'
+
+    def test_sparql(self, env=test_env):
         """
     Test content of the /database/cots/ endpoint and if contained urls are reachable
     :param env: 'offline' for localhost, 'online' for remote
     """
-        base_url = _ENV[env]['_SERVICE'] + "/ds"
+        print "Running test_sparql"
+        base_url = _ENV[env]['_SERVICE'] + "/sparql"
         #
         queries = ["SELECT * WHERE { ?satellites <http://ontology.projectchronos.eu/astronomy/orbitsPlanet> ?planets. }",
                    "SELECT * WHERE { ?planets <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontology.projectchronos.eu/astronomy/TerrestrialPlanet> . }",
@@ -23,23 +35,18 @@ class HTTPendpointsTest(unittest.TestCase):
 
         for i, r in enumerate(responses):
             print i, r
-            try:
-                json.loads(r)
-                assert True
-            except Exception:
-                print "the endpoint response was in the wrong format or status 400 or 500"
-                assert False
+            test_integrity(r)
 
-    def test_json(self, env='offline'):
+    def test_json(self, env=test_env):
         """
     Test content of the /database/cots/ endpoint and if contained urls are reachable
     :param env: 'offline' for localhost, 'online' for remote
     """
+        print "Running test_json"
         import urllib
 
         base_url = _ENV[env]['_SERVICE'] + "/database/cots/"
         response = get_curling(base_url)
-        print response
         response = json.loads(response)
         props = ["go_to_collection", "collection_ld+json_description", "collection_n-triples_description", "name"]
         names = [f.split('_')[1] for f in families]
@@ -50,6 +57,40 @@ class HTTPendpointsTest(unittest.TestCase):
                        if k != 'name'
                        else v in names
                        for k, v in r.items())
+
+    def test_jsonld(self, env=test_env):
+        """
+    Test the hypermedia endpoints: /hydra/spacecraft/
+    """
+        print "Running test_jsonld"
+        import urllib
+
+        base_url = _ENV[env]['_SERVICE'] + "/hydra/spacecraft/"
+        response = urllib.urlopen(base_url).read()
+        test_integrity(response)
+
+    def test_articles(self, env=test_env):
+        """
+    Test the NL API: /visualize/articles/?api=true
+    """
+        print "Running test_articles"
+        import urllib
+
+        base_url = _ENV[env]['_SERVICE'] + "/visualize/articles/"
+
+        first = get_curling(base_url, {'api': 'true'})
+        first = test_integrity(first)
+
+        bookmark = first['next']
+        print bookmark
+        for i in range(0, 5):
+            print i
+            response = urllib.urlopen(bookmark).read()
+            response = test_integrity(response)
+            bookmark = response['next']
+            print i, bookmark
+
+
 
 
 
