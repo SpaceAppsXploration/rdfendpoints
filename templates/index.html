@@ -198,10 +198,10 @@
 
     map = {
         'planets': 'SELECT * WHERE { ?planets <http://www.w3.org/1999/02/22-rdf-syntax-ns#type><http://ontology.projectchronos.eu/astronomy/Planet> . }',
-        'sat_mars': 'SELECT * WHERE { ?satellites <http://ontology.projectchronos.eu/astronomy/orbitsPlanet><http://ontology.projectchronos.eu/solarsystem/Mars>.',
+        'sat_mars': 'SELECT * WHERE { ?satellites <http://ontology.projectchronos.eu/astronomy/orbitsPlanet><http://ontology.projectchronos.eu/solarsystem/Mars>. }',
         'sat_saturn': 'SELECT * WHERE { ?satellites <http://ontology.projectchronos.eu/astronomy/orbitsPlanet><http://ontology.projectchronos.eu/solarsystem/Saturn>. }',
-        'sun': 'SELECT * WHERE { ?satellites <http://ontology.projectchronos.eu/astronomy/orbiting><http://ontology.projectchronos.eu/solarsystem/Sun>. }',
-        'all_sats': 'SELECT * WHERE { ?planets <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontology.projectchronos.eu/astronomy/Natural_satellite> . }',
+        'sun': 'SELECT * WHERE { ?bodies <http://ontology.projectchronos.eu/astronomy/orbiting><http://ontology.projectchronos.eu/solarsystem/Sun>. }',
+        'all_sats': 'SELECT * WHERE { ?satellites <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontology.projectchronos.eu/astronomy/Natural_satellite> . }',
         'earth-like': 'SELECT * WHERE { ?planets <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontology.projectchronos.eu/astronomy/TerrestrialPlanet> . }'
     };
     function DoPost(name) {
