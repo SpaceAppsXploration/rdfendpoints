@@ -93,6 +93,10 @@ class JSON:
 			Check for each value corresponding to its key and return accordingly
 			'''
             if (isinstance(entry, unicode)):
+                if entry.find('http://') != -1:
+                    url = ' <a href="' + str(entry) + '"> > load linked data </a>'
+                    entry = entry[entry.rfind('/') + 1:]
+                    return unicode(entry + url)
                 return unicode(entry)
             if (isinstance(entry, int) or isinstance(entry, float)):
                 return str(entry)
@@ -117,8 +121,10 @@ class JSON:
         convertedOutput = convertedOutput + table_init_markup
 
         for k, v in ordered_json.iteritems():
-            convertedOutput = convertedOutput + '<tr>'
-            convertedOutput = convertedOutput + '<th>' + str(k) + '</th>'
+            if k == 'type':
+                continue
+            #convertedOutput = convertedOutput + '<tr>'
+            #convertedOutput = convertedOutput + '<th>' + str(k) + '</th>'
 
             if (v == None):
                 v = unicode("")
