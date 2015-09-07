@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 JSON 2 HTML convertor
 =====================
 
@@ -14,7 +14,7 @@ Contributors:
 
 LICENSE: MIT
 --------
-'''
+"""
 
 import json
 import ordereddict
@@ -22,9 +22,9 @@ import ordereddict
 
 class JSON:
     def convert(self, **args):
-        '''
+        """
 		convert json Object to HTML Table format
-		'''
+		"""
 
         # table attributes such as class
         # eg: table_attributes = "class = 'sortable table table-condensed table-bordered table-hover'
@@ -50,9 +50,8 @@ class JSON:
 
         return self.iterJson(ordered_json)
 
-
     def columnHeadersFromListOfDicts(self, ordered_json):
-        '''
+        """
 		If suppose some key has array of objects and all the keys are same,
 		instead of creating a new row for each such entry, club those values,
 		thus it makes more sense and more readable code.
@@ -63,7 +62,7 @@ class JSON:
 				<table border="1"><tr><th>1</th><td><table border="1"><tr><th>a</th><th>c</th><th>b</th></tr><tr><td>1</td><td>3</td><td>2</td></tr><tr><td>5</td><td>7</td><td>6</td></tr></table></td></tr></table>
 
 		@contributed by: @muellermichel
-		'''
+		"""
 
         if len(ordered_json) < 2:
             return None
@@ -82,33 +81,32 @@ class JSON:
                     return None
         return column_headers
 
-
     def iterJson(self, ordered_json):
-        '''
+        """
 		Iterate over the JSON and process it to generate the super awesome HTML Table format
-		'''
+		"""
 
         def markup(entry, parent_is_list=False):
-            '''
+            """
 			Check for each value corresponding to its key and return accordingly
-			'''
-            if (isinstance(entry, unicode)):
+			"""
+            if isinstance(entry, unicode):
                 if entry.find('http://') != -1:
                     url = ' <a href="' + str(entry) + '"> > load linked data </a>'
-                    entry = entry[entry.rfind('/') + 1:]
+                    entry = entry[entry.rfind('/') + 1:].replace('_', ' ')
                     return unicode(entry + url)
                 return unicode(entry)
-            if (isinstance(entry, int) or isinstance(entry, float)):
+            if isinstance(entry, int) or isinstance(entry, float):
                 return str(entry)
-            if (parent_is_list and isinstance(entry, list) == True):
+            if parent_is_list and isinstance(entry, list) == True:
                 # list of lists are not accepted
                 return ''
-            if (isinstance(entry, list) == True) and len(entry) == 0:
+            if isinstance(entry, list) and len(entry) == 0:
                 return ''
-            if (isinstance(entry, list) == True):
+            if isinstance(entry, list):
                 return '<ul><li>' + '</li><li>'.join(
                     [markup(child, parent_is_list=True) for child in entry]) + '</li></ul>'
-            if (isinstance(entry, dict) == True):
+            if isinstance(entry, dict):
                 return self.iterJson(entry)
 
             # safety: don't do recursion over anything that we don't know about - iteritems() will most probably fail
@@ -123,8 +121,8 @@ class JSON:
         for k, v in ordered_json.iteritems():
             if k == 'type':
                 continue
-            #convertedOutput = convertedOutput + '<tr>'
-            #convertedOutput = convertedOutput + '<th>' + str(k) + '</th>'
+            # convertedOutput = convertedOutput + '<tr>'
+            # convertedOutput = convertedOutput + '<th>' + str(k) + '</th>'
 
             if (v == None):
                 v = unicode("")
