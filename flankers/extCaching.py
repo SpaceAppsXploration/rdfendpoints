@@ -1,7 +1,7 @@
 import webapp2
 import json
 
-
+from flankers.graphtools import query
 from config.config import _DEBUG
 from datastore.models import N3Cache
 
@@ -46,9 +46,7 @@ class N3Caching(webapp2.RequestHandler):
         from scripts.remote.remote import google_urlfetch
 
         for k, v in map.items():
-            results = google_urlfetch('http://localhost:8080/sparql', {
-                'query': v
-            })
+            results = query(v)  # run the SPARQL query
 
             results = json.loads(results)
             urls = [r['bodies']['value'] for r in results['results']['bindings']]
