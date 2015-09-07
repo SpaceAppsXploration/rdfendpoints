@@ -72,7 +72,7 @@ def post_curling(url, params, file=None, display=False):
     return storage.getvalue()
 
 
-def get_curling(url, params={}):
+def get_curling(url, params=dict()):
     import pycurl
     import urllib
     from StringIO import StringIO
@@ -81,8 +81,9 @@ def get_curling(url, params={}):
     c = pycurl.Curl()
     c.setopt(c.URL, url)
     c.setopt(c.WRITEDATA, buffer)
+    c.setopt(pycurl.FOLLOWLOCATION, 1)
     c.setopt(c.URL, url + '?' + urllib.urlencode(params))
-    print urllib.urlencode(params)
+    print url + '?' + urllib.urlencode(params)
     # For older PycURL versions:
     #c.setopt(c.WRITEFUNCTION, buffer.write)
     c.perform()
@@ -92,3 +93,18 @@ def get_curling(url, params={}):
     # Body is a string in some encoding.
     # In Python 2, we can print it without knowing what the encoding is.
     return body
+
+
+def google_urlfetch(url, params=dict()):
+    import urllib
+
+    from google.appengine.api import urlfetch
+
+    data = urllib.urlencode(params)
+    url = url + '?' + data
+    result = urlfetch.fetch(url=url)
+
+    if result.status_code == 200:
+        return result.content
+    else:
+        raise Exception('Cannot urlfetch resource: status ' + str(result.status_code))

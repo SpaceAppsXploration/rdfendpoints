@@ -19,6 +19,9 @@ handlers:
 - url: /cron/indexing
   script: flankers.Indexing.application
 
+- url: /cron/n3caching
+  script: flankers.extCaching.application
+
 - url: .*
   script: main.application
 
