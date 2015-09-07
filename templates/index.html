@@ -206,8 +206,7 @@
     };
     function DoPost(name) {
         var input;
-        input = document.forms[name][0];
-        input.setAttribute("value", map[name]);
+        document.forms[name][0].setAttribute("value", map[name]);
         document.forms[name].submit();
     }
 </script>
