@@ -249,3 +249,19 @@ class Indexer(ndb.Model):
     """
     keyword = ndb.StringProperty()
     webres = ndb.KeyProperty(kind=WebResource)
+
+
+class N3Cache(ndb.Model):
+    """
+    Cache Dbpedia N3.
+    id=url
+    """
+    # id=url
+    n3 = ndb.TextProperty()
+    updated = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
+
+    def check_if_stored(self):
+        pass
+
+    def check_if_modified(self):
+        pass

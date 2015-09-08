@@ -20,9 +20,9 @@ class Indexing(webapp2.RequestHandler):
         """
         # create the Index entries
         from flankers.long_task import storeIndexer
-        half_an_hour = datetime.datetime.now() - datetime.timedelta(hours=0.5)
-        print half_an_hour
-        query = WebResource.query().filter(WebResource.stored > half_an_hour)
+        an_hour = datetime.datetime.now() - datetime.timedelta(hours=1)
+        print an_hour
+        query = WebResource.query().filter(WebResource.stored > an_hour)
         print query.count()
         for q in query:
             s = storeIndexer()
