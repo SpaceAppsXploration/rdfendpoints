@@ -89,7 +89,7 @@ class PublishEndpoints(webapp2.RequestHandler):
                 return self.response.write(json.dumps(result, indent=2))
             # return hydra:Collection
             results = {
-                "@context": "/hydra/contexts/Collection",
+                "@context": _SERVICE + "/hydra/contexts/Collection",
                 "@type": "Collection",
                 "@id": _SERVICE + "/hydra/spacecraft/subsystems",
                 "members": []
@@ -114,8 +114,8 @@ class PublishEndpoints(webapp2.RequestHandler):
             elif uuid in families:
                 # return hydra:Collection components by family > /hydra/spacecraft/components?uuid=<subsystem_name>
                 from datastore.models import Component
-                results = Component.hydrafy(Component.get_by_collection(uuid))
-                return self.response.write(results)
+                body = Component.hydrafy(Component.get_by_collection(uuid))
+                return self.response.write(body)
             # return hydra:Collection > /hydra/spacecraft/subsystems
             self.response.status = 404
             return self.response.write(

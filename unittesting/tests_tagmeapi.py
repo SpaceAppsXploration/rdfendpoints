@@ -51,14 +51,11 @@ class tagmeapiTagTest(tagmeapiTest):
         """
         test the tagging service for any given term spotted
         """
+        from flankers.textsemantics import return_wikipedia_term
         print '<TAGGING API>'
         for i, t in enumerate(self.test1):
-            results = []
-            for spot in [s['spot'] for s in TagMeService.check_spotting(t)['value']['spots']]:
-                result = TagMeService.retrieve_taggings(spot.encode('utf-8'), method='POST')
-                for n in result['annotations']:
-                    title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
-                    results.append(title)
+            response = TagMeService.check_spotting(t)
+            results = return_wikipedia_term(response)
             print i, results
             if i == 0:
                 expected = [u'Functional_(mathematics)', u'Electron_mobility', u'Units_of_measurement', u'Electric_multiple_unit', u'High,_Just-As-High,_and_Third', u'Accuracy_and_precision', u'Glove', u'Essential_Marvel', u'Success_(company)', u'Extra-vehicular_activity', u'Extra-vehicular_activity']

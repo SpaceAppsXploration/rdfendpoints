@@ -47,7 +47,7 @@ def retrieve_json(url, method='GET', data=None):
             data = urllib.urlencode(data)
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req)
-            return json.loads(response.read())
+            return json.loads(response.read().encode('ascii', 'replace'))
         else:
             raise Exception('retrieve_json(): data for POST cannot be None')
     else:

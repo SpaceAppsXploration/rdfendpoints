@@ -40,7 +40,7 @@ class TagMeService:
         import json
         endpoint = "http://tagme.di.unipi.it/spot"
 
-        body = str(text)
+        body = str(text.encode('ascii', 'replace'))
 
         params = {
             "key": api_key,

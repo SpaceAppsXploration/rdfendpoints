@@ -72,14 +72,17 @@ def post_curling(url, params, file=None, display=False):
     return storage.getvalue()
 
 
-def get_curling(url):
+def get_curling(url, params={}):
     import pycurl
+    import urllib
     from StringIO import StringIO
 
     buffer = StringIO()
     c = pycurl.Curl()
     c.setopt(c.URL, url)
     c.setopt(c.WRITEDATA, buffer)
+    c.setopt(c.URL, url + '?' + urllib.urlencode(params))
+    print urllib.urlencode(params)
     # For older PycURL versions:
     #c.setopt(c.WRITEFUNCTION, buffer.write)
     c.perform()

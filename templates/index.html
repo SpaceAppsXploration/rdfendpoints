@@ -15,13 +15,14 @@
     <div class="mdl-grid">
          <div class="mdl-cell mdl-cell--12-col">
              <h1 class="header">Space: What do you want to Explore?</h1>
-             <h3 class="header">This a query engine for space-related knowledge</h3>
+             <h3 class="header">A query engine for space-related knowledge</h3>
          </div>
     </div>
     <!-- Body area -->
     <div class="mdl-grid">
       <div class="mdl-cell mdl-cell--2-col">
            <h4>Use raw SPARQL queries&nbsp;&nbsp;<i class="material-icons md-48">forward</i></h4>
+           <h4>or order something from the menu&nbsp;&nbsp;<i class="material-icons md-48">forward</i></h4>
       </div>
       <div class="mdl-cell mdl-cell--5-col">
           <form action="/" method="post">
@@ -42,6 +43,42 @@
                   </div>
               </div>
         </form>
+
+              <table class="mdl-data-table">
+                  <tbody>
+                  <tr>
+                      <form id="planets" action="/" method="post">
+                          <input type="hidden" name="query" value=""/>
+                          <td>Gimme all the <a href="javascript:DoPost('planets');">planets!</a></td>
+                      </form>
+                      <form id="sat_mars" action="/" method="post">
+                          <input type="hidden" name="query" value=""/>
+                          <td>Gimme all the <a href="javascript:DoPost('sat_mars');">satellites of Mars!</a></td>
+                      </form>
+                  </tr>
+                  <tr>
+                      <form id="sat_saturn" action="/" method="post">
+                          <input type="hidden" name="query" value=""/>
+                          <td>Gimme all the <a href="javascript:DoPost('sat_saturn');">satellites of Saturn!</a></td>
+                      </form>
+                      <form id="sun" action="/" method="post">
+                          <input type="hidden" name="query" value=""/>
+                          <td>Gimme <a href="javascript:DoPost('sun');">everything that orbits the Sun!</a></td>
+                      </form>
+                  </tr>
+                  <tr>
+                      <form id="all_sats" action="/" method="post">
+                          <input type="hidden" name="query" value=""/>
+                          <td>Gimme all the <a href="javascript:DoPost('all_sats');">natural satellites!</a></td>
+                      </form>
+                      <form id="earth-like" action="/" method="post">
+                          <input type="hidden" name="query" value=""/>
+                          <td>Gimme all the <a href="javascript:DoPost('earth-like');">Earth-like planets!</a></td>
+                      </form>
+                  </tr>
+                  </tbody>
+              </table>
+
       </div>
       <div class="mdl-cell mdl-cell--4-col">
           <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect" style="min-height: 250px;">
@@ -157,5 +194,22 @@
 
 </style>
 
+<script>
+
+    map = {
+        'planets': 'SELECT * WHERE { ?planets <http://www.w3.org/1999/02/22-rdf-syntax-ns#type><http://ontology.projectchronos.eu/astronomy/Planet> . }',
+        'sat_mars': 'SELECT * WHERE { ?satellites <http://ontology.projectchronos.eu/astronomy/orbitsPlanet><http://ontology.projectchronos.eu/solarsystem/Mars>. }',
+        'sat_saturn': 'SELECT * WHERE { ?satellites <http://ontology.projectchronos.eu/astronomy/orbitsPlanet><http://ontology.projectchronos.eu/solarsystem/Saturn>. }',
+        'sun': 'SELECT * WHERE { ?bodies <http://ontology.projectchronos.eu/astronomy/orbiting><http://ontology.projectchronos.eu/solarsystem/Sun>. }',
+        'all_sats': 'SELECT * WHERE { ?satellites <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontology.projectchronos.eu/astronomy/Natural_satellite> . }',
+        'earth-like': 'SELECT * WHERE { ?planets <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontology.projectchronos.eu/astronomy/TerrestrialPlanet> . }'
+    };
+    function DoPost(name) {
+        var input;
+        input = document.forms[name][0];
+        input.setAttribute("value", map[name]);
+        document.forms[name].submit();
+    }
+</script>
 </body>
 </html>

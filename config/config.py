@@ -15,16 +15,19 @@ _VOCS = {
     'exploration': 'http://ontology.projectchronos.eu/exploration/'
 }
 
-_TEMP_SECRET = "***********"
+_TEMP_SECRET = "**********"
+
+_ENV = {'offline': {'_SERVICE': 'http://localhost:8080',
+                    '_DEBUG': True},
+        'online': {'_SERVICE': 'http://hypermedia.projectchronos.eu',
+                   '_DEBUG': True}}
 
 
 def set_env_variables():
     if not 'SERVER_SOFTWARE' in os.environ or os.environ['SERVER_SOFTWARE'].startswith('Development'):
-        _SERVICE = "http://localhost:8080"
-        _DEBUG = True
+        _SERVICE, _DEBUG = _ENV['offline']['_SERVICE'], _ENV['offline']['_DEBUG']
     else:
-        _SERVICE = "http://hypermedia.projectchronos.eu"
-        _DEBUG = True
+        _SERVICE, _DEBUG = _ENV['online']['_SERVICE'], _ENV['online']['_DEBUG']
 
     _REST_SERVICE = _SERVICE + "/database/cots/"
     _COMPONENTS_URL = _SERVICE + "/database/cots/store"
@@ -33,6 +36,8 @@ def set_env_variables():
     return _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG
 
 _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG = set_env_variables()
+
+_ARTICLES_API = [_SERVICE + "/visualize/articles/?api=true", _SERVICE + "/visualize/articles/?api=true&url="]
 
 _CRAWLING_POST = {'local': 'http://localhost:8080/database/crawling/store',
                   'remote': 'http://hypermedia.projectchronos.eu/database/crawling/store'}
