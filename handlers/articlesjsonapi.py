@@ -51,7 +51,7 @@ class Articles(webapp2.RequestHandler):
                 articles, more, next_bookmark = Articles._lookup(bookmark, keyword)
                 bookmark_parameter = '&bookmark={}'.format(next_bookmark) if next_bookmark else ''
                 listed = {'articles': [webres.dump_to_json() for webres in articles],
-                          'next': '{}/visualize/articles/?api=true&bookmark={}'.format(_SERVICE, bookmark_parameter)}
+                          'next': '{}/visualize/articles/?api=true{}'.format(_SERVICE, bookmark_parameter)}
                 saved = (next_bookmark, listed)
                 memcache.add(key=mkey, value=saved)
             else:
