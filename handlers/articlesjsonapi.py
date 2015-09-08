@@ -4,6 +4,9 @@ import json
 
 from google.appengine.api import memcache
 from google.appengine.ext.webapp import template
+from google.appengine.ext import ndb
+from datastore.models import WebResource, Indexer
+
 
 from config.config import _SERVICE, _PATH
 
@@ -40,8 +43,8 @@ class Articles(webapp2.RequestHandler):
             )
         else:
             # serve articles
-            bookmark = self.request.get('bookmark')
-            keyword = self.request.get('keyword')
+            bookmark = self.request.get('bookmark', default_value=None)
+            keyword = self.request.get('keyword', default_value=None)
             mkey = Articles._memkey(bookmark, keyword)
             saved = memcache.get(key=mkey)
             if saved is None:
@@ -68,11 +71,7 @@ class Articles(webapp2.RequestHandler):
 
     @staticmethod
     def _lookup(bookmark, keyword):
-        from google.appengine.ext import ndb
-        from datastore.models import WebResource, Indexer
-
         # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
-
         page_size = 25
         cursor = None
         if bookmark:
