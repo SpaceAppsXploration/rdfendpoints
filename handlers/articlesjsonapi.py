@@ -1,6 +1,7 @@
 import os
 import webapp2
 import json
+from urllib import urlencode
 
 from google.appengine.api import memcache
 from google.appengine.ext.webapp import template
@@ -66,7 +67,16 @@ class Articles(webapp2.RequestHandler):
                 )
             # return template
             path = os.path.join(_PATH, 'articles.html')
-            return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
+            next_parameters = None
+            print next_bookmark
+            print keyword
+            if next_bookmark:
+                if keyword:
+                    next_parameters = urlencode({'bookmark': next_bookmark,
+                                                 'keyword':  keyword})
+                else:
+                    next_parameters = urlencode({'bookmark': next_bookmark})
+            return self.response.out.write(template.render(path, {'next': next_parameters,
                                                                   'articles': listed}))
 
     @staticmethod
