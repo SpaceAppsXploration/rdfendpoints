@@ -15,8 +15,6 @@ class Scrawler(webapp2.RequestHandler):
     """
     A very basic crawler for RSS links
     """
-    queue = []
-
     def get(self):
         """
         Handler for the cronjob: /cron/startcrawling
