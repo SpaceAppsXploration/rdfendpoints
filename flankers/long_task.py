@@ -7,6 +7,33 @@ from google.appengine.api import memcache
 __author__ = 'Lorenzo'
 
 
+def store_feed(e):
+    """
+    store a single entry from the feedparser
+    :param e: the entry
+    :return: if succeed the stored key else None
+    """
+    query = WebResource.query().filter(WebResource.url == e["link"])
+    if query.count() == 0:
+        print "STORING: " + e["link"]
+        try:
+            if 'summary' in e:
+                s, t = BeautifulSoup(e['summary'], "lxml"), BeautifulSoup(e['title'], "lxml")
+                e['summary'], e['title'] = s.get_text(), t.get_text()
+            else:
+                t = BeautifulSoup(e['title'], "lxml")
+                e['summary'], e['title'] = None , t.get_text()
+            k = WebResource.store_feed(e)
+            print "STORED: " + str(k.key)
+            return k
+        except Exception as e:
+            print "Cannot Store: " + str(e) + e['link']
+            return None
+    else:
+        print "Resource already stored"
+        return None
+
+
 class storeFeeds(longtask.LongRunningTaskHandler):
     def execute_task(self, *args):
         from flankers.Scrawler import Scrawler
@@ -25,21 +52,10 @@ class storeFeeds(longtask.LongRunningTaskHandler):
         entries = Scrawler.read_feed(l)
         if entries:
             for entry in entries:
-                # time.sleep(0.1)
-                query = WebResource.query().filter(WebResource.url == entry["link"])
-                if query.count() == 0:
-                    print "STORING: " + entry["link"]
-                    try:
-                        if 'summary' in entry:
-                            s, t = BeautifulSoup(entry['summary'], "lxml"), BeautifulSoup(entry['title'], "lxml")
-                            entry['summary'], entry['title'] = s.get_text(), t.get_text()
-                        else:
-                            t = BeautifulSoup(entry['title'], "lxml")
-                            entry['summary'], entry['title'] = None , t.get_text()
-                        i = WebResource.store_feed(entry)
-                        print "STORED: " + str(i)
-                    except Exception as e:
-                        print "Cannot Store: " + str(e) + entry['link']
+                #
+                # Store feed
+                #
+                store_feed(entry)
             memcache.set('RSS_FEEDS_CACHE', _RSS_FEEDS_CACHE)
             return None
 
@@ -59,3 +75,4 @@ class storeIndexer(longtask.LongRunningTaskHandler):
                 index = Indexer(keyword=l.strip(), webres=key)
                 index.put()
                 print "indexing stored: " + item.url + ">" + l
+
