@@ -11,9 +11,6 @@ import webapp2
 from config.config import _DEBUG
 
 
-# Adapted from http://tuhrig.de/writing-an-online-scraper-on-google-app-engine-python/
-
-
 class Scrawler(webapp2.RequestHandler):
     """
     A very basic crawler for RSS links
