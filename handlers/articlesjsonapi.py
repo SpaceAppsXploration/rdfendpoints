@@ -1,9 +1,13 @@
 import os
 import webapp2
 import json
+from urllib import urlencode
 
 from google.appengine.api import memcache
 from google.appengine.ext.webapp import template
+from google.appengine.ext import ndb
+from datastore.models import WebResource, Indexer
+
 
 from config.config import _SERVICE, _PATH
 
@@ -11,11 +15,18 @@ __author__ = 'Lorenzo'
 
 
 class Articles(webapp2.RequestHandler):
-    def get(self):
-        from google.appengine.ext import ndb
-        from datastore.models import WebResource
+    @staticmethod
+    def _memkey(bookmark, keyword):
+        '''
+        :param bookmark: None or a websafe cursor from NDB
+        :param keyword: None or a keyword string from Chronos
+        :return: A string key for memcache
+        '''
+        part0 = bookmark if bookmark else 'frombeginning'
+        part1 = keyword if keyword else 'nofilter'
+        return 'Articles_{}_{}'.format(part0, part1)
 
-        # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
+    def get(self):
 
         if self.request.get("api") and self.request.get("url"):
             # serve keywords for a given article's url
@@ -33,31 +44,19 @@ class Articles(webapp2.RequestHandler):
             )
         else:
             # serve articles
-            if not memcache.get(key="WebResource_all"):
-                query = WebResource.query()
-                memcache.add(key="WebResource_all", value=query)
+            bookmark = self.request.get('bookmark', default_value=None)
+            keyword = self.request.get('keyword', default_value=None)
+            mkey = Articles._memkey(bookmark, keyword)
+            saved = memcache.get(key=mkey)
+            if saved is None:
+                articles, more, next_bookmark = Articles._lookup(bookmark, keyword)
+                bookmark_parameter = '&bookmark={}'.format(next_bookmark) if next_bookmark else ''
+                listed = {'articles': [webres.dump_to_json() for webres in articles],
+                          'next': '{}/visualize/articles/?api=true{}'.format(_SERVICE, bookmark_parameter)}
+                saved = (next_bookmark, listed)
+                memcache.add(key=mkey, value=saved)
             else:
-                query = memcache.get(key="WebResource_all")
-
-            page_size = 25
-            cursor = None
-            bookmark = self.request.get('bookmark')
-            if bookmark:
-                cursor = ndb.Cursor.from_websafe_string(bookmark)
-
-            articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
-
-            next_bookmark = None
-            if more:
-                next_bookmark = next_cursor.to_websafe_string()
-            print next_bookmark
-
-            mkey = "Articles_" + next_bookmark
-            if not memcache.get(key=mkey):
-                listed = {'articles': [webres.dump_to_json() for webres in articles], 'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
-                memcache.add(key=mkey, value=listed)
-            else:
-                listed = memcache.get(key=mkey)
+                next_bookmark, listed = saved
 
             if self.request.get("api"):
                 # return JSON
@@ -68,5 +67,31 @@ class Articles(webapp2.RequestHandler):
                 )
             # return template
             path = os.path.join(_PATH, 'articles.html')
-            return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
+            next_parameters = None
+            print next_bookmark
+            print keyword
+            if next_bookmark:
+                if keyword:
+                    next_parameters = urlencode({'bookmark': next_bookmark,
+                                                 'keyword':  keyword})
+                else:
+                    next_parameters = urlencode({'bookmark': next_bookmark})
+            return self.response.out.write(template.render(path, {'next': next_parameters,
                                                                   'articles': listed}))
+
+    @staticmethod
+    def _lookup(bookmark, keyword):
+        # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
+        page_size = 25
+        cursor = None
+        if bookmark:
+            cursor = ndb.Cursor.from_websafe_string(bookmark)
+        if keyword is not None: # Page through articles with the specified keyword
+            refs, next_cursor, more = Indexer.query(ndb.GenericProperty('keyword') == keyword).fetch_page(page_size, start_cursor=cursor)
+            articles = ndb.get_multi(ref.webres for ref in refs)
+        else:  # Page through all articles
+            articles, next_cursor, more = WebResource.query().fetch_page(page_size, start_cursor=cursor)
+        next_bookmark = None
+        if more:
+            next_bookmark = next_cursor.to_websafe_string()
+        return articles, more, next_bookmark

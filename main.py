@@ -65,7 +65,6 @@ class Hello(webapp2.RequestHandler):
             return self.response.out.write(template.render(path, params))
         return self.response.set_status(405)
 
-
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/visualize/articles/', Articles),

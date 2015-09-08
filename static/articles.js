@@ -24,3 +24,9 @@ $('#autocomplete .typeahead').typeahead(null, {
   name: 'keywords',
   source: keywords
 });
+
+function typeahead_select(jquery_event, choice) {
+  window.location.href = "/visualize/articles/?keyword=" + encodeURIComponent(choice);
+}
+
+$( '.typeahead' ).on('typeahead:select', typeahead_select);
