@@ -35,7 +35,7 @@ def return_wikipedia_term(res):
     if res['spotted']:
         for s in [s['spot'] for s in res['value']['spots']]:
             r = TagMeService.retrieve_taggings(s.encode('utf-8'), method='POST')
-            if len(r) != 0:
+            if len(r['annotations']) != 0:
                 for n in r['annotations']:
                     title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
                     rst.append(title)
@@ -56,7 +56,7 @@ def lookup_in_taxonomy(results):
             # print base_url.format(res)
             resource = retrieve_json(base_url.format(res))
         except Exception as e:
-            print Exception('Cannot fetch taxonomy: ' + res + ' ' + str(e))
+            print Exception('Cannot fetch taxonomy: ' + res.encode('ascii', 'replace') + ' ' + str(e))
 
         if resource and 'relatedConcepts' in resource.keys():
             for c in resource['relatedConcepts']:
