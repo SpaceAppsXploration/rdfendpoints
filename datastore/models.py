@@ -209,6 +209,45 @@ class WebResource(ndb.Model):
 
             return i
 
+    @classmethod
+    def store_tweet(cls, twt):
+        """
+        Store a Tweet, its media and its containing link from the Twitter API
+        """
+        url = 'https://twitter.com/' + str(twt.GetUser().screen_name) + '/status/' + str(twt.GetId())
+        try:
+            media = twt.media[0]['media_url'] if isinstance(twt.media, list) and len(twt.media) != 0 else None
+        except Exception:
+            media = twt.media['media_url'] if isinstance(twt.media, dict) and 'media_url' in twt.media.keys() else None
+        except:
+            media = None
+
+        link = twt.urls[0].expanded_url if len(twt.urls) != 0 else None
+        text = twt.text if len(twt.text) > 35 else None
+        import time
+        published = str(twt._created_at)[:19] + str(twt._created_at)[25:]
+        published = time.strptime(published, '%a %b %d %H:%M:%S %Y')
+        published = datetime(*published[:6])
+
+        if text:
+            if cls.query().filter(cls.url == url).count() == 0:
+                # store tweet
+                w = WebResource(url=url, published=published, title=str(twt._id), abstract=text)
+                k = w.put()
+                print "Tweet stored" + str(k)
+                if media:
+                    # store image or video as child
+                    m = WebResource(url=media, published=published, parent=k, title='', abstract='')
+                    m.put()
+                    print "media stored"
+                if link:
+                    # store contained link as child
+                    l = WebResource(url=link, published=published, parent=k, title='', abstract='')
+                    l.put()
+                    print "link stored"
+
+                return w
+
     def dump_to_json(self):
         """
         make property values of an instance JSON serializable
