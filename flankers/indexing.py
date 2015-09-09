@@ -10,6 +10,7 @@ __author__ = 'Lorenzo'
 class Indexing(webapp2.RequestHandler):
     """
     A very basic crawler for RSS links
+    #TO-DO: implement memecache for stored items not yet indexed
     """
 
     def get(self):

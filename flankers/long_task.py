@@ -91,6 +91,7 @@ class storeTweets(longtask.LongRunningTaskHandler):
                 self.i += 1
         print "Total tweets: " + str(self.i)
 
+
 class storeIndexer(longtask.LongRunningTaskHandler):
     def execute_task(self, *args):
         item, key = args
