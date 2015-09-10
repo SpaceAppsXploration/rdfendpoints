@@ -193,7 +193,7 @@ class WebResource(ndb.Model):
     @classmethod
     def store_feed(cls, entry):
         """
-        Store RSS-feed entry coming from feedparser, and related index entries
+        Store RSS-feed entry coming from feedparser
         """
         if cls.query().filter(cls.url == str(entry['link'])).count() == 0:
             # define the WebResource
@@ -205,7 +205,21 @@ class WebResource(ndb.Model):
             item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
 
             item.abstract = ' '.join(entry['summary'].strip().encode('ascii', 'replace').split()) if entry['summary'] is not None else ''
+
             i = item.put()
+
+            try:
+                if len(entry.media_content) != 0:
+                    for obj in entry.media_content:
+                        # store image or video as child
+                        if cls.query().filter(cls.url == obj.url).count() == 0:
+                            m = WebResource(url=obj.url, published=item.published, parent=i, title='', abstract='')
+                            m.put()
+                            print "media stored"
+            except:
+                pass
+
+
 
             return i
 
@@ -236,15 +250,17 @@ class WebResource(ndb.Model):
                 k = w.put()
                 print "Tweet stored" + str(k)
                 if media:
-                    # store image or video as child
-                    m = WebResource(url=media, published=published, parent=k, title='', abstract='')
-                    m.put()
-                    print "media stored"
+                    if cls.query().filter(cls.url == media).count() == 0:
+                        # store image or video as child
+                        m = WebResource(url=media, published=published, parent=k, title='', abstract='')
+                        m.put()
+                        print "media stored"
                 if link:
-                    # store contained link as child
-                    l = WebResource(url=link, published=published, parent=k, title='', abstract='')
-                    l.put()
-                    print "link stored"
+                    if cls.query().filter(cls.url == link).count() == 0:
+                        # store contained link as child
+                        l = WebResource(url=link, published=published, parent=k, title='', abstract='')
+                        l.put()
+                        print "link stored"
 
                 return w
 
