@@ -27,7 +27,7 @@ def store_feed(e):
             print "STORED: " + str(k.key)
             return k
         except Exception as e:
-            print "Cannot Store: " + str(e) + e['link']
+            print "Cannot Store: " + str(e)
             return None
     else:
         print "Resource already stored"
