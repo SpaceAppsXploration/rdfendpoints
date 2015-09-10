@@ -21,12 +21,13 @@
             {{ article.title }} -
             {% endif %}
 
-            {% if article.keywords|length != 0 %}
-                <span style="color:#ff846d"><a href="{{ article.keywords }}"> check keywords </a> - </span>
-            {% else %}
-            <span style="color:#393eff"> No keyword: newsfeed </span>
+            <span style="color:#ff846d"><a href="{{ article.keywords }}"> check keywords </a> - </span>
+
+            {% if article.published != None %}
+            <span>{{ article.published }} -</span>
             {% endif %}
-            - <a href="{{ article.url }}">Go to ></a></li>
+        
+            <a href="{{ article.url }}">Go to ></a></li>
     {% endfor %}
     </ol>
 
