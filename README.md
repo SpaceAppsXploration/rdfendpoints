@@ -14,8 +14,10 @@ Check the [repo Issues](https://github.com/SpaceAppsXploration/rdfendpoints/issu
 
 Powered by: 
 
-![PyCharm](https://www.jetbrains.com/pycharm/docs/logo_pycharm.png)
-by [JetBrains](https://www.jetbrains.com)
+<img src="https://www.jetbrains.com/pycharm/docs/logo_pycharm.png" height="50" width="100" >
+<img src="http://www.faviki.com/img/dbpedia_powered.gif" height="50" width="75" >
+<img src="http://acube.di.unipi.it/wp-content/uploads/2011/07/powered_by_tagme.png" height="50" width="100" >
+<br/><br/>
 
 ## About
 This repo is part of the Chronos' Cloud:
