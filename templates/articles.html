@@ -15,11 +15,9 @@
 
     <ol>
     {% for article in articles.articles %}
-        <li>{{ article.article.title }} -
+        <li>{{ article.title }} -
             {% if article.keywords.length != 0 %}
-                {% for k in article.keywords|slice:":5" %}
-                    <span style="color:#ff846d"> {{ k }} - </span>
-                {% endfor %}
+                <span style="color:#ff846d"><a href="{{ article.keywords }}"> check keywords </a> - </span>
             {% else %}
             <span style="color:#393eff"> No keyword: newsfeed </span>
             {% endif %}
