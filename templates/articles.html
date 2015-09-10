@@ -15,7 +15,12 @@
 
     <ol>
     {% for article in articles.articles %}
-        <li>{{ article.title }} -
+        <li>{% if article.title.length < 3 %}
+            Twitter Img or Link -
+            {% else %}
+            {{ article.title }} -
+            {% endif %}
+
             {% if article.keywords.length != 0 %}
                 <span style="color:#ff846d"><a href="{{ article.keywords }}"> check keywords </a> - </span>
             {% else %}
