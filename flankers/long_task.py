@@ -24,7 +24,7 @@ def store_feed(e):
                 t = BeautifulSoup(e['title'], "lxml")
                 e['summary'], e['title'] = None , t.get_text()
             k = WebResource.store_feed(e)
-            print "STORED: " + str(k.key)
+            print "STORED: " + str(k)
             return k
         except Exception as e:
             print "Cannot Store: " + str(e)
