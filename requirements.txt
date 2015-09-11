@@ -1,3 +1,4 @@
+unidecode
 feedparser==5.2.1
 BeautifulSoup4==4.4.0
 six

@@ -198,7 +198,13 @@ class WebResource(ndb.Model):
         if cls.query().filter(cls.url == str(entry['link'])).count() == 0:
             # define the WebResource
             item = WebResource()
-            item.title = " ".join(entry['title'].encode('ascii', 'replace').split())
+            from unidecode import unidecode
+            try:
+                title = unidecode(" ".join(entry['title'].split()))
+                item.title = " ".join(title.split())
+            except:
+                item.title = " ".join(entry['title'].encode('ascii', 'replace').split())
+
             print item.title
             item.url = str(entry['link'])
             item.stored = datetime(*localtime()[:6])
@@ -210,16 +216,15 @@ class WebResource(ndb.Model):
 
             try:
                 if len(entry.media_content) != 0:
+                    print "has media"
                     for obj in entry.media_content:
                         # store image or video as child
                         if cls.query().filter(cls.url == obj.url).count() == 0:
-                            m = WebResource(url=obj.url, published=item.published, parent=i, title='', abstract='')
+                            m = WebResource(url=obj.url, published=item.published, parent=i.get(), title='', abstract='')
                             m.put()
                             print "media stored"
             except:
                 pass
-
-
 
             return i
 
