@@ -26,7 +26,7 @@ Fast and Accurate Annotation of Short Texts with Wikipedia Pages. IEEE Software 
 ## About
 This repo is part of the Chronos' Cloud:
 * Link  | Repository  
-* [Homepage](http://www.projectchronos.eu)  | [clouService](https://github.com/SpaceAppsXploration/clouService)
+* [Homepage](http://www.projectchronos.eu)  | [cloudService](https://github.com/SpaceAppsXploration/clouService)
 * [SPARQL and Hypermedia](http://hypermedia.projectchronos.eu) | [rdfendpoints](https://github.com/SpaceAppsXploration/rdfendpoints)
 * [Scientific & Technical Information](http://taxonomy.projectchronos.eu)  | [pramantha-nodejs-backend](https://github.com/SpaceAppsXploration/pramantha-nodejs-backend)
 * [RDF Vocabularies](http://ontology.projectchronos.eu)  | [ontologies](https://github.com/SpaceAppsXploration/ontologies) and [RDFvocab](https://github.com/SpaceAppsXploration/RDFvocab)  
