@@ -200,8 +200,7 @@ class WebResource(ndb.Model):
             item = WebResource()
             from unidecode import unidecode
             try:
-                title = unidecode(" ".join(entry['title'].split()))
-                item.title = " ".join(title.split())
+                item.title = unidecode(" ".join(entry['title'].split()))
             except:
                 item.title = " ".join(entry['title'].encode('ascii', 'replace').split())
 
