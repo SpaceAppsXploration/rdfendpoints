@@ -14,7 +14,7 @@ class Articles(webapp2.RequestHandler):
     """
     Serve the Articles API
     GET /visualize/articles/?
-    :param api: if true serves JSON
+    :param api: if set ot true serves JSON
     :param bookmark: holds the key for pagination
     :param url: if present serves the keywords related to a url
     """
@@ -24,7 +24,10 @@ class Articles(webapp2.RequestHandler):
 
         # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
 
-        if self.request.get("api") and self.request.get("url"):
+        if self.request.get("api") \
+                and bool(self.request.get("api")) == True \
+                and self.request.get("url"):
+
             # serve keywords for a given article's url
             self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Content-Type'] = 'application/json'
