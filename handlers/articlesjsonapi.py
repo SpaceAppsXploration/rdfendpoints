@@ -11,6 +11,13 @@ __author__ = 'Lorenzo'
 
 
 class Articles(webapp2.RequestHandler):
+    """
+    Serve the Articles API
+    GET /visualize/articles/?
+    :param api: if true serves JSON
+    :param bookmark: holds the key for pagination
+    :param url: if present serves the keywords related to a url
+    """
     def get(self):
         from google.appengine.ext import ndb
         from datastore.models import WebResource
@@ -43,6 +50,7 @@ class Articles(webapp2.RequestHandler):
             cursor = None
             bookmark = self.request.get('bookmark')
             if bookmark:
+                # if cookmark is set, serve the part of the cursor from the given bookamrk plus the page size
                 cursor = ndb.Cursor.from_websafe_string(bookmark)
 
             articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
@@ -53,6 +61,7 @@ class Articles(webapp2.RequestHandler):
             print next_bookmark
 
             if next_bookmark:
+                # serve the data with the link to the next bookmark
                 mkey = "Articles_" + next_bookmark
                 if not memcache.get(key=mkey):
                     listed = {'articles': [webres.dump_to_json()
@@ -62,20 +71,20 @@ class Articles(webapp2.RequestHandler):
                 else:
                     listed = memcache.get(key=mkey)
             else:
+                # last page, serve the page and the next bookmark is None
                 listed = {'articles': [webres.dump_to_json()
                                        for webres in articles],
                           'next': None
-                         }
-
+                          }
 
             if self.request.get("api"):
-                # return JSON
+                # param 'api' is True, return JSON
                 self.response.headers['Access-Control-Allow-Origin'] = '*'
                 self.response.headers['Content-Type'] = 'application/json'
                 return self.response.out.write(
                     json.dumps(listed)
                 )
-            # return template
+            # param 'api' is not set, return template
             path = os.path.join(_PATH, 'articles.html')
             return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
                                                                   'articles': listed}))
