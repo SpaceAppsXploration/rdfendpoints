@@ -24,7 +24,7 @@ class Articles(webapp2.RequestHandler):
             if not memcache.get(key="Keyword_" + self.request.get("url")):
                 q = WebResource.query().filter(WebResource.url == self.request.get("url")).fetch(1)
                 response = q[0].get_indexers() if len(q) == 1 else []
-                memcache.add(key="Keyword_for_" + self.request.get("url"), value=response)
+                memcache.add(key="Keyword_for_" + self.request.get("url"), value=response, time=15000)
             else:
                 response = memcache.get(key="Keyword_for_" + self.request.get("url"))
 
@@ -35,7 +35,7 @@ class Articles(webapp2.RequestHandler):
             # serve articles
             if not memcache.get(key="WebResource_all"):
                 query = WebResource.query()
-                memcache.add(key="WebResource_all", value=query)
+                memcache.add(key="WebResource_all", value=query, time=18000)
             else:
                 query = memcache.get(key="WebResource_all")
 
@@ -52,12 +52,21 @@ class Articles(webapp2.RequestHandler):
                 next_bookmark = next_cursor.to_websafe_string()
             print next_bookmark
 
-            mkey = "Articles_" + next_bookmark
-            if not memcache.get(key=mkey):
-                listed = {'articles': [webres.dump_to_json() for webres in articles], 'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
-                memcache.add(key=mkey, value=listed)
+            if next_bookmark:
+                mkey = "Articles_" + next_bookmark
+                if not memcache.get(key=mkey):
+                    listed = {'articles': [webres.dump_to_json()
+                                           for webres in articles],
+                              'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
+                    memcache.add(key=mkey, value=listed, time=15000)
+                else:
+                    listed = memcache.get(key=mkey)
             else:
-                listed = memcache.get(key=mkey)
+                listed = {'articles': [webres.dump_to_json()
+                                       for webres in articles],
+                          'next': None
+                         }
+
 
             if self.request.get("api"):
                 # return JSON
