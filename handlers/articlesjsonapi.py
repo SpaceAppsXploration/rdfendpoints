@@ -1,6 +1,7 @@
 import os
 import webapp2
 import json
+import logging
 
 from google.appengine.api import memcache
 from google.appengine.ext.webapp import template
@@ -14,7 +15,7 @@ class Articles(webapp2.RequestHandler):
     """
     Serve the Articles API
     GET /visualize/articles/?
-    :param api: if set ot true serves JSON
+    :param api: if set to true serves JSON
     :param bookmark: holds the key for pagination
     :param url: if present serves the keywords related to a url
     """
@@ -24,10 +25,7 @@ class Articles(webapp2.RequestHandler):
 
         # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
 
-        if self.request.get("api") \
-                and bool(self.request.get("api")) == True \
-                and self.request.get("url"):
-
+        if self.request.get("url"):
             # serve keywords for a given article's url
             self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Content-Type'] = 'application/json'
@@ -53,7 +51,7 @@ class Articles(webapp2.RequestHandler):
             cursor = None
             bookmark = self.request.get('bookmark')
             if bookmark:
-                # if cookmark is set, serve the part of the cursor from the given bookamrk plus the page size
+                # if bookmark is set, serve the part of the cursor from the given bookamrk plus the page size
                 cursor = ndb.Cursor.from_websafe_string(bookmark)
 
             articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
@@ -81,13 +79,13 @@ class Articles(webapp2.RequestHandler):
                           }
 
             if self.request.get("api"):
-                # param 'api' is True, return JSON
+                # param 'api' is true, return JSON
                 self.response.headers['Access-Control-Allow-Origin'] = '*'
                 self.response.headers['Content-Type'] = 'application/json'
                 return self.response.out.write(
                     json.dumps(listed)
                 )
-            # param 'api' is not set, return template
+            # param 'api' is not set or false, return template
             path = os.path.join(_PATH, 'articles.html')
             return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
                                                                   'articles': listed}))
