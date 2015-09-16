@@ -48,10 +48,13 @@ def lookup_in_taxonomy(results):
     :param results: a list of wikipedia slugs
     :return: a set of related concepts to the slugs
     """
+    from unidecode import unidecode
+
     base_url = "http://taxonomy.projectchronos.eu/space/dbpediadocs/{}"
     labels = []
     resource = None
     for res in results:
+        res = unidecode(res)
         try:
             # print base_url.format(res)
             resource = retrieve_json(base_url.format(res))
