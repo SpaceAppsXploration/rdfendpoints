@@ -37,8 +37,11 @@ def return_wikipedia_term(res):
             r = TagMeService.retrieve_taggings(s.encode('utf-8'), method='POST')
             if len(r['annotations']) != 0:
                 for n in r['annotations']:
-                    title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
-                    rst.append(title)
+                    if 'title' in n.keys():
+                        title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
+                        rst.append(title)
+                    else:
+                        print "Cannot find title in annotations: " + str(n)
     return rst
 
 
