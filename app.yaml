@@ -25,6 +25,10 @@ handlers:
 - url: /cron/storetweets
   script: flankers.tweetStore.application
 
+- url: /remoteapi
+  script: google.appengine.ext.remote_api.handler.application
+  login: admin
+
 - url: .*
   script: main.application
 
@@ -37,4 +41,4 @@ libraries:
   version: latest
 
 builtins:
-- appstats: on
+- remote_api: on
