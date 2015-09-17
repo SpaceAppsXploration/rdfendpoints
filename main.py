@@ -37,6 +37,7 @@ from handlers.sparql import Querying
 from handlers.componentjsonapi import Endpoints
 from handlers.articlesjsonapi import Articles
 from handlers.servicehandlers import Testing, Crawling
+from handlers.dataN3 import PublishWebResources, PublishConcepts
 
 #
 # hydra handlers loaded from hydra/
@@ -75,6 +76,8 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/hydra/vocab', HydraVocabulary),
     webapp2.Route('/hydra/contexts/<name:\w+.>', PublishContexts),
     webapp2.Route('/hydra/spacecraft/<name:\w*>', PublishEndpoints),
+    webapp2.Route('/data/webresource/<key:[a-zA-Z0-9-_=]+>', PublishWebResources),
+    webapp2.Route('/data/concept/<label:[a-z\+]+>', PublishConcepts),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 
