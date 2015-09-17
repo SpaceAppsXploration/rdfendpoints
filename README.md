@@ -22,6 +22,9 @@ Paolo Ferragina, Ugo Scaiella<br/>
 TagMe research paper:<br/>
 Fast and Accurate Annotation of Short Texts with Wikipedia Pages. IEEE Software 29(1): 70-75 (2012)
 <br/><br/>
+Rdf-lib Translator:<br/>
+University of Munchen, [Alex Stolz, Bene Rodriguez-Castro, Martin Hepp](http://arxiv.org/abs/1312.4704)
+<br/><br/>
 
 ## About
 This repo is part of the Chronos' Cloud:
