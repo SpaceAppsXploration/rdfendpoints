@@ -278,10 +278,10 @@ class WebResource(ndb.Model):
             # If this is a key, you might want to grab the actual model.
             if prop == 'url':
                 result[prop] = value
-                result['keywords'] = _ARTICLES_API[1] + value
+                result['keywords_url'] = _ARTICLES_API[1] + value
             if isinstance(self, ndb.Model):
                 if isinstance(value, datetime):
-                    result[prop] = value.strftime("%d %m %Y")
+                    result[prop] = value.isoformat()
                     continue
                 elif value is None:
                     result[prop] = None
