@@ -14,7 +14,7 @@ __author__ = 'Lorenzo'
 class Articles(webapp2.RequestHandler):
     """
     Serve the Articles API
-    GET /visualize/articles/?
+    GET /articles/?
     :param api: if set to true serves JSON
     :param bookmark: holds the key for pagination
     :param url: if present serves the keywords related to a url
@@ -67,7 +67,7 @@ class Articles(webapp2.RequestHandler):
                 if not memcache.get(key=mkey):
                     listed = {'articles': [webres.dump_to_json()
                                            for webres in articles],
-                              'next': _SERVICE + '/visualize/articles/?api=true&bookmark=' + next_bookmark}
+                              'next': _SERVICE + '/articles/?api=true&bookmark=' + next_bookmark}
                     memcache.add(key=mkey, value=listed, time=15000)
                 else:
                     listed = memcache.get(key=mkey)
