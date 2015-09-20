@@ -78,13 +78,13 @@ class HTTPendpointsTest(unittest.TestCase):
 
     def test_articles(self):
         """
-    Test the NL API: /visualize/articles/?api=true
+    Test the NL API: /articles/?api=true
     """
         print "Running test_articles"
         import urllib
         env = self.test_env
 
-        base_url = _ENV[env]['_SERVICE'] + "/visualize/articles/"
+        base_url = _ENV[env]['_SERVICE'] + "/articles/"
 
         first = get_curling(base_url, {'api': 'true'})
         first = test_integrity(first)
