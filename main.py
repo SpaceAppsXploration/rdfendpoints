@@ -69,7 +69,7 @@ class Hello(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
-    webapp2.Route('/visualize/articles/', Articles),
+    webapp2.Route('/articles/', Articles),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
     webapp2.Route('/sparql', Querying),
