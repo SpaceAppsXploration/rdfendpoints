@@ -61,22 +61,15 @@ class Articles(webapp2.RequestHandler):
                 next_bookmark = next_cursor.to_websafe_string()
             print next_bookmark
 
-            if next_bookmark:
-                # serve the data with the link to the next bookmark
-                mkey = "Articles_" + next_bookmark
-                if not memcache.get(key=mkey):
-                    listed = {'articles': [webres.dump_to_json()
-                                           for webres in articles],
-                              'next': _SERVICE + '/articles/?api=true&bookmark=' + next_bookmark}
-                    memcache.add(key=mkey, value=listed, time=15000)
-                else:
-                    listed = memcache.get(key=mkey)
-            else:
-                # last page, serve the page and the next bookmark is None
+            # serve the data with the link to the next bookmark
+            mkey = "Articles_" + next_bookmark if next_bookmark else str("null")
+            if not memcache.get(key=mkey):
                 listed = {'articles': [webres.dump_to_json()
                                        for webres in articles],
-                          'next': None
-                          }
+                          'next': _SERVICE + '/articles/?api=true&bookmark=' + next_bookmark if next_bookmark else None}
+                memcache.add(key=mkey, value=listed, time=15000)
+            else:
+                listed = memcache.get(key=mkey)
 
             if self.request.get("api"):
                 # param 'api' is true, return JSON
