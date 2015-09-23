@@ -15,63 +15,6 @@ __author__ = 'Lorenzo'
 _VERSION = "04"
 
 
-class Articles(webapp2.RequestHandler):
-    """
-    Serve the Articles API
-    GET /articles/?
-    :param api: if set to true serves JSON
-    :param bookmark: holds the key for pagination
-    :param url: if present serves the keywords related to a url
-    :param keyword: if present serves articles by keyword
-    """
-    def get(self):
-
-
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-
-        if self.request.get("url"):
-            # serve keywords for a given article's url
-            self.response.headers['Content-Type'] = 'application/json'
-            response = memcache_keywords(self.request.get("url"))
-            return self.response.out.write(
-                json.dumps(response)
-            )
-        elif self.request.get("keyword"):
-            pass
-        else:
-            # serve articles
-            query = memcache_webresource_query()
-
-            # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
-            page_size = 25
-            cursor = None
-            next_bookmark = None
-            bookmark = self.request.get('bookmark')
-            if bookmark:
-                # if bookmark is set, serve the part of the cursor from the given bookamrk plus the page size
-                cursor = ndb.Cursor.from_websafe_string(bookmark)
-
-            articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
-
-            # assign the key for the next cursor
-            if more:
-                next_bookmark = next_cursor.to_websafe_string()
-
-            # serve the data with the link to the next bookmark
-            listed = memcache_articles_pagination(articles, next_bookmark)
-
-            if self.request.get("api") == 'true':
-                # param 'api' is true, return JSON
-                self.response.headers['Content-Type'] = 'application/json'
-                return self.response.out.write(
-                    json.dumps(listed)
-                )
-            # param 'api' is not set or false, return template
-            path = os.path.join(_PATH, 'articles.html')
-            return self.response.out.write(template.render(path, {'bookmark': next_bookmark,
-                                                                  'articles': listed}))
-
-
 def memcache_webresource_query():
     """
     Get or Set in the memcache the full query of WebResources.
@@ -127,7 +70,7 @@ def memcache_articles_pagination(query, bkmark):
 class ArticlesJSONv1(webapp2.RequestHandler):
     """
     GET /articles/v04/<name>
-    
+
     Serve the Articles API.
     See https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API
 
