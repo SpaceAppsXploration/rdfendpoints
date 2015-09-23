@@ -125,6 +125,14 @@ def memcache_articles_pagination(query, bkmark):
 
 
 class ArticlesJSONv1(webapp2.RequestHandler):
+    """
+    GET /articles/v04/<name>
+    
+    Serve the Articles API.
+    See https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API
+
+    :param name: define namespace of the request (getting articles or keywords), can be a void string
+    """
     def get(self, name):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Content-Type'] = 'application/json'
