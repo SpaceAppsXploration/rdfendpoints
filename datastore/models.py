@@ -270,6 +270,7 @@ class WebResource(ndb.Model):
         make property values of an instance JSON serializable
         """
         result = {
+            "uuid": self.key.id()
         }
         for prop, value in self.to_dict().items():
             # If this is a key, you might want to grab the actual model.
