@@ -1,15 +1,12 @@
-#!/usr/bin/python
-# coding=utf-8
-
-__author__ = 'lorenzo'
-
 import json
 from time import localtime
 from datetime import datetime
 
 from google.appengine.ext import ndb
 
-from config.config import _ARTICLES_API
+from config.config import articles_api_version
+
+__author__ = 'lorenzo'
 
 
 class Component(ndb.Model):
@@ -278,7 +275,7 @@ class WebResource(ndb.Model):
             # If this is a key, you might want to grab the actual model.
             if prop == 'url':
                 result[prop] = value
-                result['keywords_url'] = _ARTICLES_API[1] + value
+                result['keywords_url'] = articles_api_version("04") + '?url=' + value
             if isinstance(self, ndb.Model):
                 if isinstance(value, datetime):
                     result[prop] = value.isoformat()
@@ -293,13 +290,26 @@ class WebResource(ndb.Model):
     def get_indexers(self):
         """
         For a given WebResource, get the keywords stored in Indexer for that resource
-        :return: a list of keywords
+        :return: a dict() with a "keywords" property, with value is an array of keyword objects
         """
         query = Indexer.query().filter(Indexer.webres == self.key)
         if query.count() != 0:
-            results = [q.keyword for q in query]
+            results = {
+                "keywords": [
+                    {
+                        "value": q.keyword,
+                        "slug": q.keyword.replace(" ", "+"),
+                        "related_urls": articles_api_version("04") + 'keywords?keyword=' + q.keyword
+                    }
+                    for q in query
+                ],
+                "url": self.url,
+                "uuid": self.key.id()
+            }
             return results
-        return []
+        return {
+            "keywords": None
+        }
 
 
 class Indexer(ndb.Model):
@@ -308,6 +318,20 @@ class Indexer(ndb.Model):
     """
     keyword = ndb.StringProperty()
     webres = ndb.KeyProperty(kind=WebResource)
+
+    @classmethod
+    def get_webresource(cls, kwd):
+        """
+        For a given keyword, get the Web Resources stored in Indexer
+        :param kwd: a keyword
+        :return: a list of WebResource
+        """
+        # TO-DO: check if the keyword belong to taxonomy.projectchronos.eu/concept/c
+        query = Indexer.query().filter(Indexer.keyword == kwd)
+        if query.count() != 0:
+            results = [q.webres.get() for q in query]
+            return results
+        return []
 
 
 class N3Cache(ndb.Model):

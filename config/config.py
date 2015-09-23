@@ -17,7 +17,7 @@ _VOCS = {
     'exploration': 'http://ontology.projectchronos.eu/exploration/'
 }
 
-_TEMP_SECRET = "*********"
+_TEMP_SECRET = "****************"
 
 _ENV = {'offline': {'_SERVICE': 'http://localhost:8080',
                     '_DEBUG': True},
@@ -40,7 +40,14 @@ def set_env_variables():
 
 _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG = set_env_variables()
 
-_ARTICLES_API = [_SERVICE + "/articles/?api=true", _SERVICE + "/articles/?api=true&url="]
+
+def articles_api_version(ver):
+    return _ARTICLES_API[ver]
+
+_ARTICLES_API = {
+    "03": _SERVICE + "/articles/?api=true&",
+    "04": _SERVICE + "/articles/v04/"
+}
 
 _CRAWLING_POST = {'local': 'http://localhost:8080/database/crawling/store',
                   'remote': 'http://hypermedia.projectchronos.eu/database/crawling/store'}

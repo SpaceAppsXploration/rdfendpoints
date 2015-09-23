@@ -35,7 +35,7 @@ from flankers.graphtools import query
 #
 from handlers.sparql import Querying
 from handlers.componentjsonapi import Endpoints
-from handlers.articlesjsonapi import Articles
+from handlers.articlesjsonapi import Articles, ArticlesJSONv1
 from handlers.servicehandlers import Testing, Crawling
 from handlers.dataN3 import PublishWebResources, PublishConcepts
 
@@ -69,6 +69,7 @@ class Hello(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
+    webapp2.Route('/articles/v04/<name:\w*>', ArticlesJSONv1),
     webapp2.Route('/articles/', Articles),
     webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
     webapp2.Route('/database/crawling/store', Crawling),
