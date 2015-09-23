@@ -67,6 +67,22 @@ def memcache_articles_pagination(query, bkmark):
     return listed
 
 
+def memcache_articles_by_keyword(kwd):
+    """
+    Get or set in the memcache articles related to a given keyword
+    :param kwd: a keyword
+    :return: a list
+    """
+    mkey = "Keywords_" + kwd
+    if not memcache.get(key=mkey):
+        results = Indexer.get_webresource(kwd)
+        memcache.add(key=mkey, value=results)
+    else:
+        results = memcache.get(key=mkey)
+
+    return results
+
+
 class ArticlesJSONv1(webapp2.RequestHandler):
     """
     GET /articles/v04/<name>
@@ -125,15 +141,19 @@ class ArticlesJSONv1(webapp2.RequestHandler):
         elif name == 'keywords' and self.request.get('keyword'):
             # serve articles by keyword
 
-            # TO-DO: implement memcache
-            webresources = Indexer.get_webresource(self.request.get('keyword'))
-            response = [
-                {
-                    "article": w.dump_to_json(),
-                    "uuid": w.key.id()
-                }
-                for w in webresources
-            ]
+            # fetch entities
+            webresources = memcache_articles_by_keyword(self.request.get('keyword'))
+
+            response = {
+                "keyword": self.request.get('keyword'),
+                "articles_by_keyword": [
+                    {
+                        "article": w.dump_to_json(),
+                        "uuid": w.key.id()
+                    }
+                    for w in webresources
+                ]
+            } if webresources else {"articles_by_keyword": None}
             return self.response.out.write(
                 json.dumps(response)
             )
