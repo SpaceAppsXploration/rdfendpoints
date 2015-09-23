@@ -153,7 +153,7 @@ class ArticlesJSONv1(webapp2.RequestHandler):
                     }
                     for w in webresources
                 ]
-            } if webresources else {"articles_by_keyword": None}
+            } if webresources else {"keyword": self.request.get('keyword'), "articles_by_keyword": None}
             return self.response.out.write(
                 json.dumps(response)
             )
