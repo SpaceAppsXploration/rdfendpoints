@@ -21,11 +21,12 @@ def memcache_webresource_query():
     Updates every six hours (18000 secs)
     :return: Query object or None
     """
-    if not memcache.get(key="WebResource_all"):
+    mkey = "WebResource_all"
+    if not memcache.get(key=mkey):
         query = WebResource.query()
-        memcache.add(key="WebResource_all", value=query, time=18000)
+        memcache.add(key=mkey, value=query, time=18000)
     else:
-        query = memcache.get(key="WebResource_all")
+        query = memcache.get(key=mkey)
 
     ### by now we exclude media and links children resources (resource with empty title)
     return query.filter(WebResource.title != "").order(WebResource.title).order(WebResource.key)
@@ -40,12 +41,13 @@ def memcache_keywords(url):
     from urlparse import urlparse
     parts = urlparse(url)
     if parts.scheme and parts.netloc:
-        if not memcache.get(key="Keyword_" + url):
+        mkey = "Keyword_for_" + url
+        if not memcache.get(key=mkey):
             q = WebResource.query().filter(WebResource.url == url).fetch(1)
             results = q[0].get_indexers() if len(q) == 1 else []
-            memcache.add(key="Keyword_for_" + url, value=results, time=15000)
+            memcache.add(key=mkey, value=results, time=15000)
         else:
-            results = memcache.get(key="Keyword_for_" + url)
+            results = memcache.get(key=mkey)
         return results
     else:
         return None
