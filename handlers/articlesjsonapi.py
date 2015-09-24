@@ -102,32 +102,11 @@ class ArticlesJSONv1(webapp2.RequestHandler):
 
         if len(name) == 0 and not self.request.get('url'):
             # serve articles
-            query = memcache_webresource_query()
-
-            # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
-            page_size = 25
-            cursor = None
-            next_bookmark = None
-            bookmark = self.request.get('bookmark')
-            if bookmark:
-                # if bookmark is set, serve the part of the cursor from the given bookamrk plus the page size
-                cursor = ndb.Cursor.from_websafe_string(bookmark)
-
-            articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
-
-            # assign the key for the next cursor
-            if more:
-                next_bookmark = next_cursor.to_websafe_string()
-
-            # serve the data with the link to the next bookmark
-            listed = memcache_articles_pagination(articles, next_bookmark)
-
             return self.response.out.write(
-                json.dumps(listed)
+                json.dumps(self.return_paginated_articles())
             )
         elif len(name) == 0 and self.request.get('url'):
             # serve keywords for a given article's url
-            self.response.headers['Content-Type'] = 'application/json'
             response = memcache_keywords(self.request.get("url"))
             return self.response.out.write(
                 json.dumps(response)
@@ -144,22 +123,52 @@ class ArticlesJSONv1(webapp2.RequestHandler):
             )
         elif name == 'keywords' and self.request.get('keyword'):
             # serve articles by keyword
-
-            # fetch entities
-            webresources = memcache_articles_by_keyword(self.request.get('keyword'))
-
-            response = {
-                "keyword": self.request.get('keyword'),
-                "articles_by_keyword": [
-                    {
-                        "article": w.dump_to_json(),
-                        "uuid": w.key.id()
-                    }
-                    for w in webresources
-                ]
-            } if webresources else {"keyword": self.request.get('keyword'), "articles_by_keyword": None}
             return self.response.out.write(
-                json.dumps(response)
+                json.dumps(self.return_articles_by_keyword())
             )
         else:
             return self.response.set_status(404)
+
+    def return_paginated_articles(self):
+        """
+        Fetch and return WebResource paginated query using ndb.query.fetch_page()
+        :return:
+        """
+        query = memcache_webresource_query()
+
+        # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
+        page_size = 25
+        cursor = None
+        next_bookmark = None
+        bookmark = self.request.get('bookmark')
+        if bookmark:
+            # if bookmark is set, serve the part of the cursor from the given bookamrk plus the page size
+            cursor = ndb.Cursor.from_websafe_string(bookmark)
+
+        articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
+
+        # assign the key for the next cursor
+        if more:
+            next_bookmark = next_cursor.to_websafe_string()
+
+        # serve the data with the link to the next bookmark
+        response = memcache_articles_pagination(articles, next_bookmark)
+
+        return response
+
+    def return_articles_by_keyword(self):
+        # fetch entities
+        webresources = memcache_articles_by_keyword(self.request.get('keyword'))
+
+        response = {
+            "keyword": self.request.get('keyword'),
+            "articles_by_keyword": [
+                {
+                    "article": w.dump_to_json(),
+                    "uuid": w.key.id()
+                }
+                for w in webresources
+            ]
+        } if webresources else {"keyword": self.request.get('keyword'), "articles_by_keyword": None}
+
+        return response
