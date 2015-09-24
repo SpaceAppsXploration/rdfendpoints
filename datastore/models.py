@@ -206,7 +206,7 @@ class WebResource(ndb.Model):
             item.stored = datetime(*localtime()[:6])
             item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
 
-            item.abstract = ' '.join(entry['summary'].strip().encode('ascii', 'replace').split()) if entry['summary'] is not None else ''
+            item.abstract = unidecode(" ".join(entry['summary'].strip().encode('ascii', 'replace').split())) if entry['summary'] is not None else ""
 
             i = item.put()
 
