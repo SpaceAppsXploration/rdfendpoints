@@ -49,12 +49,15 @@ class PublishWebResources(webapp2.RequestHandler):
         from datastore.models import WebResource
 
         try:
+            # if 'key' is an ndb.Key
             key = ndb.Key(urlsafe=key)
             obj = key.get()
         except Exception:
+            # if 'key' is an id()
             key = ndb.Key(WebResource, int(key))
             obj = key.get()
         except:
+            # wrong 'key'
             raise TypeError('Wrong Format of NDB key')
 
         url = str(obj.url)
@@ -138,7 +141,7 @@ class PublishConcepts(webapp2.RequestHandler):
         base_url = 'http://taxonomy.projectchronos.eu/concepts/c/'
         url = base_url + label
 
-        response = urlfetch.fetch(url)
+        response = urlfetch.fetch(url, deadline=300)
 
         content = response.content
         status = response.status_code
@@ -158,7 +161,7 @@ class PublishConcepts(webapp2.RequestHandler):
                         results += '<http://www.w3.org/1999/02/22-rdf-syntax-ns#label>' # predicate
                         results += '<' + result['label'] + '> . ' # add object
                     elif k == 'ancestor':
-                        results += 'http://ontology.projectchronos.eu/chronos/relAncestor' # predicate
+                        results += '<http://ontology.projectchronos.eu/chronos/relAncestor>' # predicate
                         results += '<' + result['ancestor'] + '> . ' # add object
                     elif k == 'group':
                         results += '<http://ontology.projectchronos.eu/chronos/group>' # predicate
