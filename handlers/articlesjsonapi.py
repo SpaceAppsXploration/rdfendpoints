@@ -1,10 +1,8 @@
-import os
 import webapp2
 import json
 import logging
 
 from google.appengine.api import memcache
-from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
 from datastore.models import WebResource, Indexer
 
@@ -13,6 +11,8 @@ from config.config import _PATH, articles_api_version
 __author__ = 'Lorenzo'
 
 _VERSION = "04"
+
+_MCACHE_SLUG = "v04_"
 
 
 def memcache_webresource_query():
@@ -26,7 +26,9 @@ def memcache_webresource_query():
         memcache.add(key="WebResource_all", value=query, time=18000)
     else:
         query = memcache.get(key="WebResource_all")
-    return query
+
+    ### by now we exclude media and links children resources (resource with empty title)
+    return query.filter(WebResource.title != "").order(WebResource.title).order(WebResource.key)
 
 
 def memcache_keywords(url):
