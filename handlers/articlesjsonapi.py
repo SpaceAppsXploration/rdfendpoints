@@ -1,97 +1,165 @@
-import os
 import webapp2
 import json
-from urllib import urlencode
+import logging
 
 from google.appengine.api import memcache
-from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
 from datastore.models import WebResource, Indexer
 
-
-from config.config import _SERVICE, _PATH
+from config.config import _PATH, articles_api_version
 
 __author__ = 'Lorenzo'
 
+_VERSION = "04"
 
-class Articles(webapp2.RequestHandler):
-    @staticmethod
-    def _memkey(bookmark, keyword):
-        '''
-        :param bookmark: None or a websafe cursor from NDB
-        :param keyword: None or a keyword string from Chronos
-        :return: A string key for memcache
-        '''
-        part0 = bookmark if bookmark else 'frombeginning'
-        part1 = keyword if keyword else 'nofilter'
-        return 'Articles_{}_{}'.format(part0, part1)
+_MCACHE_SLUG = "v04_"
 
-    def get(self):
 
-        if self.request.get("api") and self.request.get("url"):
+def memcache_webresource_query():
+    """
+    Get or Set in the memcache the full query of WebResources.
+    Updates every six hours (18000 secs)
+    :return: Query object or None
+    """
+    mkey = "WebResource_all"
+    if not memcache.get(key=mkey):
+        query = WebResource.query()
+        memcache.add(key=mkey, value=query, time=18000)
+    else:
+        query = memcache.get(key=mkey)
+
+    ### by now we exclude media and links children resources (resource with empty title)
+    return query.filter(WebResource.title != "").order(WebResource.title).order(WebResource.key)
+
+
+def memcache_keywords(url):
+    """
+    Get or set in the memcache resulting keywords for a given url
+    :param url: the url of the WebResource
+    :return: a Query object or None
+    """
+    from urlparse import urlparse
+    parts = urlparse(url)
+    if parts.scheme and parts.netloc:
+        mkey = "Keyword_for_" + url
+        if not memcache.get(key=mkey):
+            q = WebResource.query().filter(WebResource.url == url).fetch(1)
+            results = q[0].get_indexers() if len(q) == 1 else []
+            memcache.add(key=mkey, value=results, time=15000)
+        else:
+            results = memcache.get(key=mkey)
+        return results
+    else:
+        return None
+
+
+def memcache_articles_pagination(query, bkmark):
+    """
+    Get or set in the memcache single page for articles
+    :param query: the paged query
+    :param bkmark: the bookmark's key of the actual page
+    :return: dict() with an array of articles and a url to the next bookmarked page
+    """
+    mkey = "Articles_" + bkmark if bkmark else str("null")
+    if not memcache.get(key=mkey):
+        listed = {'articles': [webres.dump_to_json()
+                               for webres in query],
+                  'next': articles_api_version(_VERSION) + '?bookmark=' + bkmark if bkmark else None}
+        memcache.add(key=mkey, value=listed, time=15000)
+    else:
+        listed = memcache.get(key=mkey)
+    return listed
+
+
+def memcache_articles_by_keyword(kwd):
+    """
+    Get or set in the memcache articles related to a given keyword
+    :param kwd: a keyword
+    :return: a list
+    """
+    mkey = "Keywords_" + kwd
+    if not memcache.get(key=mkey):
+        results = Indexer.get_webresource(kwd)
+        memcache.add(key=mkey, value=results)
+    else:
+        results = memcache.get(key=mkey)
+
+    return results
+
+
+class ArticlesJSONv1(webapp2.RequestHandler):
+    """
+    GET /articles/v04/<name>
+
+    Serve the Articles API.
+    See https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API
+
+    :param name: define namespace of the request (getting articles or keywords), can be a void string
+    """
+    def get(self, name):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Content-Type'] = 'application/json'
+
+        if len(name) == 0 and not self.request.get('url'):
+            # serve articles
+            query = memcache_webresource_query()
+
+            # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
+            page_size = 25
+            cursor = None
+            next_bookmark = None
+            bookmark = self.request.get('bookmark')
+            if bookmark:
+                # if bookmark is set, serve the part of the cursor from the given bookamrk plus the page size
+                cursor = ndb.Cursor.from_websafe_string(bookmark)
+
+            articles, next_cursor, more = query.fetch_page(page_size, start_cursor=cursor)
+
+            # assign the key for the next cursor
+            if more:
+                next_bookmark = next_cursor.to_websafe_string()
+
+            # serve the data with the link to the next bookmark
+            listed = memcache_articles_pagination(articles, next_bookmark)
+
+            return self.response.out.write(
+                json.dumps(listed)
+            )
+        elif len(name) == 0 and self.request.get('url'):
             # serve keywords for a given article's url
-            self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Content-Type'] = 'application/json'
-            if not memcache.get(key="Keyword_" + self.request.get("url")):
-                q = WebResource.query().filter(WebResource.url == self.request.get("url")).fetch(1)
-                response = q[0].get_indexers() if len(q) == 1 else []
-                memcache.add(key="Keyword_for_" + self.request.get("url"), value=response)
-            else:
-                response = memcache.get(key="Keyword_for_" + self.request.get("url"))
+            response = memcache_keywords(self.request.get("url"))
+            return self.response.out.write(
+                json.dumps(response)
+            )
+        elif isinstance(name, int):
+            # serve a single article object by id
+            self.response.set_status(404)
+            response = {
+                "error": "not implemented",
+                "status": "404"
+            }
+            return self.response.out.write(
+                json.dumps(response)
+            )
+        elif name == 'keywords' and self.request.get('keyword'):
+            # serve articles by keyword
 
+            # fetch entities
+            webresources = memcache_articles_by_keyword(self.request.get('keyword'))
+
+            response = {
+                "keyword": self.request.get('keyword'),
+                "articles_by_keyword": [
+                    {
+                        "article": w.dump_to_json(),
+                        "uuid": w.key.id()
+                    }
+                    for w in webresources
+                ]
+            } if webresources else {"keyword": self.request.get('keyword'), "articles_by_keyword": None}
             return self.response.out.write(
                 json.dumps(response)
             )
         else:
-            # serve articles
-            bookmark = self.request.get('bookmark', default_value=None)
-            keyword = self.request.get('keyword', default_value=None)
-            mkey = Articles._memkey(bookmark, keyword)
-            saved = memcache.get(key=mkey)
-            if saved is None:
-                articles, more, next_bookmark = Articles._lookup(bookmark, keyword)
-                bookmark_parameter = '&bookmark={}'.format(next_bookmark) if next_bookmark else ''
-                listed = {'articles': [webres.dump_to_json() for webres in articles],
-                          'next': '{}/visualize/articles/?api=true{}'.format(_SERVICE, bookmark_parameter)}
-                saved = (next_bookmark, listed)
-                memcache.add(key=mkey, value=saved)
-            else:
-                next_bookmark, listed = saved
-
-            if self.request.get("api"):
-                # return JSON
-                self.response.headers['Access-Control-Allow-Origin'] = '*'
-                self.response.headers['Content-Type'] = 'application/json'
-                return self.response.out.write(
-                    json.dumps(listed)
-                )
-            # return template
-            path = os.path.join(_PATH, 'articles.html')
-            next_parameters = None
-            print next_bookmark
-            print keyword
-            if next_bookmark:
-                if keyword:
-                    next_parameters = urlencode({'bookmark': next_bookmark,
-                                                 'keyword':  keyword})
-                else:
-                    next_parameters = urlencode({'bookmark': next_bookmark})
-            return self.response.out.write(template.render(path, {'next': next_parameters,
-                                                                  'articles': listed}))
-
-    @staticmethod
-    def _lookup(bookmark, keyword):
-        # Forked from https://github.com/GoogleCloudPlatform/appengine-paging-python
-        page_size = 25
-        cursor = None
-        if bookmark:
-            cursor = ndb.Cursor.from_websafe_string(bookmark)
-        if keyword is not None: # Page through articles with the specified keyword
-            refs, next_cursor, more = Indexer.query(ndb.GenericProperty('keyword') == keyword).fetch_page(page_size, start_cursor=cursor)
-            articles = ndb.get_multi(ref.webres for ref in refs)
-        else:  # Page through all articles
-            articles, next_cursor, more = WebResource.query().fetch_page(page_size, start_cursor=cursor)
-        next_bookmark = None
-        if more:
-            next_bookmark = next_cursor.to_websafe_string()
-        return articles, more, next_bookmark
+            return self.response.set_status(404)

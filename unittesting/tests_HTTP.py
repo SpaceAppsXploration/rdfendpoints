@@ -59,7 +59,7 @@ class HTTPendpointsTest(unittest.TestCase):
         for r in response:
             assert all(True if rp in props else False for rp in [k for k in r.keys()])
             print "Testing urls in the response. Wait..."
-            assert all(urllib.urlopen(v).getcode() == 200
+            assert all(urllib.urlopen(v).getcode() == 200 or urllib.urlopen(v).getcode() == 301
                        if k != 'name'
                        else v in names
                        for k, v in r.items())
@@ -78,13 +78,13 @@ class HTTPendpointsTest(unittest.TestCase):
 
     def test_articles(self):
         """
-    Test the NL API: /visualize/articles/?api=true
+    Test the NL API: /articles/?api=true
     """
         print "Running test_articles"
         import urllib
         env = self.test_env
 
-        base_url = _ENV[env]['_SERVICE'] + "/visualize/articles/"
+        base_url = _ENV[env]['_SERVICE'] + "/articles/"
 
         first = get_curling(base_url, {'api': 'true'})
         first = test_integrity(first)
@@ -99,7 +99,7 @@ class HTTPendpointsTest(unittest.TestCase):
             print i, bookmark
 
     def runTest(self):
-        run = HTTPendpointsTest(env='offline')
+        run = HTTPendpointsTest(env='online')
         run.test_sparql()
         run.test_json()
         run.test_jsonld()

@@ -14,13 +14,20 @@ handlers:
   upload: static/.*\.(html|js|css)$
 
 - url: /cron/startcrawling
-  script: flankers.Scrawler.application
+  script: flankers.scrawler.application
 
 - url: /cron/indexing
-  script: flankers.Indexing.application
+  script: flankers.indexing.application
 
 - url: /cron/n3caching
   script: flankers.extCaching.application
+
+- url: /cron/storetweets
+  script: flankers.tweetStore.application
+
+- url: /remoteapi
+  script: google.appengine.ext.remote_api.handler.application
+  login: admin
 
 - url: .*
   script: main.application
@@ -30,6 +37,8 @@ libraries:
   version: "2.5.2"
 - name: lxml
   version: "latest"
+- name: ssl
+  version: latest
 
 builtins:
-- appstats: on
+- remote_api: on

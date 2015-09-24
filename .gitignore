@@ -62,11 +62,14 @@ target/
 # Google App Engine generated folder
 appengine-generated/
 
-RDFvocab
+# RDFvocab
 # six.py
 # pyparsing.py
+# ordereddict.py
+# feedparser.py
 .idea/
 flankers/tagmeapi/secret/keys.py
+config/tw_secret.py
 app.old# Created by .ignore support plugin (hsz.mobi)
 
 lib/

@@ -15,20 +15,24 @@
 
     <ol>
     {% for article in articles.articles %}
-        <li>{{ article.title }} -
-            {% if article.keywords.length != 0 %}
-                {% for k in article.keywords|slice:":5" %}
-                    <span style="color:#ff846d"> {{ k }} - </span>
-                {% endfor %}
+        <li>{% if article.title|length < 1 %}
+            Twitter Img or Link -
             {% else %}
-            <span style="color:#393eff"> No keyword: newsfeed </span>
+            {{ article.title }} -
             {% endif %}
-            - <a href="{{ article.url }}">Go to ></a></li>
+
+            <span style="color:#ff846d"><a href="{{ article.keywords_url }}"> check keywords </a> - </span>
+
+            {% if article.published != None %}
+            <span>{{ article.published }} -</span>
+            {% endif %}
+
+            <a href="{{ article.url }}">Go to ></a></li>
     {% endfor %}
     </ol>
 
-    {% if next %}
-      <p><a href="?{{ next }}">Next</a></p>
+    {% if bookmark %}
+      <p><a href="?bookmark={{ bookmark }}">Next</a></p>
     {% endif %}
 
 <link href="/articles.css" rel="stylesheet">  
