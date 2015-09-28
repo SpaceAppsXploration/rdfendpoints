@@ -20,7 +20,7 @@ Check the [repo Issues](https://github.com/SpaceAppsXploration/rdfendpoints/issu
 TagMe API by:<br/>
 Paolo Ferragina, Ugo Scaiella<br/>
 TagMe research paper:<br/>
-Fast and Accurate Annotation of Short Texts with Wikipedia Pages. IEEE Software 29(1): 70-75 (2012)
+[Fast and Accurate Annotation of Short Texts with Wikipedia Pages. IEEE Software 29(1): 70-75 (2012)](http://arxiv.org/abs/1006.3498)
 <br/><br/>
 Rdf-lib Translator:<br/>
 University of Munchen, [Alex Stolz, Bene Rodriguez-Castro, Martin Hepp](http://arxiv.org/abs/1312.4704)
