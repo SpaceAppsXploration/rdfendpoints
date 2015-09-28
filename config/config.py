@@ -17,7 +17,8 @@ _VOCS = {
     'exploration': 'http://ontology.projectchronos.eu/exploration/'
 }
 
-_TEMP_SECRET = "****************"
+
+_CLIENT_TOKEN = "*****************"
 
 _ENV = {'offline': {'_SERVICE': 'http://localhost:8080',
                     '_DEBUG': True},
@@ -53,3 +54,5 @@ _CRAWLING_POST = {'local': 'http://localhost:8080/database/crawling/store',
                   'remote': 'http://hypermedia.projectchronos.eu/database/crawling/store'}
 
 _PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
+
+_XPREADER_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'xpreader-client')

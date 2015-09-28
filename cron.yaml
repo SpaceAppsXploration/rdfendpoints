@@ -1,13 +1,13 @@
 cron:
 - description: scrawler
   url: /cron/startcrawling
-  schedule: every 10 minutes
+  schedule: every 30 minutes
 - description: indexing
   url: /cron/indexing
-  schedule: every 60 minutes
+  schedule: every 120 minutes
 - description: storetweets
   url: /cron/storetweets
-  schedule: every 45 minutes
+  schedule: every 90 minutes
 - description: n3caching
   url: /cron/n3caching
   schedule: 1 of month 16:00

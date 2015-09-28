@@ -1,5 +1,5 @@
 """
-Main entrypoint for the chronostriples app.
+Main entrypoint for the chronostriples website.
 Publishing at http://hypermedia.projectchronos.eu
 
 FORKED FROM https://github.com/mr-niels-christensen/rdflib-appengine/blob/master/src/example/httpserver.py
@@ -23,7 +23,7 @@ from json2html import *
 #
 # all the static variables are in config/config.py
 #
-from config.config import _PATH, _DEBUG
+from config.config import _PATH, _DEBUG, _XPREADER_PATH
 
 #
 # utilities that are used inside handlers are in flankers/
@@ -34,15 +34,9 @@ from flankers.graphtools import query
 # handlers loaded from handlers/
 #
 from handlers.sparql import Querying
-from handlers.componentjsonapi import Endpoints
 from handlers.articlesjsonapi import ArticlesJSONv1
-from handlers.servicehandlers import Testing, Crawling
+from handlers.servicehandlers import DataStoreOperationsAPI
 from handlers.dataN3 import PublishWebResources, PublishConcepts
-
-#
-# hydra handlers loaded from hydra/
-#
-from hydra.handlers import HydraVocabulary, PublishContexts, PublishEndpoints
 
 
 class Hello(webapp2.RequestHandler):
@@ -67,15 +61,35 @@ class Hello(webapp2.RequestHandler):
         return self.response.set_status(405)
 
 
+class Testing(webapp2.RequestHandler):
+    """
+    /test: test handler
+    """
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        try:
+            from bs4 import BeautifulSoup
+            from json2html import __version__
+        except Exception as e:
+            raise e
+        self.response.write('test passed')
+
+#
+### Handlers Order:
+# 1. Test handler
+# 2. Articles JSON API
+# 3. Datastore Operations private API
+# 4. SPARQL endpoint
+# 5. NTriples API (WebResource)
+# 6. NTriples API (Taxonomy concepts)
+# 7. Homepage
+#
+
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/articles/v04/<name:\w*>', ArticlesJSONv1),
-    webapp2.Route('/database/cots/<keywd:\w*>', Endpoints),
-    webapp2.Route('/database/crawling/store', Crawling),
+    webapp2.Route('/datastore/<name:[a-z]+>', DataStoreOperationsAPI),
     webapp2.Route('/sparql', Querying),
-    webapp2.Route('/hydra/vocab', HydraVocabulary),
-    webapp2.Route('/hydra/contexts/<name:\w+.>', PublishContexts),
-    webapp2.Route('/hydra/spacecraft/<name:\w*>', PublishEndpoints),
     webapp2.Route('/data/webresource/<key:[a-zA-Z0-9-_=]+>', PublishWebResources),
     webapp2.Route('/data/concept/<label:[a-z\+]+>', PublishConcepts),
     webapp2.Route('/', Hello),
