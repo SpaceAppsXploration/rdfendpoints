@@ -171,10 +171,12 @@ class PublishConcepts(webapp2.RequestHandler):
                 self.response.headers['Content-Type'] = "application/n-triples; charset=utf-8"
                 return self.response.write(results)
             else:
-                raise Exception("Label is in the taxonomy but it's not a keyword")
+                e = str(Exception("Label is in the taxonomy but it's not a keyword"))
+                return self.response.write(e)
 
         else:
-            raise Exception("Wrong Label or Server Not Reachable")
+            e = str(Exception("Wrong Label or Server Not Reachable"))
+            return self.response.write(e)
 
 
 

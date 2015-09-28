@@ -29,7 +29,7 @@ def memcache_webresource_query():
         query = memcache.get(key=mkey)
 
     ### by now we exclude media and links children resources (resource with empty title)
-    return query.filter(WebResource.title != "").order(WebResource.title).order(WebResource.key)
+    return query.filter(WebResource.title != "").order(WebResource.title, WebResource.key, -WebResource.stored)
 
 
 def memcache_keywords(url):
@@ -89,14 +89,17 @@ def memcache_articles_by_keyword(kwd):
 
 class ArticlesJSONv1(webapp2.RequestHandler):
     """
-    GET /articles/v04/<name>
-
-    Serve the Articles API.
+    Articles JSON API
     See https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API
-
-    :param name: define namespace of the request (getting articles or keywords), can be a void string
     """
     def get(self, name):
+        """
+        GET /articles/v04/<name>
+
+        Serve the Articles API.
+
+        :param name: define namespace of the request (getting articles or keywords), can be a void string
+        """
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Content-Type'] = 'application/json'
 

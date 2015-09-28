@@ -1,5 +1,5 @@
 import webapp2
-from config.config import _TEMP_SECRET
+from config.config import _CLIENT_TOKEN
 from flankers.graphtools import query, store_triples
 
 __author__ = ['niels', 'Lorenzo']
@@ -20,7 +20,7 @@ class Querying(webapp2.RequestHandler):
 
     def post(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
-        if self.request.get('pwd') == _TEMP_SECRET:
+        if self.request.get('token') == _CLIENT_TOKEN:
             # use graphtools.store_triples()
             app_graph, cache_graph = store_triples(self.request.get('triple'))
             return self.response.write("GRAPH STORED OK: {} triples".format(len(cache_graph)))
