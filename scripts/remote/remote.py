@@ -6,21 +6,26 @@ __author__ = 'lorenzo'
 
 import sys
 sys.path.insert(0, '../..')
-from config.config import _TEMP_SECRET
+from config.config import _CLIENT_TOKEN
 
 
 def dump_to_ds_post(url, data):
     """
-    open a connection and dump via POST to /ds
     NOTE: better to use PYcURL for this operations, avoid a lot of encoding and conflicts
     :param url: the server url
     :param data: the triples
     :return: urllib response
     """
     import urllib
-    params = urllib.urlencode({'pwd': _TEMP_SECRET, 'triple': data})
+    import logging
+
+    logging.getLogger().setLevel(logging.DEBUG)
+    params = urllib.urlencode({'token': _CLIENT_TOKEN, 'triple': data})
     f = urllib.urlopen(url, params)
-    print f.read()
+    logging.info(f.getcode())
+    if f.getcode() == 200:
+        return f.read()
+    raise Exception("dump_to_ds_post(): HTTP Error " + str(f.getcode()) + " " + str(f.read()))
 
 
 def post_curling(url, params, file=None, display=False):
@@ -102,7 +107,7 @@ def google_urlfetch(url, params=dict()):
 
     data = urllib.urlencode(params)
     url = url + '?' + data
-    result = urlfetch.fetch(url=url)
+    result = urlfetch.fetch(url=url, deadline=300)
 
     if result.status_code == 200:
         return result.content
