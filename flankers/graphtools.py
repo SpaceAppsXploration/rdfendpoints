@@ -14,7 +14,7 @@ from config.config import _GRAPH_ID
 
 def graph(graph_id=_GRAPH_ID):
     """
-    return a Graph with a particular name
+    Return a Graph with a particular name
     :param graph_id: graph identification
     :return: a Graph() instance
     """
@@ -27,7 +27,7 @@ def update(q):
 
 def query(q):
     """
-    queries the Graph() instance
+    Query a single Graph() instance (default graph)
     :param q:
     :return: JSON
     """
@@ -39,11 +39,22 @@ def query(q):
     return response.serialize(format='json')
 
 
+def query_all():
+    """
+    Query all the shard
+    :return:
+
+    >>> combined_graph = rdflib.graph.ReadOnlyGraphAggregate(vocab_graph, concept_graph, crawled_graph)
+    >>> for (p, o) in combined_graph.predicate_objects(my_uri_ref):
+    >>>     do_stuff(p, o)
+    """
+    pass
+
 
 def store_triples(triples, graph_id=_GRAPH_ID):
     """
-    Caches and store the new triples
-    :param triples: triples POSted
+    Cache and store the new triples
+    :param triples: triples POSTed
     :return: graphs
     """
     cache_graph = Graph()
