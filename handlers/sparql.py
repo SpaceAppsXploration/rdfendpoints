@@ -22,6 +22,8 @@ class Querying(webapp2.RequestHandler):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         if self.request.get('token') == _CLIENT_TOKEN:
             # use graphtools.store_triples()
-            app_graph, cache_graph = store_triples(self.request.get('triple'))
+            data = self.request.get('triple')
+            graph_id = self.request.get('graph_id')
+            app_graph, cache_graph = store_triples(data, graph_id)
             return self.response.write("GRAPH STORED OK: {} triples".format(len(cache_graph)))
         return self.response.set_status(405)
