@@ -20,6 +20,13 @@ class BulkOperations(unittest.TestCase):
         :param results: list of the collected ids
         :param bookmark: bookmark to fetch different datastore's pages
         :return: results list
+
+        # USAGE
+            >>> iterated = download_ids_generator(environment='offline')
+            >>> for uuid in iterated:
+            >>>     print uuid
+            >>>     next(iterated)
+
         """
         import itertools
 
@@ -36,21 +43,12 @@ class BulkOperations(unittest.TestCase):
             bookmark=to_append['next']
         )
 
-    '''
-    iterated = download_ids_generator(environment='offline')
-    for uuid in iterated:
-        print uuid
-        next(iterated)
-    '''
-
-
     def create_webresource_triple(self, uuid):
         """
         Create chronos:webresource object for the triple store
         :param uuid: the unique id of the webresource
         :return: a RDF-lib triple (tuple)
         """
-
         from rdflib import URIRef
         from rdflib.namespace import RDF
 
@@ -59,9 +57,6 @@ class BulkOperations(unittest.TestCase):
         robject = URIRef('http://ontology.projectchronos.eu/chronos/webresource')
 
         return subject, RDF.type, robject
-
-    # dump_to_triple_store()
-
 
     def dump_to_graph(self, list_of_ids, url):
         """
