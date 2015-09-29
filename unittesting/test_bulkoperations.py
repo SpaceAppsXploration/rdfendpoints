@@ -46,7 +46,7 @@ class BulkOperations(unittest.TestCase):
 
     def create_webresource_triple(self, uuid):
         """
-        Create chronos:webresource object in the triple store
+        Create chronos:webresource object for the triple store
         :param uuid: the unique id of the webresource
         :return: a RDF-lib triple (tuple)
         """
@@ -64,6 +64,12 @@ class BulkOperations(unittest.TestCase):
 
 
     def dump_to_graph(self, list_of_ids, url):
+        """
+        Take a list of unique ids, create a graph of triples and dump them to the shard
+        :param list_of_ids: a list() of numerical ids from the datastore
+        :param url: the url of the sparql endpoint of the shard
+        :return: None
+        """
         from scripts.remote.remote import post_curling
         from rdflib import Graph
 
@@ -74,7 +80,8 @@ class BulkOperations(unittest.TestCase):
 
         triples = g.serialize(format='nt')
         post_curling(url,
-                     {'token': _CLIENT_TOKEN, 'triple': triples, 'graph_id': 'webresources'},
+                     {'token': _CLIENT_TOKEN, 'triple': triples,
+                      'graph_id': 'webresources-graph'},
                      display=True
                      )
 
