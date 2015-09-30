@@ -9,7 +9,7 @@ __author__ = 'niels'
 from rdflib import Graph
 
 from datastore.ndbstore import NDBStore
-from config.config import _VOC_GRAPH_ID, _WEBRES_GRAPH_ID, _KWD_GRAPH_ID
+from config.config import _VOC_GRAPH_ID, _WEBRES_GRAPH_ID, _CONCEPTS_GRAPH_ID
 
 
 def graph(graph_id=_VOC_GRAPH_ID):

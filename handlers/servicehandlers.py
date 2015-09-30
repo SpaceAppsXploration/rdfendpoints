@@ -12,7 +12,15 @@ __author__ = 'Lorenzo'
 
 class DataStoreOperationsAPI(JSONBaseHandler):
     """
-    /datastore/<name> POST: Service handler for operations on crawled resources
+    Service handler for operations on crawled resources.
+
+    /datastore/<name> GET:
+    - serve a single WebResource object (using ?retrieve= parameter)
+    - serve a list of WebResource object's ids (paginated)
+    - serve a list of concepts related to a WebResource (using ?retrieve= parameter)
+
+    /datastore/<name> POST:
+    #TO-DO: other CRUDs to be implemented
     """
     def get(self, name):
         """
@@ -23,24 +31,16 @@ class DataStoreOperationsAPI(JSONBaseHandler):
 
         if self.request.get('token') == _CLIENT_TOKEN:
             if name == 'webresource' and self.request.get('retrieve'):
-                from datastore.models import WebResource
-                # RETRIEVE WebResource
-                try:
-                    k = ndb.Key(WebResource, int(self.request.get('retrieve')))
-                except ValueError as e:
-                    try:
-                        k = ndb.Key(urlsafe=self.request.get('retrieve'))
-                    except ProtocolBufferDecodeError as e:
-                        return self.json_error_handler(500, exception=repr(e))
 
-                resource = WebResource.query().filter(WebResource.key == k).fetch(1)
-                resource = resource[0].dump_to_json()
+                resource = self.retrieve_a_single_webresource(self.request.get('retrieve'))
+
+                resource = resource.dump_to_json()
                 return self.response.write(
                     resource
                 )
 
             elif name == 'index':
-                # RETRIEVE Index (list of all keys presents in the datastore, paginated)
+                # RETRIEVE a index of WebResource (list of all keys presents in the datastore, paginated)
                 from articlesjsonapi import memcache_webresource_query
 
                 query = memcache_webresource_query()
@@ -70,6 +70,24 @@ class DataStoreOperationsAPI(JSONBaseHandler):
                 return self.response.write(
                     json.dumps(listed)
                 )
+            elif name == 'concepts' and self.request.get('retrieve'):
+                # RETRIEVE keywords related to a WebResource
+                from datastore.models import WebResource, Indexer
+
+                # Find concepts related to a WebResource
+                resource = self.retrieve_a_single_webresource(self.request.get('retrieve'))
+                concepts = Indexer.query().filter(Indexer.webres == resource.key)
+
+                listed = {'concepts': [
+                    concept.keyword.replace(" ", "+")
+                    for concept in concepts
+                ],
+                'resource_id': resource.key.id()
+                }
+
+                return self.response.write(
+                    json.dumps(listed)
+                )
             else:
                 return self.json_error_handler(404)
         else:
@@ -91,11 +109,26 @@ class DataStoreOperationsAPI(JSONBaseHandler):
                 self.response.status = 400
                 return json.dumps({"error": 1, "status": 404})
 
+    def retrieve_a_single_webresource(self, uuid):
+        """
+        Fetch a single WebResource from a id() or a Key() string
+        :param uuid: a key.id() or a Key() string
+        :return: a WebResource instance
+        """
+        from datastore.models import WebResource
+        # RETRIEVE WebResource
+        try:
+            # if the parameter is an id()
+            k = ndb.Key(WebResource, int(uuid))
+        except ValueError as e:
+            try:
+                # if the parameter is a Key()
+                k = ndb.Key(urlsafe=uuid)
+            except ProtocolBufferDecodeError as e:
+                return self.json_error_handler(500, exception=repr(e))
 
-class FourOhFour(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.set_status(404)
+        resource = WebResource.query().filter(WebResource.key == k).fetch(1)
+        return resource[0]
 
 
 class Testing(webapp2.RequestHandler):
