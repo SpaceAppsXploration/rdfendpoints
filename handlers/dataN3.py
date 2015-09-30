@@ -186,7 +186,7 @@ class PublishSpaceDocs(webapp2.RequestHandler):
     """
     def get(self, term):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Content-Type'] = "application/n-triples; charset=utf-8"
+        self.response.headers['Content-Type'] = "application/json"
         from google.appengine.api import urlfetch
 
         base_url = 'http://taxonomy.projectchronos.eu/space/dbpediadocs/'
