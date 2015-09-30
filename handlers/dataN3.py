@@ -179,6 +179,31 @@ class PublishConcepts(webapp2.RequestHandler):
             return self.response.write(e)
 
 
+class PublishSpaceDocs(webapp2.RequestHandler):
+    """
+    Publish in NTriples format from taxonomy.projectchronos.eu/space/dbpediadocs
+    #TO-DO: serialize to Ntriples
+    """
+    def get(self, term):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Content-Type'] = "application/n-triples; charset=utf-8"
+        from google.appengine.api import urlfetch
+
+        base_url = 'http://taxonomy.projectchronos.eu/space/dbpediadocs/'
+        url = base_url + term
+
+        response = urlfetch.fetch(url, deadline=300)
+
+        content = response.content
+        status = response.status_code
+
+        if status == 200:
+            return self.response.write(content)
+        else:
+            e = str(Exception("Wrong Label or Server Not Reachable"))
+            return self.response.write(e)
+
+
 
 
 

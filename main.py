@@ -36,7 +36,7 @@ from flankers.graphtools import query
 from handlers.sparql import Querying
 from handlers.articlesjsonapi import ArticlesJSONv1
 from handlers.servicehandlers import DataStoreOperationsAPI
-from handlers.dataN3 import PublishWebResources, PublishConcepts
+from handlers.dataN3 import PublishWebResources, PublishConcepts, PublishSpaceDocs
 
 
 class Hello(webapp2.RequestHandler):
@@ -82,7 +82,8 @@ class Testing(webapp2.RequestHandler):
 # 4. SPARQL endpoint
 # 5. NTriples API (WebResource)
 # 6. NTriples API (Taxonomy concepts)
-# 7. Homepage
+# 7. NTriples API (Taxonomy DBpedia terms)
+# 8. Homepage
 #
 
 application = webapp2.WSGIApplication([
@@ -92,6 +93,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/sparql', Querying),
     webapp2.Route('/data/webresource/<key:[a-zA-Z0-9-_=]+>', PublishWebResources),
     webapp2.Route('/data/concept/<label:[a-z\+]+>', PublishConcepts),
+    webapp2.Route('/data/dbpediadocs/<term:[a-z_\(\)-]+>', PublishSpaceDocs),
     webapp2.Route('/', Hello),
 ], debug=_DEBUG)
 
