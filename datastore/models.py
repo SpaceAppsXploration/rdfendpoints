@@ -49,7 +49,7 @@ class WebResource(ndb.Model):
             item = WebResource()
             from unidecode import unidecode
             try:
-                item.title = unidecode(" ".join(entry['title'].split()))
+                item.title = unidecode(unicode(" ".join(entry['title'].split())))
             except:
                 item.title = " ".join(entry['title'].encode('ascii', 'replace').split())
 
@@ -58,7 +58,10 @@ class WebResource(ndb.Model):
             item.stored = datetime(*localtime()[:6])
             item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
 
-            item.abstract = unidecode(" ".join(entry['summary'].strip().encode('ascii', 'replace').split())) if entry['summary'] is not None else ""
+            try:
+                item.abstract = unidecode(unicode(" ".join(entry['summary'].strip().split()))) if entry['summary'] is not None else ""
+            except:
+                item.abstract = " ".join(entry['summary'].strip().encode('ascii', 'replace').split()) if entry['summary'] is not None else ""
 
             i = item.put()
 
@@ -137,7 +140,7 @@ class WebResource(ndb.Model):
                     result[prop] = None
                     continue
                 from unidecode import unidecode
-                result[prop] = unidecode((value.encode('ascii', 'replace').strip()))
+                result[prop] = unidecode(unicode(value.strip()))
 
         return result
 
