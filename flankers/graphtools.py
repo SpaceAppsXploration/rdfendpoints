@@ -9,10 +9,10 @@ __author__ = 'niels'
 from rdflib import Graph
 
 from datastore.ndbstore import NDBStore
-from config.config import _GRAPH_ID
+from config.config import _VOC_GRAPH_ID, _WEBRES_GRAPH_ID, _KWD_GRAPH_ID
 
 
-def graph(graph_id=_GRAPH_ID):
+def graph(graph_id=_VOC_GRAPH_ID):
     """
     Return a Graph with a particular name
     :param graph_id: graph identification
@@ -39,19 +39,30 @@ def query(q):
     return response.serialize(format='json')
 
 
-def query_all():
+def query_all(q):
     """
     Query all the shard
     :return:
 
+    http://rdflib.readthedocs.org/en/latest/apidocs/rdflib.html?highlight=graph%20name#rdflib.graph.ConjunctiveGraph
+    >>> vocabgraph = Graph(store=NDBStore(identifier=graph_id))
     >>> combined_graph = rdflib.graph.ReadOnlyGraphAggregate(vocab_graph, concept_graph, crawled_graph)
     >>> for (p, o) in combined_graph.predicate_objects(my_uri_ref):
     >>>     do_stuff(p, o)
     """
-    pass
+    import rdflib
+    vocabularies = Graph(store=NDBStore(identifier=_VOC_GRAPH_ID))
+    webresources = Graph(store=NDBStore(identifier=_WEBRES_GRAPH_ID))
+    combined_graph = rdflib.graph.ReadOnlyGraphAggregate(vocabularies, webresources)
+    response = combined_graph.query(q)
+    if response.type == 'CONSTRUCT': #These cannot be JSON-serialized so we extract the data with a SELECT
+        g = Graph()
+        g += response
+        response = g.query("SELECT ?s ?p ?o WHERE {?s ?p ?o}")
+    return response.serialize(format='json')
 
 
-def store_triples(triples, graph_id=_GRAPH_ID):
+def store_triples(triples, graph_id=_VOC_GRAPH_ID):
     """
     Cache and store the new triples
     :param triples: triples POSTed

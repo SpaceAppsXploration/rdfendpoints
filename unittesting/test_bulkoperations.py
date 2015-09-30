@@ -1,7 +1,7 @@
 import unittest
 import json
 from scripts.remote.remote import get_curling
-from config.config import _CLIENT_TOKEN, _ENV, _SERVICE
+from config.config import _CLIENT_TOKEN, _ENV, _SERVICE, _WEBRES_GRAPH_ID
 
 __author__ = 'Lorenzo'
 
@@ -75,8 +75,9 @@ class BulkOperations(unittest.TestCase):
 
         triples = g.serialize(format='nt')
         post_curling(url,
-                     {'token': _CLIENT_TOKEN, 'triple': triples,
-                      'graph_id': 'webresources-graph'},
+                     {'token': _CLIENT_TOKEN,
+                      'triple': triples,
+                      'graph_id': _WEBRES_GRAPH_ID},
                      display=True
                      )
 

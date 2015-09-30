@@ -1,6 +1,6 @@
 import webapp2
 from config.config import _CLIENT_TOKEN
-from flankers.graphtools import query, store_triples
+from flankers.graphtools import query, query_all, store_triples
 
 __author__ = ['niels', 'Lorenzo']
 
@@ -15,7 +15,7 @@ class Querying(webapp2.RequestHandler):
             self.response.headers['Access-Control-Allow-Origin'] = '*'
             self.response.headers['Content-Type'] = 'application/sparql-results+json; charset=utf-8'
             print(self.request.get('query'))
-            return self.response.write(query(self.request.get('query')))
+            return self.response.write(query_all(self.request.get('query')))
         return self.response.write("Query not defined")
 
     def post(self):

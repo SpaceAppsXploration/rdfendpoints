@@ -4,7 +4,9 @@ import os
 
 global socket
 
-_GRAPH_ID = 'default-graph'
+_VOC_GRAPH_ID = 'vocabularies-graph'
+_WEBRES_GRAPH_ID = 'webresources-graph'
+_KWD_GRAPH_ID = 'keywords-graph'
 _GRAPH_INSTANCE_ID = 'Graph-instance'
 
 _VOCS = {
@@ -18,7 +20,7 @@ _VOCS = {
 }
 
 
-_CLIENT_TOKEN = "*****************"
+_CLIENT_TOKEN = "********************************"
 
 _ENV = {'offline': {'_SERVICE': 'http://localhost:8080',
                     '_DEBUG': True},

@@ -12,13 +12,13 @@ import sys
 import urllib
 
 from remote import post_curling
-from config.config import _CLIENT_TOKEN, _VOCS, _GRAPH_ID
+from config.config import _CLIENT_TOKEN, _VOCS, _VOC_GRAPH_ID
 
 
 def _upload_all(url):
     for k, v in _VOCS.items():
         triples = urllib.urlopen(v)
-        post_curling(url, {'token': _CLIENT_TOKEN, 'triple': triples.read(), 'graph_id': _GRAPH_ID }, display=True)
+        post_curling(url, {'token': _CLIENT_TOKEN, 'triple': triples.read(), 'graph_id': _VOC_GRAPH_ID }, display=True)
 
 if __name__ == "__main__":
     _upload_all(sys.argv[1])
