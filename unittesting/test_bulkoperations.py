@@ -81,10 +81,10 @@ class BulkOperations(unittest.TestCase):
         triples = []
         if concepts:
             for c in concepts:
-                subject = _SERVICE + '/data/concept/' + c
+                subject = _SERVICE + '/data/webresource/' + str(uuid)
                 subject = URIRef(subject)
                 predicate = URIRef('http://ontology.projectchronos.eu/chronos/relConcept')
-                robject = _SERVICE + '/data/webresource/' + str(uuid)
+                robject = _SERVICE + '/data/concept/' + c
                 robject = URIRef(robject)
                 triples.append((subject, predicate, robject))
 
