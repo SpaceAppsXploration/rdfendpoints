@@ -18,7 +18,7 @@ class WebResource(ndb.Model):
     url = ndb.StringProperty()
     stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
     published = ndb.DateTimeProperty(default=None)
-    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link'], default='feed')
+    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link', 'pdf'], default='feed')
     in_graph = ndb.BooleanProperty(default=False)
 
     @classmethod
@@ -73,7 +73,7 @@ class WebResource(ndb.Model):
                     for obj in entry.media_content:
                         # store image or video as child
                         if cls.query().filter(cls.url == obj.url).count() == 0:
-                            m = WebResource(url=obj.url, published=item.published, parent=i.get(), title='', abstract='')
+                            m = WebResource(url=obj.url, published=item.published, parent=i.get(), title='', abstract='', type_of='media')
                             m.put()
                             print "media stored"
             except:
@@ -137,6 +137,9 @@ class WebResource(ndb.Model):
             if isinstance(self, ndb.Model):
                 if isinstance(value, datetime):
                     result[prop] = value.isoformat()
+                    continue
+                elif isinstance(value, bool):
+                    result[prop] = value
                     continue
                 elif value is None:
                     result[prop] = None
