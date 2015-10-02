@@ -18,6 +18,8 @@ class WebResource(ndb.Model):
     url = ndb.StringProperty()
     stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
     published = ndb.DateTimeProperty(default=None)
+    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link'], default='feed')
+    in_graph = ndb.BooleanProperty(default=False)
 
     @classmethod
     def dump_from_json(cls, j):
@@ -102,19 +104,19 @@ class WebResource(ndb.Model):
         if text:
             if cls.query().filter(cls.url == url).count() == 0:
                 # store tweet
-                w = WebResource(url=url, published=published, title=str(twt._id), abstract=text)
+                w = WebResource(url=url, published=published, title=str(twt._id), abstract=text, type_of='tweet')
                 k = w.put()
                 print "Tweet stored" + str(k)
                 if media:
                     if cls.query().filter(cls.url == media).count() == 0:
                         # store image or video as child
-                        m = WebResource(url=media, published=published, parent=k, title='', abstract='')
+                        m = WebResource(url=media, published=published, parent=k, title='', abstract='', type_of='media')
                         m.put()
                         print "media stored"
                 if link:
                     if cls.query().filter(cls.url == link).count() == 0:
                         # store contained link as child
-                        l = WebResource(url=link, published=published, parent=k, title='', abstract='')
+                        l = WebResource(url=link, published=published, parent=k, title='', abstract='', type_of='link')
                         l.put()
                         print "link stored"
 
