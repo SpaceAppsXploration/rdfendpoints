@@ -46,14 +46,15 @@ def query_all(q):
 
     http://rdflib.readthedocs.org/en/latest/apidocs/rdflib.html?highlight=graph%20name#rdflib.graph.ConjunctiveGraph
     >>> vocabgraph = Graph(store=NDBStore(identifier=graph_id))
-    >>> combined_graph = rdflib.graph.ReadOnlyGraphAggregate(vocab_graph, concept_graph, crawled_graph)
+    >>> combined_graph = rdflib.graph.ReadOnlyGraphAggregate([vocab_graph, concept_graph, crawled_graph])
     >>> for (p, o) in combined_graph.predicate_objects(my_uri_ref):
     >>>     do_stuff(p, o)
     """
     import rdflib
     vocabularies = Graph(store=NDBStore(identifier=_VOC_GRAPH_ID))
     webresources = Graph(store=NDBStore(identifier=_WEBRES_GRAPH_ID))
-    combined_graph = rdflib.graph.ReadOnlyGraphAggregate(vocabularies, webresources)
+    concepts = Graph(store=NDBStore(identifier=_CONCEPTS_GRAPH_ID))
+    combined_graph = rdflib.graph.ReadOnlyGraphAggregate([vocabularies, webresources, concepts])
     response = combined_graph.query(q)
     if response.type == 'CONSTRUCT': #These cannot be JSON-serialized so we extract the data with a SELECT
         g = Graph()
