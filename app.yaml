@@ -29,6 +29,10 @@ handlers:
   script: flankers.tweetStore.application
   login: admin
 
+- url: /cron/storefb
+  script: flankers.fbstore.application
+  login: admin
+
 - url: /remoteapi
   script: google.appengine.ext.remote_api.handler.application
   login: admin
@@ -46,4 +50,4 @@ libraries:
 
 builtins:
 - remote_api: on
-- appstats: on
+- appstats: off

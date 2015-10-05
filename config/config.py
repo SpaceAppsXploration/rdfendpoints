@@ -6,7 +6,7 @@ global socket
 
 _VOC_GRAPH_ID = 'vocabularies-graph'
 _WEBRES_GRAPH_ID = 'webresources-graph'
-_KWD_GRAPH_ID = 'keywords-graph'
+_CONCEPTS_GRAPH_ID = 'concepts-graph'
 _GRAPH_INSTANCE_ID = 'Graph-instance'
 
 _VOCS = {

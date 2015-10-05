@@ -18,7 +18,7 @@ class WebResource(ndb.Model):
     url = ndb.StringProperty()
     stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
     published = ndb.DateTimeProperty(default=None)
-    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link', 'pdf'], default='feed')
+    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link', 'pdf', 'fb'], default='feed')
     in_graph = ndb.BooleanProperty(default=False)
 
     @classmethod
@@ -69,7 +69,6 @@ class WebResource(ndb.Model):
 
             try:
                 if len(entry.media_content) != 0:
-                    print "has media"
                     for obj in entry.media_content:
                         # store image or video as child
                         if cls.query().filter(cls.url == obj.url).count() == 0:
@@ -85,6 +84,7 @@ class WebResource(ndb.Model):
     def store_tweet(cls, twt):
         """
         Store a Tweet, its media and its containing link from the Twitter API
+        :param twt: a dictionary containing the response from the TWT API
         """
         url = 'https://twitter.com/' + str(twt.GetUser().screen_name) + '/status/' + str(twt.GetId())
         try:
@@ -120,6 +120,38 @@ class WebResource(ndb.Model):
                         l.put()
                         print "link stored"
 
+                return w
+
+    @classmethod
+    def store_fb_post(cls, alias, obj):
+        """
+        Store a FB post, and its links
+        :param obj: a post as a dict from the FB API
+        """
+        import time
+        from flankers.tools import spot_urls
+
+        if 'message' in obj.keys():
+            title = obj['id'].split('_')[1]
+            url = 'https://www.facebook.com/' + alias + '/posts/' + title
+            if cls.query().filter(cls.url == url).count() == 0:
+                published = str(obj['created_time'][0:19])
+                published = time.strptime(published, '%Y-%m-%dT%H:%M:%S')
+                published = datetime(*published[:6])
+                # store id > title, created_time > published, message > abstract
+                w = WebResource(url=url, title=title, abstract=obj['message'].strip(), published=published,
+                                type_of='fb', in_graph=False)
+                k = w.put()
+                print "fb post stored"
+
+                spotted = spot_urls(obj['message'])
+                if spotted:
+                    for s in spotted:
+                        if cls.query().filter(cls.url == s).count() == 0:
+                            # store contained link as child
+                            l = WebResource(url=s, published=published, parent=k, title='', abstract='', type_of='link')
+                            l.put()
+                            print "link stored"
                 return w
 
     def dump_to_json(self):
@@ -194,6 +226,15 @@ class Indexer(ndb.Model):
             results = [q.webres.get() for q in query]
             return results
         return []
+
+    def dump_to_json(self):
+        """
+        Dump the keyword > resource mapping to dict
+        """
+        return {
+            "uuid": self.key.id(),
+            "keyword": self.keyword
+        }
 
 
 class N3Cache(ndb.Model):
