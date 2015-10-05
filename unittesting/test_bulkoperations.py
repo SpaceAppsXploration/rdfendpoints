@@ -17,6 +17,7 @@ class BulkOperations(unittest.TestCase):
         else:
             self.test_env = 'offline'
 
+    @unittest.skip('do not run')
     def download_ids_generator(self, results=(), bookmark='start', environment='offline'):
         """
         Recursive - Fetch and collect all the resources' ids in the datastore
@@ -25,10 +26,10 @@ class BulkOperations(unittest.TestCase):
         :return: results list
 
         # USAGE
-            >>> iterated = download_ids_generator(environment='offline')
-            >>> for uuid in iterated:
-            >>>     print uuid
-            >>>     next(iterated)
+            iterated = download_ids_generator(environment='offline')
+            for uuid in iterated:
+                 print uuid
+                 next(iterated)
 
         """
         import itertools
@@ -46,6 +47,7 @@ class BulkOperations(unittest.TestCase):
             bookmark=to_append['next']
         )
 
+    @unittest.skip('do not run')
     def create_webresource_triple(self, uuid):
         """
         Create chronos:webresource object for the triple store
@@ -61,6 +63,7 @@ class BulkOperations(unittest.TestCase):
 
         return subject, RDF.type, robject
 
+    @unittest.skip('do not run')
     def create_concepts_triples(self, uuid):
         """
         Fetch concepts related to a webresource and create triples
@@ -90,6 +93,7 @@ class BulkOperations(unittest.TestCase):
 
         return triples
 
+    @unittest.skip('do not run')
     def dump_webresources_to_graph(self, list_of_ids, url):
         """
         Take a list of unique ids, create a graph of webresources, serialize it to triples and dump them to the
@@ -112,6 +116,7 @@ class BulkOperations(unittest.TestCase):
                      display=True
                      )
 
+    @unittest.skip('do not run')
     def dump_concepts_to_graph(self, list_of_ids, url):
         """
         Take a list of unique ids, create a graph of concepts, serialize it to triples and dump them to
@@ -133,6 +138,7 @@ class BulkOperations(unittest.TestCase):
                      display=True
                      )
 
+    @unittest.skip('do not run')
     def fetch_and_dump_webresources(self, bookmark='start'):
         """
         Recursive - Fetch all the resources' ids in the datastore and dump it into the triple store.
@@ -161,6 +167,58 @@ class BulkOperations(unittest.TestCase):
             bookmark=to_append['next']
         )
 
+    def set_typeof_and_ingraph_properties(self, bookmark='start'):
+        print "Fetching page: " + bookmark
+        articles = get_curling(_ENV[self.test_env]['_SERVICE'] + '/datastore/index',
+                                {'token': _CLIENT_TOKEN,
+                                 'bookmark': bookmark if bookmark != 'start' else ''})
+        articles = json.loads(articles)
+
+        # fetch single article
+        for a in articles['articles']:
+            res = get_curling(
+                _ENV[self.test_env]['_SERVICE'] + '/datastore/webresource',
+                {
+                    'retrieve': a,
+                    'token': _CLIENT_TOKEN
+                }
+            )
+            res = json.loads(res)
+            if not res['type_of'] in res.keys():
+                try:
+                    int(res['title'])
+                    update = {'type_of': 'tweet', 'in_graph': False }
+                except Exception:
+                    if res['title'] == '':
+                        if res['url'].endswith(('jpg', 'jpeg', 'png', 'mp3', 'mp4')):
+                            update = {'type_of': 'media', 'in_graph': False }
+                        else:
+                            update = {'type_of': 'link', 'in_graph': False }
+                    else:
+                        update = {'type_of': 'feed', 'in_graph': False }
+
+                print update
+                post_curling(
+                    _ENV[self.test_env]['_SERVICE'] + '/datastore/webresource',
+                    { 'token': _CLIENT_TOKEN,
+                      'update': a,
+                      'properties': json.dumps(update)
+                     },
+                    display=True
+                )
+
+
+        if not articles['next']:
+            return None
+
+        return self.fetch_and_dump_webresources(
+            bookmark=articles['next']
+        )
+
     def runTest(self):
         run = BulkOperations(env='offline')
-        run.fetch_and_dump_webresources()
+        run.set_typeof_and_ingraph_properties()
+        #run.fetch_and_dump_webresources()
+
+
+

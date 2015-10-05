@@ -5,6 +5,9 @@ from google.appengine.ext import ndb
 from google.net.proto.ProtocolBuffer import ProtocolBufferDecodeError
 
 from config.config import _CLIENT_TOKEN
+
+from datastore.models import WebResource, Indexer
+
 from handlers.basehandler import JSONBaseHandler
 
 __author__ = 'Lorenzo'
@@ -30,16 +33,15 @@ class DataStoreOperationsAPI(JSONBaseHandler):
         self.response.headers['Content-Type'] = 'application/json'
 
         if self.request.get('token') == _CLIENT_TOKEN:
-            if name == 'webresource' and self.request.get('retrieve'):
-
-                resource = self.retrieve_a_single_webresource(self.request.get('retrieve'))
-
-                resource = resource.dump_to_json()
+            if (name == 'webresource' or name == 'indexer') and self.request.get('retrieve'):
+                # respond with a single resource of the requested kind
+                resource = self.retrieve_a_single_resource(self.request.get('retrieve'), kind=name)
+                print type(resource)
+                resource = resource.dump_to_json() if resource else None
                 return self.response.write(
-                    resource
-                )
-
-            elif name == 'index':
+                    json.dumps(resource)
+                ) if resource else self.json_error_handler(404, '?retrieve=ID Wrong ID')
+            elif (name == 'webresource' or name == 'indexer') and self.request.get('index'):
                 # RETRIEVE a index of WebResource (list of all keys presents in the datastore, paginated)
                 from articlesjsonapi import memcache_webresource_query
 
@@ -75,7 +77,7 @@ class DataStoreOperationsAPI(JSONBaseHandler):
                 from datastore.models import WebResource, Indexer
 
                 # Find concepts related to a WebResource
-                resource = self.retrieve_a_single_webresource(self.request.get('retrieve'))
+                resource = self.retrieve_a_single_resource(self.request.get('retrieve'))
                 concepts = Indexer.query().filter(Indexer.webres == resource.key)
 
                 listed = {'concepts': [
@@ -89,9 +91,11 @@ class DataStoreOperationsAPI(JSONBaseHandler):
                     json.dumps(listed)
                 )
             else:
-                return self.json_error_handler(404)
+                return self.response.write(self.json_error_handler(404))
         else:
-            return self.json_error_handler(405, exception='Not authorized')
+            return self.response.write(
+                self.json_error_handler(405, exception='Not authorized')
+            )
 
     def post(self, name):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -101,6 +105,29 @@ class DataStoreOperationsAPI(JSONBaseHandler):
                 from datastore.models import WebResource
                 # CREATE WEBRESOURCE
                 # UPDATE WEBRESOURCE
+                if self.request.get('update') and self.request.get('properties'):
+                    res = self.retrieve_a_single_resource(self.request.get('update'))
+
+                    if res:
+                        print 'here: ' + str(type(res))
+                        props = json.loads(self.request.get('properties'))
+                        for prop in props.keys():
+                            print prop
+                            setattr(res, prop, props[prop])
+                        print 'here: ' + str(type(res))
+                        res.put()
+                        print 'updating properties: ' + str(props)
+                else:
+                    return self.response.write(
+                        self.json_error_handler(
+                            404,
+                            exception='property \'update\' or \'properties\' missing'
+                        )
+                    )
+
+
+
+
             elif name == 'indexer':
                 from datastore.models import Indexer
                 # CREATE INDEXER
@@ -109,26 +136,34 @@ class DataStoreOperationsAPI(JSONBaseHandler):
                 self.response.status = 400
                 return json.dumps({"error": 1, "status": 404})
 
-    def retrieve_a_single_webresource(self, uuid):
+    def retrieve_a_single_resource(self, uuid, kind='webresource'):
         """
         Fetch a single WebResource from a id() or a Key() string
         :param uuid: a key.id() or a Key() string
         :return: a WebResource instance
         """
-        from datastore.models import WebResource
-        # RETRIEVE WebResource
-        try:
-            # if the parameter is an id()
-            k = ndb.Key(WebResource, int(uuid))
-        except ValueError as e:
+        # RETRIEVE entity
+        models = {
+            'webresource': WebResource,
+            'indexer': Indexer
+        }
+        if kind in models.keys():
             try:
-                # if the parameter is a Key()
-                k = ndb.Key(urlsafe=uuid)
-            except ProtocolBufferDecodeError as e:
-                return self.json_error_handler(500, exception=repr(e))
+                # if the parameter is an id()
+                k = ndb.Key(models[kind], int(uuid))
+            except ValueError as e:
+                try:
+                    # if the parameter is a Key()
+                    k = ndb.Key(urlsafe=uuid)
+                except ProtocolBufferDecodeError as e:
+                    return self.response.write(
+                        self.json_error_handler(500, exception=repr(e))
+                    )
 
-        resource = WebResource.query().filter(WebResource.key == k).fetch(1)
-        return resource[0]
+            resource = k.get()
+            return resource or None
+        else:
+            raise ValueError('retrieve_a_single_resource(): Wrong kind')
 
 
 class Testing(webapp2.RequestHandler):

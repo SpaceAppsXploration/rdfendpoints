@@ -20,8 +20,8 @@ class JSONBaseHandler(webapp2.RequestHandler):
         :return: Display a JSON as response
         """
         self.response.status = code
-        return self.response.write(
-            json.dumps({"error": 1, "status": code})
-        ) if not exception else self.response.write(
-            json.dumps({"error": 1, "status": code, "exception": exception})
+        return json.dumps(
+            {"error": 1, "status": code}
+        ) if not exception else json.dumps(
+            {"error": 1, "status": code, "exception": exception}
         )
