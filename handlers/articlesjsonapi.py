@@ -172,6 +172,6 @@ class ArticlesJSONv1(webapp2.RequestHandler):
                 }
                 for w in webresources
             ]
-        } if webresources else {"keyword": self.request.get('keyword'), "articles_by_keyword": None}
+        } if webresources else {"keyword": self.request.get('keyword'), "articles_by_keyword": []}
 
         return response

@@ -202,7 +202,7 @@ class WebResource(ndb.Model):
             }
             return results
         return {
-            "keywords": None
+            "keywords": []
         }
 
 
