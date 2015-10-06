@@ -24,6 +24,10 @@ class TagMeService:
 
     @staticmethod
     def return_gen_scopes():
+        """
+        Return terms that define the project's scope
+        :return: list()
+        """
         return ['Aerospace', 'Astrophysics', 'Cosmic_ray', 'Spaceflight', 'Spacecraft', 'Avionics', "Command_and_control",
                 "Geodesy", 'Astronomical_object', 'Astronomy', 'Aircraft', 'Atmosphere',
                 "Navigation", "Radio_navigation", "Satellite", "Spaceflight", "Physics",

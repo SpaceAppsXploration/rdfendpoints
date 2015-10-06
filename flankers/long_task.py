@@ -42,6 +42,11 @@ class storeFeeds(longtask.LongRunningTaskHandler):
     #TO-DO: move memcache in handler Scrawler
     """
     def execute_task(self, *args):
+        """
+        Take a feed's url from the cached list and fetch posts
+        :param args: no arguaments at the moment
+        :return: None
+        """
         from flankers.scrawler import Scrawler
 
         RSS_FEEDS_CACHE = memcache.get('RSS_FEEDS_CACHE')
@@ -69,6 +74,9 @@ class storeFeeds(longtask.LongRunningTaskHandler):
 
 
 class storeTweets(longtask.LongRunningTaskHandler):
+    """
+    Long Task to store tweets
+    """
     i = 0
 
     def recurring(self, timeline):
@@ -79,10 +87,12 @@ class storeTweets(longtask.LongRunningTaskHandler):
 
     def execute_task(self, timeline, remain=list()):
         """
+        Store a tweet in the datastore
+        Storing method: see WebResource.store_tweet() in models.
         #TO-DO: make this recursive
-        :param timeline:
+        :param timeline: a timeline dict() fetched from TW API
         :param remain:
-        :return:
+        :return: None
         """
         for twt in timeline:
             if isinstance(twt, list):
@@ -95,7 +105,16 @@ class storeTweets(longtask.LongRunningTaskHandler):
 
 
 class storeIndexer(longtask.LongRunningTaskHandler):
+    """
+    Long Task to handle indexing of a given resource
+    """
     def execute_task(self, *args):
+        """
+        Index an article.
+        See Indexer class in models.
+        :param args: single object to index and its key
+        :return: None
+        """
         item, key = args
         from flankers.textsemantics import find_related_concepts
         if not (item.title == '' and item.abstract == ''):
@@ -111,7 +130,16 @@ class storeIndexer(longtask.LongRunningTaskHandler):
 
 
 class storeFBposts(longtask.LongRunningTaskHandler):
+    """
+    Long Task to store FB posts
+    """
     def execute_task(self, *args):
+        """
+        Store post, also recursively if response contains paging.
+        Storing method: see WebResource.store_fb_post() in models.
+        :param args: url of a post and the alias of the page that holds it
+        :return: None
+        """
         url, alias = args
 
         def get_wall_recursive(url):

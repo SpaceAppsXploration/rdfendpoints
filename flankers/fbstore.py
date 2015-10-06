@@ -37,7 +37,7 @@ class FBStore(webapp2.RequestHandler):
 
     def get(self):
         try:
-            [self.get_wall_posts(a) for a in aliases]
+            [self.get_wall_posts(a) for a in aliases]  # fetch wall posts for each alias
         except Exception as e:
             raise Exception('FBStore Handler - Error in get(): ' + str(e))
 
@@ -45,10 +45,15 @@ class FBStore(webapp2.RequestHandler):
         return self.response.write('Done')
 
     def get_wall_posts(self, alias):
+        """
+        Start the long task for a given alias
+        :param alias: the alias of the FB page
+        :return: None
+        """
         from flankers.long_task import storeFBposts
 
-        url = 'https://graph.facebook.com/' + alias + '/posts?' + token # + '&limit=5'
-        f = storeFBposts()
+        url = 'https://graph.facebook.com/{}/posts?{}&limit=5'.format(alias, token)
+        f = storeFBposts()  # long task
         f.execute_task(url, alias)
 
 
