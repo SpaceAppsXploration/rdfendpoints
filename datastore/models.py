@@ -139,7 +139,7 @@ class WebResource(ndb.Model):
                 published = time.strptime(published, '%Y-%m-%dT%H:%M:%S')
                 published = datetime(*published[:6])
                 # store id > title, created_time > published, message > abstract
-                w = WebResource(url=url, title=title, abstract=obj['message'].strip(), published=published,
+                w = WebResource(url=url, title=title, abstract=" ".join(obj['message'].strip().split()), published=published,
                                 type_of='fb', in_graph=False)
                 k = w.put()
                 print "fb post stored"
