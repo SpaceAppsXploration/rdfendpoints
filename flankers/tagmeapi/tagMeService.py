@@ -38,9 +38,11 @@ class TagMeService:
         :return: dictionary with a flag message ('spotted') and a loaded JSON from response ('value')
         """
         import json
+        from unidecode import unidecode
+
         endpoint = "http://tagme.di.unipi.it/spot"
 
-        body = str(text.encode('ascii', 'replace'))
+        body = unidecode(text)
 
         params = {
             "key": api_key,
@@ -50,7 +52,7 @@ class TagMeService:
         try:
             answer = json.loads(urllib2.urlopen(url).read())
         except (Exception, UnicodeDecodeError):
-            print(">>>>>>>>>>>>>>>>> ERROR >>>>>>>>>>", text)
+            print(">>>>>>>>>>>>>>>>> ERROR >>>>>>>>>>", url)
             return {"spotted": False, "value": None}
 
         if len(answer["spots"]) != 0:
