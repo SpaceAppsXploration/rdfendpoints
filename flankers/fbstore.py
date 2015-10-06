@@ -45,24 +45,11 @@ class FBStore(webapp2.RequestHandler):
         return self.response.write('Done')
 
     def get_wall_posts(self, alias):
-        url = 'https://graph.facebook.com/' + alias + '/posts?' + token
+        from flankers.long_task import storeFBposts
 
-        def get_wall_recursive(url):
-            response = urllib.urlopen(url)
-            response = json.loads(response.read())
-            if 'error' not in response.keys():
-                for o in response['data']:
-                    WebResource.store_fb_post(alias, o)
-            else:
-                from flankers.errors import RESTerror
-                raise RESTerror('get_wall_recursive(): FB API error')
-
-            if 'paging' not in response.keys() or not response['paging']['next']:
-                return None
-
-            return get_wall_recursive(response['paging']['next'])
-
-        return get_wall_recursive(url)
+        url = 'https://graph.facebook.com/' + alias + '/posts?' + token # + '&limit=5'
+        f = storeFBposts()
+        f.execute_task(url, alias)
 
 
 application = webapp2.WSGIApplication([

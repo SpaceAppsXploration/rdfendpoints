@@ -1,3 +1,5 @@
+import urllib
+import json
 import time
 from bs4 import BeautifulSoup
 import lib.longtask as longtask
@@ -106,4 +108,26 @@ class storeIndexer(longtask.LongRunningTaskHandler):
                     index = Indexer(keyword=l.strip(), webres=key)
                     index.put()
                     print "indexing stored: " + item.url + ">" + l
+
+
+class storeFBposts(longtask.LongRunningTaskHandler):
+    def execute_task(self, *args):
+        url, alias = args
+
+        def get_wall_recursive(url):
+            response = urllib.urlopen(url)
+            response = json.loads(response.read())
+            if 'error' not in response.keys():
+                for o in response['data']:
+                    WebResource.store_fb_post(alias, o)
+            else:
+                from flankers.errors import RESTerror
+                raise RESTerror('get_wall_recursive(): FB API error')
+
+            if 'paging' not in response.keys() or not response['paging']['next']:
+                return None
+
+            return get_wall_recursive(response['paging']['next'])
+
+        return get_wall_recursive(url)
 
