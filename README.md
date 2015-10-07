@@ -3,20 +3,20 @@
 
 This repository is part of the __Chronos' Cloud__:
 <table>
-<th>
+<tr>
 <td>Link</td><td>Repository</td>  
-</th>
-<tr>
-<td>[Homepage](http://www.projectchronos.eu)</td><td>[cloudService](https://github.com/SpaceAppsXploration/clouService)</td>
 </tr>
 <tr>
-<td>[SPARQL and Hypermedia](http://hypermedia.projectchronos.eu)</td><td>[rdfendpoints](https://github.com/SpaceAppsXploration/rdfendpoints)</td>
+<td>Homepage: http://www.projectchronos.eu</td><td>https://github.com/SpaceAppsXploration/clouService</td>
 </tr>
 <tr>
-<td>[Scientific & Technical Information](http://taxonomy.projectchronos.eu)</td><td>[pramantha-nodejs-backend](https://github.com/SpaceAppsXploration/pramantha-nodejs-backend)</td>
+<td>SPARQL and Hypermedia: http://hypermedia.projectchronos.eu</td><td>https://github.com/SpaceAppsXploration/rdfendpoints</td>
 </tr>
 <tr>
-<td>[RDF Vocabularies](http://ontology.projectchronos.eu)</td><td>[ontologies](https://github.com/SpaceAppsXploration/ontologies) and [RDFvocab](https://github.com/SpaceAppsXploration/RDFvocab)</td>  
+<td>Scientific & Technical Information: http://taxonomy.projectchronos.eu</td><td>https://github.com/SpaceAppsXploration/pramantha-nodejs-backend</td>
+</tr>
+<tr>
+<td>RDF Vocabularies: http://ontology.projectchronos.eu</td><td>https://github.com/SpaceAppsXploration/ontologies and https://github.com/SpaceAppsXploration/RDFvocab</td>  
 </tr>
 </table>
 
