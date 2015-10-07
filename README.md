@@ -5,6 +5,7 @@ This repository is part of the __Chronos' Cloud__:
 <table>
 <th>
 <td>Link</td><td>Repository</td>  
+</th>
 <tr>
 <td>[Homepage](http://www.projectchronos.eu)</td><td>[cloudService](https://github.com/SpaceAppsXploration/clouService)</td>
 </tr>
