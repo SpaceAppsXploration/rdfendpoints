@@ -56,6 +56,12 @@ class WebResource(ndb.Model):
                 item.title = " ".join(entry['title'].encode('ascii', 'replace').split())
 
             print item.title
+
+            if str(entry['link']).endswith('pdf'):
+                item.type_of = 'pdf'
+            elif 'arxiv.com' in str(entry['link']):
+                item.type_of = 'paper'
+
             item.url = str(entry['link'])
             item.stored = datetime(*localtime()[:6])
             item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
