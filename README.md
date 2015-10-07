@@ -1,14 +1,25 @@
 # Project Chronos
 ## rdfendpoints
 
-This repository is part of the Chronos' Cloud:
-* Link  | Repository  
-* [Homepage](http://www.projectchronos.eu)  | [cloudService](https://github.com/SpaceAppsXploration/clouService)
-* [SPARQL and Hypermedia](http://hypermedia.projectchronos.eu) | [rdfendpoints](https://github.com/SpaceAppsXploration/rdfendpoints)
-* [Scientific & Technical Information](http://taxonomy.projectchronos.eu)  | [pramantha-nodejs-backend](https://github.com/SpaceAppsXploration/pramantha-nodejs-backend)
-* [RDF Vocabularies](http://ontology.projectchronos.eu)  | [ontologies](https://github.com/SpaceAppsXploration/ontologies) and [RDFvocab](https://github.com/SpaceAppsXploration/RDFvocab)  
+This repository is part of the __Chronos' Cloud__:
+<table>
+<th>
+<td>Link</td><td>Repository</td>  
+<tr>
+<td>[Homepage](http://www.projectchronos.eu)</td><td>[cloudService](https://github.com/SpaceAppsXploration/clouService)</td>
+</tr>
+<tr>
+<td>[SPARQL and Hypermedia](http://hypermedia.projectchronos.eu)</td><td>[rdfendpoints](https://github.com/SpaceAppsXploration/rdfendpoints)</td>
+</tr>
+<tr>
+<td>[Scientific & Technical Information](http://taxonomy.projectchronos.eu)</td><td>[pramantha-nodejs-backend](https://github.com/SpaceAppsXploration/pramantha-nodejs-backend)</td>
+</tr>
+<tr>
+<td>[RDF Vocabularies](http://ontology.projectchronos.eu)</td><td>[ontologies](https://github.com/SpaceAppsXploration/ontologies) and [RDFvocab](https://github.com/SpaceAppsXploration/RDFvocab)</td>  
+</tr>
+</table>
 
-Project Chronos is realizing also different clients based on this data:
+Project Chronos is realizing also different __clients__ working on top of this server:
 * [XPreader android](https://github.com/SpaceAppsXploration/android-xpreader): a news feed reader with semantic indexing for Android
 * [XPreader js](https://github.com/SpaceAppsXploration/xpreader-client): a news feed reader with semantic indexing for modern browsers
 * [XPgraph-experience](https://github.com/SpaceAppsXploration/xpgraph-experience): a gamified experience about space exploration
