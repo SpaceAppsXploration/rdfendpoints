@@ -18,7 +18,7 @@ class WebResource(ndb.Model):
     url = ndb.StringProperty()
     stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
     published = ndb.DateTimeProperty(default=None)
-    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link', 'pdf', 'fb'], default='feed')
+    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link', 'pdf', 'paper', 'fb'], default='feed')
     in_graph = ndb.BooleanProperty(default=False)
 
     @classmethod
