@@ -29,7 +29,7 @@ def memcache_webresource_query():
         query = memcache.get(key=mkey)
 
     ### by now we exclude media and links children resources (resource with empty title)
-    return query.filter(WebResource.title != "").order(WebResource.title, WebResource.key, -WebResource.stored)
+    return query.filter(WebResource.type_of != 'link').order(WebResource.type_of, WebResource.key, -WebResource.stored)
 
 
 def memcache_keywords(url):
