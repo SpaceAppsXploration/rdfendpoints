@@ -1,7 +1,22 @@
 # Project Chronos
 ## rdfendpoints
 
+This repository is part of the Chronos' Cloud:
+* Link  | Repository  
+* [Homepage](http://www.projectchronos.eu)  | [cloudService](https://github.com/SpaceAppsXploration/clouService)
+* [SPARQL and Hypermedia](http://hypermedia.projectchronos.eu) | [rdfendpoints](https://github.com/SpaceAppsXploration/rdfendpoints)
+* [Scientific & Technical Information](http://taxonomy.projectchronos.eu)  | [pramantha-nodejs-backend](https://github.com/SpaceAppsXploration/pramantha-nodejs-backend)
+* [RDF Vocabularies](http://ontology.projectchronos.eu)  | [ontologies](https://github.com/SpaceAppsXploration/ontologies) and [RDFvocab](https://github.com/SpaceAppsXploration/RDFvocab)  
+
+Project Chronos is realizing also different clients based on this data:
+* [XPreader android](https://github.com/SpaceAppsXploration/android-xpreader): a news feed reader with semantic indexing for Android
+* [XPreader js](https://github.com/SpaceAppsXploration/xpreader-client): a news feed reader with semantic indexing for modern browsers
+* [XPgraph-experience](https://github.com/SpaceAppsXploration/xpgraph-experience): a gamified experience about space exploration
+
+## This repository
 Check the [repo Issues](https://github.com/SpaceAppsXploration/rdfendpoints/issues) to know what's going on.
+
+Forked from [mr-niels-christensen/rdflib-appengine](https://github.com/mr-niels-christensen/rdflib-appengine)
 
 ## To-Do
 * Write tests! (:
@@ -15,7 +30,7 @@ Check the [repo Issues](https://github.com/SpaceAppsXploration/rdfendpoints/issu
 ## Powered by 
 <img src="https://www.jetbrains.com/pycharm/docs/logo_pycharm.png" height="50" width="140" >
 <img src="http://www.faviki.com/img/dbpedia_powered.gif" height="50" width="75" >
-<img src="http://acube.di.unipi.it/wp-content/uploads/2011/07/powered_by_tagme.png" height="50" width="100" >
+<img src="http://acube.di.unipi.it/wp-content/uploads/2011/07/powered_by_tagme.png" height="50" width="115" >
 
 TagMe API by:<br/>
 Paolo Ferragina, Ugo Scaiella<br/>
@@ -25,14 +40,3 @@ TagMe research paper:<br/>
 Rdf-lib Translator:<br/>
 University of Munchen, [Alex Stolz, Bene Rodriguez-Castro, Martin Hepp](http://arxiv.org/abs/1312.4704)
 <br/><br/>
-
-## About
-This repo is part of the Chronos' Cloud:
-* Link  | Repository  
-* [Homepage](http://www.projectchronos.eu)  | [cloudService](https://github.com/SpaceAppsXploration/clouService)
-* [SPARQL and Hypermedia](http://hypermedia.projectchronos.eu) | [rdfendpoints](https://github.com/SpaceAppsXploration/rdfendpoints)
-* [Scientific & Technical Information](http://taxonomy.projectchronos.eu)  | [pramantha-nodejs-backend](https://github.com/SpaceAppsXploration/pramantha-nodejs-backend)
-* [RDF Vocabularies](http://ontology.projectchronos.eu)  | [ontologies](https://github.com/SpaceAppsXploration/ontologies) and [RDFvocab](https://github.com/SpaceAppsXploration/RDFvocab)  
-
-
-Forked from [mr-niels-christensen/rdflib-appengine](https://github.com/mr-niels-christensen/rdflib-appengine)
