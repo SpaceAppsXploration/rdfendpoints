@@ -18,7 +18,7 @@ class WebResource(ndb.Model):
     url = ndb.StringProperty()
     stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
     published = ndb.DateTimeProperty(default=None)
-    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link', 'pdf', 'paper', 'fb'], default='feed')
+    type_of = ndb.StringProperty(choices=['feed', 'tweet', 'media', 'link', 'pdf', 'paper', 'fb', 'movie'], default='feed')
     in_graph = ndb.BooleanProperty(default=False)
 
     @classmethod
@@ -66,10 +66,11 @@ class WebResource(ndb.Model):
             item.stored = datetime(*localtime()[:6])
             item.published = datetime(*entry['published_parsed'][:6]) if 'published_parsed' in entry.keys() else item.stored
 
+            abstract = entry['summary'].replace('\n', '')
             try:
-                item.abstract = unidecode(unicode(" ".join(entry['summary'].strip().split()))) if entry['summary'] is not None else ""
+                item.abstract = unidecode(unicode(" ".join(abstract.strip().split()))) if entry['summary'] is not None else ""
             except:
-                item.abstract = " ".join(entry['summary'].strip().encode('ascii', 'replace').split()) if entry['summary'] is not None else ""
+                item.abstract = " ".join(abstract.strip().encode('ascii', 'replace').split()) if entry['summary'] is not None else ""
 
             i = item.put()
 
@@ -145,7 +146,11 @@ class WebResource(ndb.Model):
                 published = time.strptime(published, '%Y-%m-%dT%H:%M:%S')
                 published = datetime(*published[:6])
                 # store id > title, created_time > published, message > abstract
-                w = WebResource(url=url, title=title, abstract=" ".join(obj['message'].strip().split()), published=published,
+
+                abstract = obj['message'].replace('\n', '')
+                abstract = " ".join(abstract.strip().split())
+
+                w = WebResource(url=url, title=title, abstract=abstract, published=published,
                                 type_of='fb', in_graph=False)
                 k = w.put()
                 print "fb post stored"
