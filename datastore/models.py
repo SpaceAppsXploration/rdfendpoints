@@ -192,6 +192,22 @@ class WebResource(ndb.Model):
         result = {
             "uuid": self.key.id()
         }
+
+        ### find a parent if entity is a child
+        # try:
+        #     result['parent'] = self.key.parent().id()
+        # except AttributeError:
+        #    result['parent'] = None
+
+        ### find and get children if present
+        # ancestor_query = WebResource.query(ancestor=self.key).fetch()
+        #result['children'] = [
+        #    ndb.Key('WebResource', self.key.id(), 'WebResource', e.key.id()).get().key.id()
+        #    if len(ancestor_query) <= 2 else []
+        #    for e in ancestor_query[1:]
+        #]
+
+        # serializing other properties
         for prop, value in self.to_dict().items():
             # If this is a key, you might want to grab the actual model.
             if prop == 'url':
