@@ -33,6 +33,10 @@ handlers:
   script: flankers.fbstore.application
   login: admin
 
+- url: /cron/storeyoutube
+  script: flankers.youtubestore.application
+  login: admin
+
 - url: /remoteapi
   script: google.appengine.ext.remote_api.handler.application
   login: admin

@@ -1,4 +1,5 @@
 import json
+import time
 from time import localtime
 from datetime import datetime
 
@@ -103,7 +104,7 @@ class WebResource(ndb.Model):
 
         link = twt.urls[0].expanded_url if len(twt.urls) != 0 else None
         text = twt.text if len(twt.text) > 35 else None
-        import time
+
         published = str(twt._created_at)[:19] + str(twt._created_at)[25:]
         published = time.strptime(published, '%a %b %d %H:%M:%S %Y')
         published = datetime(*published[:6])
@@ -135,7 +136,6 @@ class WebResource(ndb.Model):
         Store a FB post, and its links
         :param obj: a post as a dict from the FB API
         """
-        import time
         from flankers.tools import spot_urls
 
         if 'message' in obj.keys():
@@ -164,6 +164,26 @@ class WebResource(ndb.Model):
                             l.put()
                             print "link stored"
                 return w
+
+    @classmethod
+    def store_youtube_video(cls, obj):
+        """
+        Store a Youtube video
+        :param obj: a video as a dict from the Youtube API
+        """
+        url = 'http://www.youtube.com/' + obj['id']['videoId']
+
+        if cls.query().filter(cls.url == url).count() == 0:
+            title = obj['snippet']['title']
+            abstract = obj['snippet']['description'].replace('\n', '')
+            published = str(obj['snippet']['publishedAt'][0:19])
+            published = time.strptime(published, '%Y-%m-%dT%H:%M.%S')
+            published = datetime(*published[:6])
+            v = WebResource(title=title, url=url, abstract=abstract, published=published, type_of='documentary')
+            v.put()
+
+            return v
+
 
     def dump_to_json(self):
         """

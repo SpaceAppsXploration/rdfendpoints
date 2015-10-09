@@ -4,12 +4,15 @@ cron:
   schedule: every 30 minutes
 - description: indexing
   url: /cron/indexing
-  schedule: every 120 minutes
+  schedule: every 60 minutes
 - description: storetweets
   url: /cron/storetweets
   schedule: every 90 minutes
 - description: storefb
   url: /cron/storefb
+  schedule: every 480 minutes
+- description: storeyoutube
+  url: /cron/storeyoutube
   schedule: every 480 minutes
 - description: n3caching
   url: /cron/n3caching
