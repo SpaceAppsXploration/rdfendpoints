@@ -6,6 +6,7 @@ from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from datastore.models import WebResource, Indexer
 
+from handlers.basehandler import BaseHandler
 from config.config import _PATH, articles_api_version
 
 __author__ = 'Lorenzo'
@@ -28,8 +29,8 @@ def memcache_webresource_query():
     else:
         query = memcache.get(key=mkey)
 
-    ### by now we exclude media and links children resources (resource with empty title)
-    return query.filter(WebResource.type_of != 'link').order(WebResource.type_of, WebResource.key, -WebResource.stored)
+    ### Note: http://stackoverflow.com/a/28627068/2536357
+    return query.order(-WebResource.stored)
 
 
 def memcache_keywords(url):
@@ -87,7 +88,7 @@ def memcache_articles_by_keyword(kwd):
     return results
 
 
-class ArticlesJSONv1(webapp2.RequestHandler):
+class ArticlesJSONv1(BaseHandler):
     """
     Articles JSON API
     See https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API
@@ -100,8 +101,8 @@ class ArticlesJSONv1(webapp2.RequestHandler):
 
         :param name: define namespace of the request (getting articles or keywords), can be a void string
         """
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Content-Type'] = 'application/json'
+        self.response.headers.add_header("Access-Control-Allow-Origin", "*")
+        self.response.headers.add_header("Content-Type", "application/json")
 
         if len(name) == 0 and not self.request.get('url'):
             # serve articles
