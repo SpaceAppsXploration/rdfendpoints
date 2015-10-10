@@ -173,7 +173,7 @@ class WebResource(ndb.Model):
         """
         print obj
         if 'videoId' in obj['id']:  # check if object is a video (not a channel)
-            url = 'http://www.youtube.com/' + obj['id']['videoId']
+            url = 'http://www.youtube.com/watch?v=' + obj['id']['videoId']
 
             if cls.query().filter(cls.url == url).count() == 0:
                 title = obj['snippet']['title']
