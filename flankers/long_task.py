@@ -133,6 +133,8 @@ class storeFBposts(longtask.LongRunningTaskHandler):
     """
     Long Task to store FB posts
     """
+    counter = 0
+
     def execute_task(self, *args):
         """
         Store post, also recursively if response contains paging.
@@ -152,9 +154,10 @@ class storeFBposts(longtask.LongRunningTaskHandler):
                 from flankers.errors import RESTerror
                 raise RESTerror('get_wall_recursive(): FB API error')
 
-            if 'paging' not in response.keys() or not response['paging']['next']:
+            if 'paging' not in response.keys() or not response['paging']['next'] or self.counter == 10:
                 return None
 
+            self.counter += 1
             return get_wall_recursive(response['paging']['next'])
 
         return get_wall_recursive(url)
