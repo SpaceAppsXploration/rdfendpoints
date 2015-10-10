@@ -9,10 +9,13 @@ from config.youtube_secret import _KEY, YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VE
 from datastore.models import WebResource
 
 
-params = {'q': 'space+exploration+documentary',
-          'publishedAfter': '2005-01-01T00:00:00Z',
-          'publishedBefore': '2005-01-01T00:00:00Z',
-          'order': 'relevance'}
+params = {
+    'part': 'id, snippet',
+    'q': 'space+exploration+documentary',
+    'publishedAfter': '2005-01-01T00:00:00Z',
+    'publishedBefore': '2005-01-01T00:00:00Z',
+    'order': 'relevance'
+}
 
 ### Advanced operators: https://support.google.com/youtube/answer/2685977?hl=en
 # 'q': '##"some tag"' (double # operator)
@@ -35,7 +38,7 @@ class YoutubeStore(webapp2.RequestHandler):
         def fetch_data(client):
             data = client.search().list(
                 q=params['q'],
-                part=params['params'],
+                part=params['part'],
                 maxResults=200,
                 publishedAfter='2005-01-01T00:00:00Z'
             ).execute()
