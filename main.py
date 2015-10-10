@@ -33,13 +33,14 @@ from flankers.graphtools import query
 #
 # handlers loaded from handlers/
 #
+from handlers.basehandler import BaseHandler
 from handlers.sparql import Querying
 from handlers.articlesjsonapi import ArticlesJSONv1
 from handlers.servicehandlers import DataStoreOperationsAPI
 from handlers.dataN3 import PublishWebResources, PublishConcepts, PublishSpaceDocs
 
 
-class Hello(webapp2.RequestHandler):
+class Hello(BaseHandler):
     """
     / GET: Homepage
     """
