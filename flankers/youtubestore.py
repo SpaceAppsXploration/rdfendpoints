@@ -1,5 +1,6 @@
 import webapp2
 import urllib
+import json
 
 from apiclient.discovery import build
 from optparse import OptionParser
@@ -39,7 +40,7 @@ class YoutubeStore(webapp2.RequestHandler):
             data = client.search().list(
                 q=params['q'],
                 part=params['part'],
-                maxResults=200,
+                maxResults=50,
                 publishedAfter='2005-01-01T00:00:00Z'
             ).execute()
 
@@ -49,11 +50,13 @@ class YoutubeStore(webapp2.RequestHandler):
             WebResource.store_youtube_video(obj)
 
         def store_response(resp):
-            for video in resp.items:
+            print isinstance(resp['items'], list)
+            for video in resp['items']:
                 store_video(video)
 
         client = build_client()
         response = fetch_data(client)
+        #print response
         store_response(response)
 
         # note: pageToken = response.nextPageToken

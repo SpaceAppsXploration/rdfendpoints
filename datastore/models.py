@@ -171,18 +171,21 @@ class WebResource(ndb.Model):
         Store a Youtube video
         :param obj: a video as a dict from the Youtube API
         """
-        url = 'http://www.youtube.com/' + obj['id']['videoId']
+        print obj
+        if 'videoId' in obj['id']:  # check if object is a video (not a channel)
+            url = 'http://www.youtube.com/' + obj['id']['videoId']
 
-        if cls.query().filter(cls.url == url).count() == 0:
-            title = obj['snippet']['title']
-            abstract = obj['snippet']['description'].replace('\n', '')
-            published = str(obj['snippet']['publishedAt'][0:19])
-            published = time.strptime(published, '%Y-%m-%dT%H:%M.%S')
-            published = datetime(*published[:6])
-            v = WebResource(title=title, url=url, abstract=abstract, published=published, type_of='documentary')
-            v.put()
+            if cls.query().filter(cls.url == url).count() == 0:
+                title = obj['snippet']['title']
+                abstract = obj['snippet']['description'].replace('\n', '')
+                published = str(obj['snippet']['publishedAt'][0:19])
+                published = time.strptime(published, '%Y-%m-%dT%H:%M:%S')
+                published = datetime(*published[:6])
+                v = WebResource(title=title, url=url, abstract=abstract, published=published, type_of='movie')
+                v.put()
 
-            return v
+                return v
+        return None
 
 
     def dump_to_json(self):
