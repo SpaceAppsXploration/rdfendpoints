@@ -174,9 +174,9 @@ class WebResource(ndb.Model):
         print obj
         if 'videoId' in obj['id']:  # check if object is a video (not a channel)
             url = 'http://www.youtube.com/watch?v=' + obj['id']['videoId']
+            title = obj['snippet']['title']
 
-            if cls.query().filter(cls.url == url).count() == 0:
-                title = obj['snippet']['title']
+            if cls.query().filter(cls.url == url).count() == 0 and cls.query().filter(cls.title == title).count() == 0:
                 abstract = obj['snippet']['description'].replace('\n', '')
                 published = str(obj['snippet']['publishedAt'][0:19])
                 published = time.strptime(published, '%Y-%m-%dT%H:%M:%S')
@@ -186,7 +186,6 @@ class WebResource(ndb.Model):
 
                 return v
         return None
-
 
     def dump_to_json(self):
         """
