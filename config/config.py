@@ -20,7 +20,7 @@ _VOCS = {
 }
 
 
-_CLIENT_TOKEN = "********************************"
+_CLIENT_TOKEN = "******"
 
 _ENV = {'offline': {'_SERVICE': 'http://localhost:8080',
                     '_DEBUG': True},
@@ -44,12 +44,18 @@ def set_env_variables():
 _SERVICE, _REST_SERVICE, _COMPONENTS_URL, _HYDRA_VOCAB, _DEBUG = set_env_variables()
 
 
-def articles_api_version(ver):
-    return _ARTICLES_API[ver]
+def articles_api_version(ver, endpoint='ALL'):
+    if endpoint in _ARTICLES_API.keys():
+        return _ARTICLES_API[endpoint][ver]
 
 _ARTICLES_API = {
-    "03": _SERVICE + "/articles/?api=true&",
-    "04": _SERVICE + "/articles/v04/"
+    "ALL": {
+        "03": _SERVICE + "/articles/?api=true&",
+        "04": _SERVICE + "/articles/v04/"
+    },
+    "TYPE_OF": {
+        "04": _SERVICE + "/articles/v04/article"
+    }
 }
 
 _CRAWLING_POST = {'local': 'http://localhost:8080/database/crawling/store',
@@ -58,3 +64,11 @@ _CRAWLING_POST = {'local': 'http://localhost:8080/database/crawling/store',
 _PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
 
 _XPREADER_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'xpreader-client')
+
+# Given slug for different query types
+_MEMCACHE_SLUGS = {
+    'ALL': 'WebResource_all',
+    'TYPE_OF': 'Articles_type_of',
+    'KEYWORDS': 'Keywords_for_',
+    'KWD_BY_ARTICLE': 'Keywords_'
+}
