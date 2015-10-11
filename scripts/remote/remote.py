@@ -84,11 +84,14 @@ def get_curling(url, params=dict()):
 
     buffer = StringIO()
     c = pycurl.Curl()
-    c.setopt(c.URL, url)
     c.setopt(c.WRITEDATA, buffer)
     c.setopt(pycurl.FOLLOWLOCATION, 1)
-    c.setopt(c.URL, url + '?' + urllib.urlencode(params))
-    print url + '?' + urllib.urlencode(params)
+    if params:
+        c.setopt(c.URL, url + '?' + urllib.urlencode(params))
+    else:
+        c.setopt(c.URL, url)
+
+    print "pyCURLing url:" + str(c.getinfo(pycurl.EFFECTIVE_URL))
     # For older PycURL versions:
     #c.setopt(c.WRITEFUNCTION, buffer.write)
     c.perform()

@@ -132,6 +132,7 @@ class ArticlesJSONv1(JSONBaseHandler):
         """
         from config.config import articles_api_version
 
+        # define the right url for the endpoint
         if self._query_type == 'ALL':
             url = articles_api_version(self._API_VERSION) + '?bookmark='
         elif self._query_type == 'TYPE_OF':
@@ -140,6 +141,7 @@ class ArticlesJSONv1(JSONBaseHandler):
         else:
             raise ValueError('JSONBaseHandler.build_response(): self._query_type value error')
 
+        # return the dictionary output
         return {
             'articles': [
                 webres.dump_to_json()

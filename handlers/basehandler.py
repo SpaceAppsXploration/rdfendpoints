@@ -16,7 +16,10 @@ from datastore.models import WebResource, Indexer
 
 class JSONBaseHandler(webapp2.RequestHandler):
     """
-    Extends RequestHandler with new custom methods
+    Extends RequestHandler with new custom methods for:
+    - Error Handling
+    - Handling different queries with the same handler
+    - Implement memecache for the operations in the handler
     """
 
     def __init__(self, *args, **kwargs):
@@ -27,10 +30,11 @@ class JSONBaseHandler(webapp2.RequestHandler):
 
     def json_error_handler(self, code, exception=None):
         """
-        Print out error in JSON format.
+        Print out error in JSON as a readable dictionary.
+
         :param code: status code to display (int)
         :param exception: error message
-        :return: Display a JSON as response
+        :return: a dict()
         """
         self.response.status = code
         return json.dumps(
@@ -42,6 +46,8 @@ class JSONBaseHandler(webapp2.RequestHandler):
     def memcache_webresource_query(self):
         """
         Get or Set in the memcache the full query of WebResources.
+
+        It's used by all the endpoints to fetch all the data.
         Updates every six hours (18000 secs)
         :return: Query object or None
         """
@@ -57,7 +63,9 @@ class JSONBaseHandler(webapp2.RequestHandler):
 
     def memcache_keywords(self, url):
         """
-        Get or set in the memcache resulting keywords for a given url
+        Get or set in the memcache resulting keywords for a given url.
+
+        GET /articles/<version>/?url=<resource url>
         :param url: the url of the WebResource
         :return: a Query object or None
         """
@@ -77,7 +85,10 @@ class JSONBaseHandler(webapp2.RequestHandler):
 
     def memcache_articles_pagination(self, query, bkmark):
         """
-        Get or set in the memcache single page for articles
+        Get or set in the memcache single page for articles.
+
+        Store different keys based on cursor bookmarks. If the requested data is not in
+        the cache, build the response (build_response) and cache it
         :param query: the paged query
         :param bkmark: the bookmark's key of the actual page
         :return: dict() with an array of articles and a url to the next bookmarked page
@@ -92,7 +103,9 @@ class JSONBaseHandler(webapp2.RequestHandler):
 
     def memcache_articles_by_keyword(self, kwd):
         """
-        Get or set in the memcache articles related to a given keyword
+        Get or set in the memcache articles related to a given keyword.
+
+        GET /articles/<version>/?keyword=<some keyword>
         :param kwd: a keyword
         :return: a list
         """
@@ -107,7 +120,7 @@ class JSONBaseHandler(webapp2.RequestHandler):
 
     def build_response(self, query, bookmark):
         """
-        Extends super().build_response
+        To be extended in the handler
         :param query: a Query or a Cursor
         :param bookmark: a cursor's bookamrk or None
         """
