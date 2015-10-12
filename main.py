@@ -78,18 +78,22 @@ class Testing(webapp2.RequestHandler):
 #
 ### Handlers Order:
 # 1. Test handler
-# 2. Articles JSON API
-# 3. Datastore Operations private API
-# 4. SPARQL endpoint
-# 5. NTriples API (WebResource)
-# 6. NTriples API (Taxonomy concepts)
-# 7. NTriples API (Taxonomy DBpedia terms)
-# 8. Homepage
+# 2. Keywords Filter-By JSON API
+# 3. Articles Filter-By JSON API
+# 4. Articles Base JSON API
+# 5. Datastore Operations private API
+# 6. SPARQL endpoint
+# 7. NTriples API (WebResource)
+# 8. NTriples API (Taxonomy concepts)
+# 9. NTriples API (Taxonomy DBpedia terms)
+# 10. Homepage
 #
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
-    webapp2.Route('/articles/v04/<name:\w*>', ArticlesJSONv1),
+    webapp2.Route('/articles/v04/keywords/by', ArticlesJSONv1),
+    webapp2.Route('/articles/v04/by', ArticlesJSONv1),
+    webapp2.Route('/articles/v04/', ArticlesJSONv1),
     webapp2.Route('/datastore/<name:[a-z]+>', DataStoreOperationsAPI),
     webapp2.Route('/sparql', Querying),
     webapp2.Route('/data/webresource/<key:[a-zA-Z0-9-_=]+>', PublishWebResources),

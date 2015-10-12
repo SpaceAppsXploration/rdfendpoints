@@ -9,9 +9,13 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
-- url: /(.*\.(html|js|css))$
-  static_files: static/\1
+- url: /(.*\.(html|js|css|json|png|woff|woff2|ttf))$
+  static_files: static/docs/\1
   upload: static/.*\.(html|js|css)$
+
+- url: /docs
+  static_files: static/docs/index.html
+  upload: static/index.html
 
 - url: /cron/startcrawling
   script: flankers.scrawler.application

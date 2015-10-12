@@ -10,7 +10,10 @@ __author__ = 'Lorenzo'
 def test_integrity(res):
     try:
         res = json.loads(res)
-        return res
+        if 'error' not in res.keys():
+            return res
+        else:
+            raise Exception
     except Exception:
         print "the endpoint response was in the wrong format or status 400 or 500"
         print res
@@ -85,7 +88,7 @@ class HTTPendpointsTest(unittest.TestCase):
         import urllib
         env = self.test_env
 
-        base_url = _ENV[env]['_SERVICE'] + "/articles/" + _VERSION + "/?type_of=media"
+        base_url = _ENV[env]['_SERVICE'] + "/articles/" + _VERSION + "/by?type=fb"
 
         first = get_curling(base_url)
         first = test_integrity(first)
@@ -128,7 +131,7 @@ class HTTPendpointsTest(unittest.TestCase):
         pass
 
     def runTest(self):
-        run = HTTPendpointsTest(env='online')
+        run = HTTPendpointsTest(env='offline')
         #run.test_sparql()
         #run.test_articles_api_base_view()
         run.test_articles_api_type_view()

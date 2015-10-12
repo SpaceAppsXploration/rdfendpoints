@@ -8,10 +8,6 @@ from config.config import _PATH, articles_api_version, _MEMCACHE_SLUGS
 
 __author__ = 'Lorenzo'
 
-_VERSION = "04"
-
-_MCACHE_SLUG = "v04_"
-
 
 class ArticlesJSONv1(JSONBaseHandler):
     """
@@ -19,7 +15,12 @@ class ArticlesJSONv1(JSONBaseHandler):
     See https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API
     """
 
-    def get(self, name):
+    def __init__(self, *args, **kwargs):
+        super(ArticlesJSONv1, self).__init__(*args, **kwargs)
+        self._VERSION = 'v04'
+        self._BASEPATH = '/articles/' + self._VERSION + '/'
+
+    def get(self, obj=None):
         """
         GET /articles/v04/<name>
 
@@ -30,23 +31,73 @@ class ArticlesJSONv1(JSONBaseHandler):
         self.response.headers.add_header("Access-Control-Allow-Origin", "*")
         self.response.headers.add_header("Content-Type", "application/json")
 
-        if len(name) == 0 and not self.request.get('url') and not self.request.get('type_of'):
-            # serve articles
+        # if path = / --> Base
+        # if path = /by --> ?type or ?keyword
+        # if path = /keywords/by ---> ?url
+
+        if self.request.path == self._BASEPATH:
+            # serve Articles Base
             setattr(self, '_query_type', 'ALL')
-            setattr(self, '_query', self.memcache_webresource_query())
-            #print self._query_type
+            setattr(self,
+                    '_query',
+                    self.memcache_webresource_query().order(-WebResource.published))
+
             return self.response.out.write(
                 json.dumps(
-                    self.return_paginated_articles()
+                    self.return_paginated_articles(),
+                    indent=2
                 )
             )
-        elif len(name) == 0 and self.request.get('url'):
-            # serve keywords for a given article's url
-            response = self.memcache_keywords(self.request.get("url"))
-            return self.response.out.write(
-                json.dumps(response)
-            )
-        elif isinstance(name, int):
+        elif self.request.path == self._BASEPATH + 'by':
+            if self.request.get('type'):
+                # serve Articles by type
+                if self.request.get('type') in tuple(WebResource.type_of._choices):
+                    # set global handler attributes for the handler instance
+                    setattr(self, '_query_type', 'TYPE_OF')
+                    setattr(self,
+                            '_query',
+                            self._query.filter(WebResource.type_of == self.request.get('type')).order(WebResource.type_of, -WebResource.published))
+
+                    print self._query_type
+
+                    response = self.return_paginated_articles()
+                    return self.response.out.write(
+                        json.dumps(
+                            response,
+                            indent=2
+                        )
+                    )
+                else:
+                    return self.response.out.write(
+                        self.json_error_handler(404, 'incorrect "type" parameter value')
+                    )
+            elif self.request.get('keyword'):
+                # serve articles by keyword
+                return self.response.out.write(
+                    json.dumps(
+                        self.return_articles_by_keyword(self.request.get('keyword')),
+                        indent=2
+                    )
+                )
+            else:
+                return self.response.out.write(
+                    self.json_error_handler(404, 'need to define a ?type or a ?keyword')
+                )
+        elif self.request.path == self._BASEPATH + 'keywords/by':
+            if self.request.get('url'):
+                # serve keywords for a given article's url
+                response = self.memcache_keywords(self.request.get('url'))
+                return self.response.out.write(
+                    json.dumps(
+                        response,
+                        indent=2
+                    )
+                )
+            else:
+                return self.response.out.write(
+                    self.json_error_handler(404, 'need to define a ?url')
+                )
+        elif isinstance(obj, int):
             # serve a single article object by id
             self.response.set_status(404)
             response = {
@@ -54,29 +105,11 @@ class ArticlesJSONv1(JSONBaseHandler):
                 "status": "404"
             }
             return self.response.out.write(
-                json.dumps(response)
-            )
-        elif name == 'keywords' and self.request.get('keyword'):
-            # serve articles by keyword
-            return self.response.out.write(
-                json.dumps(self.return_articles_by_keyword())
-            )
-        elif len(name) == 0 and self.request.get('type_of'):
-            if self.request.get('type_of') in tuple(WebResource.type_of._choices):
-                # set global handler attributes for the handler instance
-                setattr(self, '_query_type', 'TYPE_OF')
-                setattr(self, '_query', self._query.filter(WebResource.type_of == self.request.get('type_of')).order(WebResource.type_of, -WebResource.published))
-
-                print self._query_type
-
-                response = self.return_paginated_articles()
-                return self.response.out.write(
-                    json.dumps(response)
+                json.dumps(
+                    response,
+                    indent=2
                 )
-            else:
-                return self.response.out.write(
-                    self.json_error_handler(404, 'incorrect "type_of" parameter value')
-                )
+            )
         else:
             return self.response.out.write(
                 self.json_error_handler(404, 'wrong url')
@@ -109,20 +142,17 @@ class ArticlesJSONv1(JSONBaseHandler):
 
         return response
 
-    def return_articles_by_keyword(self):
+    def return_articles_by_keyword(self, kwd):
         # fetch entities
-        webresources = self.memcache_articles_by_keyword(self.request.get('keyword'))
+        webresources = self.memcache_articles_by_keyword(kwd)
 
         response = {
-            "keyword": self.request.get('keyword'),
-            "articles_by_keyword": [
-                {
-                    "article": w.dump_to_json(),
-                    "uuid": w.key.id()
-                }
+            "keyword": kwd,
+            "articles": [
+                w.dump_to_json()
                 for w in webresources
             ]
-        } if webresources else {"keyword": self.request.get('keyword'), "articles_by_keyword": []}
+        } if webresources else {"keyword": kwd, "articles_by_keyword": []}
 
         return response
 
@@ -136,8 +166,8 @@ class ArticlesJSONv1(JSONBaseHandler):
         if self._query_type == 'ALL':
             url = articles_api_version(self._API_VERSION) + '?bookmark='
         elif self._query_type == 'TYPE_OF':
-            url = articles_api_version(self._API_VERSION) + '?type_of=' +\
-                self.request.get('type_of') + '&bookmark='
+            url = articles_api_version(self._API_VERSION) + 'by?type=' +\
+                self.request.get('type') + '&bookmark='
         else:
             raise ValueError('JSONBaseHandler.build_response(): self._query_type value error')
 

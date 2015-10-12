@@ -214,7 +214,7 @@ class WebResource(ndb.Model):
             # If this is a key, you might want to grab the actual model.
             if prop == 'url':
                 result[prop] = value
-                result['keywords_url'] = articles_api_version("04") + '?url=' + value
+                result['keywords_url'] = articles_api_version("04") + 'keywords/by?url=' + value
             if isinstance(self, ndb.Model):
                 if isinstance(value, datetime):
                     result[prop] = value.isoformat()
@@ -242,7 +242,7 @@ class WebResource(ndb.Model):
                     {
                         "value": q.keyword,
                         "slug": q.keyword.replace(" ", "+"),
-                        "related_urls": articles_api_version("04") + 'keywords?keyword=' + q.keyword
+                        "related_urls": articles_api_version("04") + 'by?keyword=' + q.keyword
                     }
                     for q in query
                 ],
@@ -252,6 +252,9 @@ class WebResource(ndb.Model):
             return results
         return {
             "keywords": []
+            ,
+            "url": self.url,
+            "uuid": self.key.id()
         }
 
 
