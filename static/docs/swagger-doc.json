@@ -1,0 +1,149 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Articles API",
+        "description": "A REST service to access Chronos Semantic Data about Space Exploration",
+        "version": "0.4.5"
+    },
+    "host": "localhost:8080",
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/articles/v04",
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Articles Base endpoint",
+                "description": "The Articles Base endpoint returns a JSON object with an __array of \nArticles Objects__ and a bookmark to paginate to the next batch of\nArticles. Every batch holds 25 Articles Objects.\nFull documentation at https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API \n",
+                "parameters": [
+                    {
+                        "name": "bookmark",
+                        "in": "query",
+                        "description": "a bookmark-token to the next batch",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Articles Base"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of Articles Objects",
+                        "schema": {
+                            "type": "object",
+                            "articles": {
+                                "type": "array",
+                                "$ref": "#/definitions/ArticleObject"
+                            },
+                            "next": {
+                                "type": "string",
+                                "$ref": "#/definitions/BookmarkToken"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/by": {
+            "get": {
+                "summary": "Articles Filters endpoint",
+                "description": "Filter Articles collection __by type__ to return Article(s) of the same type; or __by keyword__ to return Article(s) indexed by that keyword.\n",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "one of the type of Article Object like 'feed', 'movie', 'media', 'tweet', 'fb', 'paper', 'pdf'",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "keyword",
+                        "in": "query",
+                        "description": "a keyword in the index",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "bookmark",
+                        "in": "query",
+                        "description": "a bookmark-token to the next batch",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Filter Articles"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of Articles indexed by keyword",
+                        "schema": {
+                            "type": "object",
+                            "articles": {
+                                "type": "array",
+                                "$ref": "#/definitions/ArticleObject"
+                            },
+                            "keyword": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/keywords/by": {
+            "get": {
+                "summary": "Keywords endpoint",
+                "description": "Return Keywords related to a given Article Object \n",
+                "parameters": [
+                    {
+                        "name": "url",
+                        "in": "query",
+                        "description": "a url defining an Article Object",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Filter Keywords"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of Keywords in the index referred to an Article",
+                        "schema": {
+                            "type": "object",
+                            "keywords": {
+                                "type": "array",
+                                "format": "string"
+                            },
+                            "url": "string",
+                            "uuid": "integer"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
