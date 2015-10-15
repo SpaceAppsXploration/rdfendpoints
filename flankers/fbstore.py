@@ -27,7 +27,7 @@ def generate_token():
 
 
 token = generate_token()
-aliases = ['GuntersSpacePage', 'SETIInstitute', 'planetarysociety']
+aliases = ['GuntersSpacePage', 'SETIInstitute', 'planetarysociety', 'nasasolarsystem']
 
 
 class FBStore(webapp2.RequestHandler):
