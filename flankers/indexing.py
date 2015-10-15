@@ -1,5 +1,6 @@
 import webapp2
 import datetime
+from time import localtime
 
 from config.config import _DEBUG
 from datastore.models import WebResource
@@ -21,7 +22,7 @@ class Indexing(webapp2.RequestHandler):
         """
         # create the Index entries
         from flankers.long_task import storeIndexer
-        an_hour = datetime.datetime.now() - datetime.timedelta(hours=1)
+        an_hour = datetime.datetime(*localtime()[:6]) - datetime.timedelta(hours=1)
         print an_hour
         query = WebResource.query().filter(WebResource.stored > an_hour)
         print query.count()
