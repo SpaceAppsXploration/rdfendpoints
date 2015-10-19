@@ -121,6 +121,7 @@ class storeIndexer(longtask.LongRunningTaskHandler):
             # if item is not a media or a link from Twitter
             # it is or a feed or a tweet
             text = item.abstract if len(item.abstract) != 0 else item.title
+            text = text[:1799] if len(text) >= 1800 else text
             labels = find_related_concepts(text)
             for l in labels:
                 if Indexer.query().filter(Indexer.webres == key).count() == 0:
