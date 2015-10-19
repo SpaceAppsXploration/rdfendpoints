@@ -131,7 +131,7 @@ class HTTPendpointsTest(unittest.TestCase):
         pass
 
     def runTest(self):
-        run = HTTPendpointsTest(env='offline')
+        run = HTTPendpointsTest(env='online')
         #run.test_sparql()
         #run.test_articles_api_base_view()
         run.test_articles_api_type_view()
