@@ -10,22 +10,24 @@ from google.appengine.api import memcache
 
 __author__ = 'Lorenzo'
 
-from config.config import _MEMCACHE_SLUGS
+from config.config import _MEMCACHE_SLUGS  # holds the different keys used in the memcache
 from datastore.models import WebResource, Indexer
 
 
 class JSONBaseHandler(webapp2.RequestHandler):
     """
+    Handler For JSON Endpoints.
+
     Extends RequestHandler with new custom methods for:
     - Error Handling
     - Handling different queries with the same handler
-    - Implement memecache for the operations in the handler
+    - Implement memcache for the operations in the handler
     """
 
     def __init__(self, *args, **kwargs):
         super(JSONBaseHandler, self).__init__(*args, **kwargs)
-        self._query = self.memcache_webresource_query()
-        self._query_type = None
+        self._query = self.memcache_webresource_query()  # holds the query needed to serve the data
+        self._query_type = None  # type of the query: ALL=global TYPE_OF=filtered by type ...
         self._API_VERSION = '04'
 
     def json_error_handler(self, code, exception=None):
@@ -91,7 +93,7 @@ class JSONBaseHandler(webapp2.RequestHandler):
         the cache, build the response (build_response) and cache it
         :param query: the paged query
         :param bkmark: the bookmark's key of the actual page
-        :return: dict() with an array of articles and a url to the next bookmarked page
+        :return: dict(), see build_response()
         """
         mkey = self._query_type + bkmark if bkmark else str("null")
         if not memcache.get(key=mkey):
