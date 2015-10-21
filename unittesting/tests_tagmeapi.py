@@ -11,6 +11,9 @@ class tagmeapiTest(unittest.TestCase):
     def setUp(self):
         # list of texts
         self.test1 = ["""
+        Ice? Diamonds? Salt-lick for giant nocturnal astro-worms that follow the terminator around the dwarf planet so they're always in darkness (never photographed by NASA's Dawn probe). NASA wants your guess: http://www.jpl.nasa.gov/dawn/world_ceres/
+        New Imagery of the bright spots of the dwarf planet's Occator crater.
+        """, """
         Functional Extravehicular Mobility Units (EMUs) with high precision gloves are essential for the success of Extravehicular Activity (EVA).
         """, """
         The NASA Protoflight Research Initiative is an internal NASA study conducted within the Office of the Chief Engineer to better understand the use of Protoflight within NASA. Extensive literature reviews and interviews with key NASA members with experience in both robotic and human spaceflight missions has resulted in three main conclusions and two observations. The first conclusion is that NASA's Protoflight method is not considered to be "prescriptive." The current policies and guidance allo...
@@ -58,7 +61,7 @@ class tagmeapiTagTest(tagmeapiTest):
             results = return_wikipedia_term(response)
             print i, results
             if i == 0:
-                expected = [u'Functional_(mathematics)', u'Electron_mobility', u'Units_of_measurement', u'Electric_multiple_unit', u'High,_Just-As-High,_and_Third', u'Accuracy_and_precision', u'Glove', u'Essential_Marvel', u'Success_(company)', u'Extra-vehicular_activity', u'Extra-vehicular_activity']
+                expected = [u'Functional_(mathematics)', u'Electron_mobility', u'Units_of_measurement', u'Electric_multiple_unit', u'Accuracy_and_precision', u'Glove', u'Essential_Marvel', u'Success_(company)', u'Extra-vehicular_activity', u'Extra-vehicular_activity']
                 assert results == expected
             elif i == 1:
                 expected = [u'NASA', u'Research', u'Initiative', u'Neijia', u'Research', u'Conducting', u'The_Office_(U.S._TV_series)', u'Engineer', u'Engineer', u'Engineer', u'Understanding', u'Literature_review', u'Interview', u'Key_(music)', u'Member_of_Parliament', u'Experience', u'Robotics', u'Human_spaceflight', u'Mission_(Christianity)', u'Main_(river)', u'Observation', u'World_War_I', u'Entailment', u'NASA', u'Method_(computer_programming)', u'Linguistic_prescription', u'The_Current_(song)', u'Policy', u'Missile_guidance', u'Emic_unit']
@@ -80,6 +83,7 @@ class tagmeapiRelateTest(tagmeapiTest):
             results = []
             for spot in [s['spot'] for s in TagMeService.check_spotting(t)['value']['spots']]:
                 result = TagMeService.retrieve_taggings(spot.encode('utf-8'), method='POST')
+                print result
                 for n in result['annotations']:
                     title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
                     results.append(TagMeService.relate(title, self.scopes))  # compare the spotted and tagged term to the generic scopes
@@ -133,13 +137,21 @@ class tagmeapiLabelsTest(tagmeapiTest):
         """
         test the function that returns tagged labels from a given text
         """
-        from flankers.textsemantics import find_related_concepts
+        from flankers.textsemantics import TextSemantics
 
         for i, t in enumerate(self.test1):
-            results = find_related_concepts(t)
+            semantics = TextSemantics(t)
+            results = semantics.find_related_concepts()
             print i, results
             # print True, name and the mean of the rho of the term in relation with the scopes
             if i == 0:
+                expected = {'remote exploration of planets', 'craters (extraterrestrial)',
+                            'interplanetary trajectories', 'ice cover (climatology)', 'economic impacts',
+                            'snow and ice observations', 'planet location', 'craters (earth)',
+                            'appropriations hearings (nasa)', 'interplanetary shock waves', 'dwarf planets',
+                            'interplanetary gases'}
+                assert results == expected
+            elif i == 1:
                 expected = {'electric power units (electrical design)', 'precision time and time interval (ptti)',
                             'electric power units (aircraft)', 'auxiliary power units (apu) (aircraft)',
                             'electric power units (spacecraft)', 'manned maneuvering units',
@@ -148,23 +160,6 @@ class tagmeapiLabelsTest(tagmeapiTest):
                             'inertial sensors and measurement units (spacecraft)',
                             'inertial sensors and measurement units (aircraft)',
                             'extravehicular activity (physiological effects)'}
-                assert results == expected
-            elif i == 1:
-                expected = {'robotics (hardware)', 'asteroids (observation)', 'robotics',
-                            'extrasolar planets (observation)', 'snow and ice observations',
-                            'remote manipulator arms (robotics)', 'moons (observation)', 'binaries (observation)',
-                            'quasars (observation)', 'novae (observation)', 'celestial bodies (observation)',
-                            'manned spacecraft', 'nebulae (observation)', 'black holes (observation)',
-                            'manned orbital laboratories', 'supernovae (observation)', 'meteoroids (observation)',
-                            'celestial motion (observation)', 'manned lunar exploration',
-                            'histories of aeronautics and space programs', 'comets (observation)',
-                            'manned planetary exploration', 'manned maneuvering units',
-                            'appropriations hearings (nasa)', 'star trackers (observation)', 'pulsars (observation)',
-                            'stars (observation)', 'galaxies (observation)', 'space programs',
-                            'legal liability of manned space flight', 'meteors (observation)',
-                            'scene analysis (robotics)', 'rendezvous guidance', 'manned flights (space exploration)',
-                            'natural satellites (observation)', 'teleoperators (robotics)',
-                            'observation of celestial bodies'}
                 assert results == expected
             elif i == 2:
                 expected = set([])

@@ -12,7 +12,7 @@ __author__ = 'Lorenzo'
 
 from config.config import _MEMCACHE_SLUGS  # holds the different keys used in the memcache
 from datastore.models import WebResource, Indexer
-from flankers.textsemantics import find_term_ancestorship
+from flankers.textsemantics import TextSemantics
 
 
 class JSONBaseHandler(webapp2.RequestHandler):
@@ -147,7 +147,7 @@ class JSONBaseHandler(webapp2.RequestHandler):
                 memcache.add(key=mkey, value=results)
             else:
                 try:
-                    results = find_term_ancestorship(term)
+                    results = TextSemantics.find_term_ancestorship(term)
                 except Exception as e:
                     raise ValueError(str(e))
                 memcache.add(key=mkey, value=results)
