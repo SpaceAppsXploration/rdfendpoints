@@ -73,25 +73,41 @@ class Testing(webapp2.RequestHandler):
             from json2html import __version__
         except Exception as e:
             raise e
-        self.response.write('test passed')
+        return self.response.out.write('test passed')
 
+        #from datastore.models import Indexer, WebResource
+        #from google.appengine.ext import ndb
+
+        #results = []
+        #resources = WebResource.query(WebResource.type_of == 'fb').fetch(500)
+        #for r in resources:
+        #    index = Indexer.query(Indexer.webres == r.key)
+        #    for i in index:
+        #        results.append((i.keyword, r.key.id()))
+
+        #self.response.out.write(results)
 #
 ### Handlers Order:
 # 1. Test handler
 # 2. Keywords Filter-By JSON API
 # 3. Articles Filter-By JSON API
-# 4. Articles Base JSON API
-# 5. Datastore Operations private API
-# 6. SPARQL endpoint
-# 7. NTriples API (WebResource)
-# 8. NTriples API (Taxonomy concepts)
-# 9. NTriples API (Taxonomy DBpedia terms)
-# 10. Homepage
+# 4. Articles Index JSON API
+# 5. Articles Index (filtered) JSON API
+# 6. Articles Base JSON API
+# 7. Datastore Operations private API
+# 8. SPARQL endpoint
+# 9. NTriples API (WebResource)
+# 10. NTriples API (Taxonomy concepts)
+# 11. NTriples API (Taxonomy DBpedia terms)
+# 12. Homepage
 #
 
 application = webapp2.WSGIApplication([
     webapp2.Route('/test', Testing),
     webapp2.Route('/articles/v04/keywords/by', ArticlesJSONv1),
+    webapp2.Route('/articles/v04/resources/by', ArticlesJSONv1),
+    webapp2.Route('/articles/v04/indexer', ArticlesJSONv1),
+    webapp2.Route('/articles/v04/indexer/by', ArticlesJSONv1),
     webapp2.Route('/articles/v04/by', ArticlesJSONv1),
     webapp2.Route('/articles/v04/', ArticlesJSONv1),
     webapp2.Route('/datastore/<name:[a-z]+>', DataStoreOperationsAPI),

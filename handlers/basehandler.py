@@ -120,6 +120,31 @@ class JSONBaseHandler(webapp2.RequestHandler):
 
         return results
 
+    def memcache_indexer_keywords_distinct(self):
+        """
+        Get or set in the memcache the keywords indexed with count.
+
+        :return: a Query()
+        """
+        mkey = _MEMCACHE_SLUGS['INDEXER_DISTINCT']
+        if not memcache.get(key=mkey):
+            query = Indexer.query(projection=[Indexer.keyword], distinct=True)
+            results = {
+                "indexed": [
+                    {
+                        "keyword": q.keyword,
+                        "count": Indexer.query(Indexer.keyword == q.keyword).count()
+                    }
+                    for q in query
+                ],
+                "n_indexed": query.count()
+            }
+            memcache.add(key=mkey, value=results)
+        else:
+            results = memcache.get(key=mkey)
+
+        return results
+
     def build_response(self, query, bookmark):
         """
         To be extended in the handler

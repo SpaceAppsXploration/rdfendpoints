@@ -11,8 +11,10 @@ __author__ = 'Lorenzo'
 
 class ArticlesJSONv1(JSONBaseHandler):
     """
-    Articles JSON API
-    See https://github.com/SpaceAppsXploration/rdfendpoints/wiki/Articles-API
+    Articles JSON API Handlers.
+
+    Extended from JSONBaseHandler.
+    See http://hypermedia.projectchronos.eu/docs
     """
 
     def __init__(self, *args, **kwargs):
@@ -40,7 +42,7 @@ class ArticlesJSONv1(JSONBaseHandler):
             setattr(self, '_query_type', 'ALL')
             setattr(self,
                     '_query',
-                    self.memcache_webresource_query().order(-WebResource.published))
+                    self._query.order(-WebResource.published))
 
             return self.response.out.write(
                 json.dumps(
@@ -56,7 +58,8 @@ class ArticlesJSONv1(JSONBaseHandler):
                     setattr(self, '_query_type', 'TYPE_OF')
                     setattr(self,
                             '_query',
-                            self._query.filter(WebResource.type_of == self.request.get('type')).order(WebResource.type_of, -WebResource.published))
+                            self._query.filter(WebResource.type_of == self.request.get('type'))
+                                       .order(WebResource.type_of, -WebResource.published))
 
                     print self._query_type
 
@@ -93,6 +96,37 @@ class ArticlesJSONv1(JSONBaseHandler):
                         indent=2
                     )
                 )
+            elif self.request.get('wikislug'):
+                # return a mapping between a label from wikipedia and keywords
+                pass
+            else:
+                return self.response.out.write(
+                    self.json_error_handler(404, 'need to define a ?url')
+                )
+        elif self.request.path == self._BASEPATH + 'indexer':
+            # return all the terms (keywords) used by the index
+            results = self.memcache_indexer_keywords_distinct()
+            return self.response.out.write(
+                json.dumps(results)
+            )
+        elif self.request.path == self._BASEPATH + 'indexer/by':
+            if self.request.get('term'):
+                pass
+            elif self.request.get('subject'):
+                pass
+            elif self.request.get('division'):
+                pass
+            else:
+                return self.response.out.write(
+                    self.json_error_handler(404, 'need to define a ?term, ?subject or ?division')
+                )
+        elif self.request.path == self._BASEPATH + 'resources/by':
+            if self.request.get('type'):
+                # serve keywords for a given type: wikislugs, missions, events ...
+                pass
+            elif self.request.get('id'):
+                # serve a given resource from its id
+                pass
             else:
                 return self.response.out.write(
                     self.json_error_handler(404, 'need to define a ?url')
