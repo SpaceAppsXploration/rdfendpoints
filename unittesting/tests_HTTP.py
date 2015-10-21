@@ -20,14 +20,16 @@ def test_integrity(res):
         assert False
 
 
-class HTTPendpointsTest(unittest.TestCase):
+class HTTPEndpoints(unittest.TestCase):
     def __init__(self, env=None):
-        super(HTTPendpointsTest, self).__init__()
+        super(HTTPEndpoints, self).__init__()
         if env is not None:
             self.test_env = env
         else:
             self.test_env = 'offline'
 
+
+class Endpoints_SPARQL(HTTPEndpoints):
     def test_sparql(self):
         """
     Test content of the /database/cots/ endpoint and if contained urls are reachable
@@ -47,6 +49,12 @@ class HTTPendpointsTest(unittest.TestCase):
             print i, r
             test_integrity(r)
 
+    def runTest(self):
+        run = Endpoints_SPARQL(env='online')
+        run.test_sparql()
+
+
+class Endpoints_Articles(HTTPEndpoints):
     def test_articles_api_base_view(self):
         """
     Test the Articles JSON API: /articles/<version>/
@@ -88,7 +96,7 @@ class HTTPendpointsTest(unittest.TestCase):
         import urllib
         env = self.test_env
 
-        base_url = _ENV[env]['_SERVICE'] + "/articles/" + _VERSION + "/by?type=fb"
+        base_url = _ENV[env]['_SERVICE'] + "/articles/" + _VERSION + "/by?type=feed"
 
         first = get_curling(base_url)
         first = test_integrity(first)
@@ -111,6 +119,32 @@ class HTTPendpointsTest(unittest.TestCase):
                 print 'Articles by_type finished'
                 return None
 
+    def runTest(self):
+        run = Endpoints_Articles(env='online')
+        run.test_articles_api_base_view()
+        run.test_articles_api_type_view()
+
+
+class Endpoints_Indexer(HTTPEndpoints):
+    def test_indexer_base(self):
+        _VERSION = "v04"
+        print "Running test_indexer_base"
+
+        env = self.test_env
+
+        base_url = _ENV[env]['_SERVICE'] + "/articles/" + _VERSION + "/indexer"
+
+        response = get_curling(base_url)
+        test_integrity(response)
+
+        print "Counted keywords: " + str(json.loads(response)['n_indexed'])
+
+    def runTest(self):
+        run = Endpoints_Indexer(env='online')
+        run.test_indexer_base()
+
+
+class Endpoints_N3(HTTPEndpoints):
     def test_n3_endpoints(self):
         """
     Test the N3
@@ -131,11 +165,8 @@ class HTTPendpointsTest(unittest.TestCase):
         pass
 
     def runTest(self):
-        run = HTTPendpointsTest(env='online')
-        #run.test_sparql()
-        #run.test_articles_api_base_view()
-        run.test_articles_api_type_view()
-        #run.test_n3_endpoints()
+        run = Endpoints_N3(env='online')
+        run.test_n3_endpoints()
 
 
 
