@@ -62,12 +62,17 @@ def lookup_in_taxonomy(results):
             # print base_url.format(res)
             resource = retrieve_json(base_url.format(res))
         except Exception as e:
-            print Exception('Cannot fetch taxonomy: ' + res.encode('ascii', 'replace') + ' ' + str(e))
+            print Exception('lookup_in_taxonomy(): Cannot fetch taxonomy: ' + res.encode('ascii', 'replace') + ' ' + str(e))
 
         if resource and 'relatedConcepts' in resource.keys():
             for c in resource['relatedConcepts']:
                 if c:
-                    label = c[c.rfind('/') + 1:].replace('+', ' ')
+                    try:
+                        resource = retrieve_json(c)
+                    except Exception as e:
+                        raise Exception('lookup_in_taxonomy(): Cannot fetch relatedConcepts: ' + str(e))
+
+                    label = resource['label']
                     # print 'Found! ' + label
                     labels.append(str(label))
     return set(labels)
@@ -80,8 +85,6 @@ def find_term_ancestorship(term):
     :param term: a term in the taxonomy
     :return: a dictionary
     """
-    import json
-
     term = term.replace(" ", "+")
     print term
     base_url = "http://taxonomy.projectchronos.eu/concepts/c/{}"
