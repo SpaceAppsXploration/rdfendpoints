@@ -23,26 +23,6 @@ class WebResource(ndb.Model):
     in_graph = ndb.BooleanProperty(default=False)
 
     @classmethod
-    def dump_from_json(cls, j):
-        """
-        Store a WebResource from a JSON object
-        :param j: a JSON
-        :return: a WebResource
-        """
-        print j
-        j = json.loads(j)
-        if cls.query().filter(cls.url == j['url']).count() == 0:
-            m = WebResource()
-            m.title = j['title']
-            m.abstract = j['abstract']
-            m.url = j['url']
-            m.slug = j['keyword']
-            obj = m.put()
-            index = Indexer(keyword=j['key'], webres=obj)
-            index.put()
-            return obj
-
-    @classmethod
     def store_feed(cls, entry):
         """
         Store RSS-feed entry coming from feedparser
@@ -189,7 +169,7 @@ class WebResource(ndb.Model):
 
     def dump_to_json(self):
         """
-        make property values of an instance JSON serializable
+        Make property values of an instance JSON serializable and build the response body of the REST API
         """
         result = {
             "uuid": self.key.id()
@@ -257,6 +237,26 @@ class WebResource(ndb.Model):
             "uuid": self.key.id()
         }
 
+    @classmethod
+    def dump_from_json(cls, j):
+        """
+        Store a WebResource from a JSON object
+        :param j: a JSON
+        :return: a WebResource
+        """
+        print j
+        j = json.loads(j)
+        if cls.query().filter(cls.url == j['url']).count() == 0:
+            m = WebResource()
+            m.title = j['title']
+            m.abstract = j['abstract']
+            m.url = j['url']
+            m.slug = j['keyword']
+            obj = m.put()
+            index = Indexer(keyword=j['key'], webres=obj)
+            index.put()
+            return obj
+
 
 class Indexer(ndb.Model):
     """
@@ -264,6 +264,7 @@ class Indexer(ndb.Model):
     """
     keyword = ndb.StringProperty()
     webres = ndb.KeyProperty(kind=WebResource)
+    stored = ndb.DateTimeProperty(default=datetime(*localtime()[:6]))
 
     @classmethod
     def get_webresource(cls, kwd):
