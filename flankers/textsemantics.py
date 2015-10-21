@@ -71,3 +71,36 @@ def lookup_in_taxonomy(results):
                     # print 'Found! ' + label
                     labels.append(str(label))
     return set(labels)
+
+
+def find_term_ancestorship(term):
+    """
+    Return the genealogy of a term in the Taxonomy.
+
+    :param term: a term in the taxonomy
+    :return: a dictionary
+    """
+    import json
+
+    term = term.replace(" ", "+")
+    print term
+    base_url = "http://taxonomy.projectchronos.eu/concepts/c/{}"
+    try:
+        resource = retrieve_json(base_url.format(term))
+    except Exception:
+        raise ValueError("find_term_ancestorship(): term is not in the taxonomy. Wrong term.")
+
+    def get_ancestor(obj, ancestors=tuple()):
+        if 'ancestor' not in obj.keys():
+            return ancestors
+
+        new_obj = retrieve_json(obj['ancestor'])
+        ancestors += (new_obj['label'], )
+        return get_ancestor(new_obj, ancestors)
+
+    return {
+        "slug": term,
+        "term": term.replace("+", " "),
+        "ancestors": list(get_ancestor(resource))[::-1]
+    }
+
