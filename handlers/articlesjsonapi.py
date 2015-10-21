@@ -4,7 +4,7 @@ from google.appengine.ext import ndb
 from datastore.models import WebResource, Indexer
 
 from handlers.basehandler import JSONBaseHandler
-from flankers.textsemantics import find_term_ancestorship
+
 
 __author__ = 'Lorenzo'
 
@@ -117,7 +117,12 @@ class ArticlesJSONv1(JSONBaseHandler):
         elif self.request.path == self._BASEPATH + 'indexer/by':
             if self.request.get('term'):
                 # find the genealogy of a term in the Taxonomy
-                results = find_term_ancestorship(self.request.get('term'))
+                try:
+                    results = self.memcache_indexer_keywords_distinct(self.request.get('term'))
+                except ValueError as e:
+                    return self.response.out.write(
+                        self.json_error_handler(404, 'wrong term')
+                    )
                 return self.response.out.write(
                     json.dumps(results)
                 )

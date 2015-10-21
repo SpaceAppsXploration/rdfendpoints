@@ -68,24 +68,9 @@ class Testing(webapp2.RequestHandler):
     """
     def get(self):
         self.response.headers['Content-Type'] = 'text/plain'
-        try:
-            from bs4 import BeautifulSoup
-            from json2html import __version__
-        except Exception as e:
-            raise e
-        return self.response.out.write('test passed')
 
-        #from datastore.models import Indexer, WebResource
-        #from google.appengine.ext import ndb
 
-        #results = []
-        #resources = WebResource.query(WebResource.type_of == 'fb').fetch(500)
-        #for r in resources:
-        #    index = Indexer.query(Indexer.webres == r.key)
-        #    for i in index:
-        #        results.append((i.keyword, r.key.id()))
-
-        #self.response.out.write(results)
+        self.response.out.write('Done')
 #
 ### Handlers Order:
 # 1. Test handler

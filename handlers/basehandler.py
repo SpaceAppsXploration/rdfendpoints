@@ -12,6 +12,7 @@ __author__ = 'Lorenzo'
 
 from config.config import _MEMCACHE_SLUGS  # holds the different keys used in the memcache
 from datastore.models import WebResource, Indexer
+from flankers.textsemantics import find_term_ancestorship
 
 
 class JSONBaseHandler(webapp2.RequestHandler):
@@ -120,26 +121,36 @@ class JSONBaseHandler(webapp2.RequestHandler):
 
         return results
 
-    def memcache_indexer_keywords_distinct(self):
+    def memcache_indexer_keywords_distinct(self, term=None):
         """
         Get or set in the memcache the keywords indexed with count.
 
+        If term is not set, it returns the full index, else returns the
+        ancestorship of a term.
+
         :return: a Query()
         """
-        mkey = _MEMCACHE_SLUGS['INDEXER_DISTINCT']
+        mkey = _MEMCACHE_SLUGS['INDEXER_DISTINCT'] + str(term)
         if not memcache.get(key=mkey):
-            query = Indexer.query(projection=[Indexer.keyword], distinct=True)
-            results = {
-                "indexed": [
-                    {
-                        "keyword": q.keyword,
-                        "count": Indexer.query(Indexer.keyword == q.keyword).count()
-                    }
-                    for q in query
-                ],
-                "n_indexed": query.count()
-            }
-            memcache.add(key=mkey, value=results)
+            if not term:
+                query = Indexer.query(projection=[Indexer.keyword], distinct=True)
+                results = {
+                    "indexed": [
+                        {
+                            "keyword": q.keyword,
+                            "count": Indexer.query(Indexer.keyword == q.keyword).count()
+                        }
+                        for q in query
+                    ],
+                    "n_indexed": query.count()
+                }
+                memcache.add(key=mkey, value=results)
+            else:
+                try:
+                    results = find_term_ancestorship(term)
+                except Exception as e:
+                    raise ValueError(str(e))
+                memcache.add(key=mkey, value=results)
         else:
             results = memcache.get(key=mkey)
 
