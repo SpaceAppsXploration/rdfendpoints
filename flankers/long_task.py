@@ -129,6 +129,8 @@ class storeIndexer(longtask.LongRunningTaskHandler):
                     index = Indexer(keyword=l.strip(), webres=key)
                     index.put()
                     print "indexing stored: " + item.url + ">" + l
+                else:
+                    raise Exception("storeIndexer(): Resource already indexed")
 
 
 class storeFBposts(longtask.LongRunningTaskHandler):

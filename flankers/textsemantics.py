@@ -54,10 +54,14 @@ class TextSemantics(object):
                         if 'title' in n.keys():
                             title = n['title'].replace(' ', '_')  # strip whitespaces from dbpedia tag
                             rst.append(title)
+                            if len(rst) > 200:
+                                # if the terms spotted are more than 199, enough
+                                setattr(self, 'spotted', rst)
+                                return None
                         else:
                             print "Cannot find title in annotations: " + str(n)
 
-        return setattr(self, 'spotted', rst)
+        setattr(self, 'spotted', rst)
 
     def lookup_in_taxonomy(self):
         """
@@ -84,26 +88,26 @@ class TextSemantics(object):
                         try:
                             resource = retrieve_json(c)
                         except Exception:
-                            try:
+                            try:  # see bottom of the module
                                 kwd = c[c.rfind('/') + 1:].replace("+", " ").strip()
-                                print kwd, kwd in to_be_corrected.keys()
+                                # print kwd, kwd in to_be_corrected.keys()
                                 taxonomy = "http://taxonomy.projectchronos.eu/concepts/c/{}"
                                 if kwd in to_be_corrected.keys():
                                     kwd = to_be_corrected[kwd].replace(" ", "+")
-                                    print kwd
+                                    # print kwd
                                 try:
                                     resource = retrieve_json(taxonomy.format(kwd))
                                 except Exception as e:
-                                    raise ValueError("Cannot deduce keyword. Jump to next because " + str(e))
-                            except ValueError as e :
-                                print Exception('lookup_in_taxonomy(): ' + c + ' Cannot fetch relatedConcepts: ' + str(e))
+                                    raise ValueError("Cannot deduce keyword. Cannot fetch relatedConcepts: " + str(e))
+                            except ValueError as e:
+                                print str(e)
                                 continue
                             except Exception as e:
                                 print Exception('lookup_in_taxonomy(): ' + c + ' Concept is not in the space api ' + str(e))
                                 continue
 
+                        # Resource is found in the taxonomy
                         label = resource['label']
-                        # print 'Found! ' + label
                         labels.append(str(label))
         return set(labels)
 
@@ -138,7 +142,7 @@ class TextSemantics(object):
         }
 
 #
-# Workaround to avoid a bug in label sanitation in the Taxonomy server
+# Workaround to avoid a bug in label sanitation in the Taxonomy server (commas)
 # To be fixed when refactoring
 #
 to_be_corrected = {
