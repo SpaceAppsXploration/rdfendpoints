@@ -95,6 +95,8 @@ class TextSemantics(object):
                                 if kwd in to_be_corrected.keys():
                                     kwd = to_be_corrected[kwd].replace(" ", "+")
                                     # print kwd
+                                else:
+                                    kwd = kwd.replace(" ", "+")
                                 try:
                                     resource = retrieve_json(taxonomy.format(kwd))
                                 except Exception as e:

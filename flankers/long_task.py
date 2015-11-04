@@ -122,15 +122,15 @@ class storeIndexer(longtask.LongRunningTaskHandler):
             # it is or a feed or a tweet
             text = item.abstract if len(item.abstract) != 0 else item.title
             text = text[:1799] if len(text) >= 1800 else text
-            semantics = TextSemantics(text)
-            labels = semantics.find_related_concepts()
-            for l in labels:
-                if Indexer.query().filter(Indexer.webres == key).count() == 0:
-                    index = Indexer(keyword=l.strip(), webres=key)
-                    index.put()
-                    print "indexing stored: " + item.url + ">" + l
-                else:
-                    raise Exception("storeIndexer(): Resource already indexed")
+            if Indexer.query().filter(Indexer.webres == key).count() == 0:
+                semantics = TextSemantics(text)
+                labels = semantics.find_related_concepts()
+                for l in labels:
+                        index = Indexer(keyword=l.strip(), webres=key)
+                        index.put()
+                        print "indexing stored: " + item.url + ">" + l
+            else:
+                raise Exception("storeIndexer(): Resource already indexed")
 
 
 class storeFBposts(longtask.LongRunningTaskHandler):
