@@ -38,6 +38,7 @@ from handlers.sparql import Querying
 from handlers.articlesjsonapi import ArticlesJSONv1
 from handlers.servicehandlers import DataStoreOperationsAPI
 from handlers.dataN3 import PublishWebResources, PublishConcepts, PublishSpaceDocs
+from handlers.triplestoreservice import DataToTriplestore
 
 
 class Hello(BaseHandler):
@@ -69,7 +70,6 @@ class Testing(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/plain'
 
-
         self.response.out.write('Done')
 #
 ### Handlers Order:
@@ -81,6 +81,7 @@ class Testing(webapp2.RequestHandler):
 # 6. Articles Base JSON API
 # 7. Datastore Operations private API
 # 8. SPARQL endpoint
+# 8b. Datastore to Triplestore service
 # 9. NTriples API (WebResource)
 # 10. NTriples API (Taxonomy concepts)
 # 11. NTriples API (Taxonomy DBpedia terms)
@@ -97,6 +98,7 @@ application = webapp2.WSGIApplication([
     webapp2.Route('/articles/v04/', ArticlesJSONv1),
     webapp2.Route('/datastore/<name:[a-z]+>', DataStoreOperationsAPI),
     webapp2.Route('/sparql', Querying),
+    webapp2.Route('/triplestore/<perform:[a-z]+>', DataToTriplestore),
     webapp2.Route('/data/webresource/<key:[a-zA-Z0-9-_=]+>', PublishWebResources),
     webapp2.Route('/data/concept/<label:[a-z\+]+>', PublishConcepts),
     webapp2.Route('/data/dbpediadocs/<term:[a-z_\(\)-]+>', PublishSpaceDocs),
