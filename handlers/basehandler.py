@@ -180,3 +180,10 @@ class BaseHandler(webapp2.RequestHandler):
         return self.response.out.write(template.render(path, {}))
     """
     pass
+
+
+class ServiceHandler(webapp2.RequestHandler):
+    """
+    Base Handler for service handlers. Handlers that provide utilities for remote database
+    """
+    pass

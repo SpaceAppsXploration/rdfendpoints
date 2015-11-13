@@ -63,14 +63,14 @@ def query_all(q):
     return response.serialize(format='json')
 
 
-def store_triples(triples, graph_id=_VOC_GRAPH_ID):
+def store_triples(triples, graph_id=_VOC_GRAPH_ID, format="nt"):
     """
     Cache and store the new triples
     :param triples: triples POSTed
     :return: graphs
     """
     cache_graph = Graph()
-    cache_graph.parse(data=triples, format="nt")
+    cache_graph.parse(data=triples, format=format)
     app_graph = graph(graph_id)
     app_graph += cache_graph
     return app_graph, cache_graph

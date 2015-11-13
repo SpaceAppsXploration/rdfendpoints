@@ -75,7 +75,7 @@ class TextSemantics(object):
         labels = []
         resource = None
         for res in self.spotted:
-            res = unidecode(res)
+            #res = unidecode(res)
             try:
                 # print base_url.format(res)
                 resource = retrieve_json(base_url.format(res))

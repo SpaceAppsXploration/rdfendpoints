@@ -1,5 +1,8 @@
 import webapp2
 import json
+import logging
+
+from google.appengine.ext.webapp import template
 
 from flankers.graphtools import query
 from config.config import _DEBUG
@@ -15,7 +18,13 @@ map = {
     'all_sats': 'SELECT * WHERE { ?bodies <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontology.projectchronos.eu/astronomy/Natural_satellite> . }'
 }
 
+
 def get_link(url):
+    """
+    Get the dbpedia url from a chronos ontology url by fetching the entity and checking the rdf:sameAs property
+    :param url: a ontology.projectchronos.eu entity
+    :return: str, the url of the dbpedia resource
+    """
     from scripts.remote.remote import google_urlfetch
 
     rdf = google_urlfetch(url, {'format': 'jsonld'})
@@ -41,9 +50,10 @@ class N3Caching(webapp2.RequestHandler):
     def get(self):
         """
         Handler for the cronjob: /cron/n3caching
-        It stores ntriples texts from external sources
+        It stores XML data from external sources
         """
-        from scripts.remote.remote import google_urlfetch
+        from google.appengine.api import urlfetch
+        logging.getLogger().handlers[0].setLevel(logging.DEBUG)
 
         for k, v in map.items():
             results = query(v)  # run the SPARQL query
@@ -52,17 +62,22 @@ class N3Caching(webapp2.RequestHandler):
             urls = [r['bodies']['value'] for r in results['results']['bindings']]
 
             for u in urls:
-                print u
-                l = get_link(u)
-                j = dbpedia_url(l)
-                print j
+                l = dbpedia_url(get_link(u))
+                if l.endswith('.ntriples'):
+                    l = l[:-9]
+                print l
                 try:
-                    response = google_urlfetch(j)
-                    if response.startswith('<http:') and N3Cache.get_by_id(j) is None:
-                        n3 = N3Cache(id=j, n3=response)
-                        n3.put()
+                    response = urlfetch.fetch(l)
+                    if response.content.startswith('<?xml version="1.0"'):
+                        try:
+                            n3 = N3Cache(id=l, n3=response.content)
+                            print "Storing resource"
+                            n3.put()
+                        except Exception:
+                            print "Error or already stored"
+                            pass
                     else:
-                        print response
+                        print "ERROR: NO XML: " + str(response)
                 except Exception as e:
                     print e
 
